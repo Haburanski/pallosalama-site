@@ -205,8 +205,8 @@
   .ig-link:hover .ig-icon, .ig-link:focus-visible .ig-icon{ background-color:var(--ember); }
   .ig-link:focus-visible{ outline:none; }
   #blackout{position:fixed;inset:0;background:#000;opacity:0;pointer-events:none;transition:opacity 0.3s linear;z-index:9999;}
-  /* V12.9 (21 Oct): the page fades in from black over 2 s when it is opened. */
-  #blackout{animation:openfade 2s ease-out;}
+  /* V12.9 (21 Oct): the page fades in from black over 1.2 s when it is opened. */
+  #blackout{animation:openfade 1.2s ease-out;}
   @keyframes openfade{from{opacity:1;}to{opacity:0;}}
   @media (prefers-reduced-motion:reduce){#blackout{animation:none;}}
 </style>
@@ -294,7 +294,7 @@ Masterointi: Tyko Tuulivaara
 // V12.9 (20 Oct, hosting move): the MP3 lives in Cloudflare R2 (too big for page hosting). It is a different
 // address than the page, so the audio element asks for it with CORS (crossorigin) - without that, Web Audio
 // (Android Chrome, iPhone fade path) would play silence. The R2 bucket has a matching CORS rule.
-const CONFIG={file:'https://pub-0c9d256591844e5baf3b4855be8c043d.r2.dev/Pallosalama_lobbyfirst.mp3',lobby:3600,album:2031,cycle:3600,fadeIn:8,resumeFade:3,backstep:2,version:'12.9',build:'2026-10-21-fade7-open2',visualFade:7,driftThreshold:3,quietDriftThreshold:1,quietFrom:2025,quietTo:2042,driftBoundaryGuard:30,driftCooldown:60,maxSeekCorrections:3};
+const CONFIG={file:'https://pub-0c9d256591844e5baf3b4855be8c043d.r2.dev/Pallosalama_lobbyfirst.mp3',lobby:3600,album:2031,cycle:3600,fadeIn:8,resumeFade:3,backstep:2,version:'12.9',build:'2026-10-21-fade7-open1.2',visualFade:7,driftThreshold:3,quietDriftThreshold:1,quietFrom:2025,quietTo:2042,driftBoundaryGuard:30,driftCooldown:60,maxSeekCorrections:3};
 const $=id=>document.getElementById(id);
 const a=$('lobby-audio'),btn=$('sound-toggle'),clock=$('clock'),label=$('clock-label'),message=$('lobby-message'),badge=$('live-badge'),blackout=$('blackout');
 const params=new URLSearchParams(location.search);
