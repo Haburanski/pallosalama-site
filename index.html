@@ -212,37 +212,37 @@
   @keyframes openfade{from{opacity:1;}to{opacity:0;}}
   @media (prefers-reduced-motion:reduce){#blackout{animation:none;}}
 
-  /* V12.9 lobbytext (22 Oct 2026): layout and text sizes from the approved demo.
+  /* V12.9 lobbytext (22 Oct 2026, sizes ~10% smaller 22:03): layout and text sizes from the approved demo.
      Name biggest; everything else one size; "alkaa" line halfway between name and button. */
   :root{ --bg:#000000; --mist:#8A8F94; --line:#2A2E30; --edge:#3A3F42; }
   body{ font-weight:300; text-align:center; }
   .lobby{ padding:56px 24px 0; justify-content:flex-start; }
   .orb-field{ margin-bottom:8px; }
   .orb-img{ width:300px; max-width:80vw; }
-  .lobby-artist,.lobby-title{ font-size:30px; font-weight:700; letter-spacing:0.02em; line-height:1.25; margin:0; }
+  .lobby-artist,.lobby-title{ font-size:27px; font-weight:700; letter-spacing:0.02em; line-height:1.25; margin:0; }
   .lobby-artist{ margin-bottom:4px; letter-spacing:0.01em; }
   .lobby-title{ margin-bottom:32px; }
   .clock-block{ gap:0; }
-  .clock-line{ font-size:20px; font-weight:300; }
-  .clock-label{ color:var(--ink); font-size:20px; letter-spacing:0; }
-  .clock{ font-size:20px; font-weight:300; }
-  .live-badge{ font-size:15px; margin-top:14px; }
+  .clock-line{ font-size:18px; font-weight:300; }
+  .clock-label{ color:var(--ink); font-size:18px; letter-spacing:0; }
+  .clock{ font-size:18px; font-weight:300; }
+  .live-badge{ font-size:14px; margin-top:14px; }
   .sound-toggle{ margin-top:32px; min-height:48px; padding:0 32px; border:1px solid var(--edge); border-radius:999px;
-    color:var(--ink); font-size:20px; font-weight:400; letter-spacing:0.04em; min-width:0; }
+    color:var(--ink); font-size:18px; font-weight:400; letter-spacing:0.04em; min-width:0; }
   .sound-toggle:hover, .sound-toggle:focus-visible{ border-color:var(--ember); }
-  .listen-hint{ margin:14px 0 0; font-size:14px; line-height:1.6; color:var(--mist); visibility:hidden; }
+  .listen-hint{ margin:14px 0 0; font-size:13px; line-height:1.6; color:var(--mist); visibility:hidden; }
   .content{ display:flex; flex-direction:column; align-items:center; max-width:none; padding:0 24px; }
   .divider{ width:40px; height:1px; background:var(--line); margin:4px 0 6px; }
-  .tracks{ margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:14px; font-size:20px; }
+  .tracks{ margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:14px; font-size:18px; }
   .tracks span{ color:var(--mist); margin-right:12px; font-variant-numeric:tabular-nums; }
-  .credits{ margin:28px 0 0; font-size:20px; color:var(--mist); line-height:1.6; }
-  .contact-line{ margin:28px 0 12px; font-size:20px; }
+  .credits{ margin:28px 0 0; font-size:18px; color:var(--mist); line-height:1.6; }
+  .contact-line{ margin:28px 0 12px; font-size:18px; }
   #contact a{ border-bottom:none; }
   .ig-link{ margin-top:0; padding:10px; }
   .share-bar{ margin-top:6px; gap:28px; }
-  .share-btn{ border:none; background:transparent; color:var(--ink); font-size:20px; font-weight:300; padding:6px 4px; }
+  .share-btn{ border:none; background:transparent; color:var(--ink); font-size:18px; font-weight:300; padding:6px 4px; }
   .share-btn:hover, .share-btn:focus-visible{ background:transparent; color:var(--ember); }
-  footer{ padding:28px 24px 40px; font-size:13px; color:var(--mist); }
+  footer{ padding:28px 24px 40px; font-size:12px; color:var(--mist); }
   body[data-album="true"][data-held="true"] .content{ display:flex; }
 </style>
 </head>
