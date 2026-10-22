@@ -4,10 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Pallosalama</title>
-<meta name="description" content="Pallosalama soi kerran tunnissa">
+<meta name="description" content="Harri Kalevi Sippola: Pallosalama soi aina tasatunnein">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Pallosalama">
-<meta property="og:description" content="Pallosalama soi kerran tunnissa">
+<meta property="og:description" content="Harri Kalevi Sippola: Pallosalama soi aina tasatunnein">
 <meta property="og:image" content="https://pallosalama.fi/og-image.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -618,7 +618,7 @@ btn.addEventListener('click',()=>{if(mode==='OFF')on();else if(held)resumeHeld('
 const cleanUrl=()=>location.href.split(/[?#]/)[0];
 function copyText(txt){return new Promise((res,rej)=>{const fallback=()=>{try{const ta=document.createElement('textarea');ta.value=txt;ta.setAttribute('readonly','');ta.style.cssText='position:fixed;top:-1000px;opacity:0';document.body.appendChild(ta);ta.select();const ok=document.execCommand&&document.execCommand('copy');ta.remove();ok?res():rej();}catch(e){rej(e);}};if(navigator.clipboard?.writeText)navigator.clipboard.writeText(txt).then(res,fallback);else fallback();});}
 function copied(b){if(!b)return;if(!b.dataset.label)b.dataset.label=b.textContent;b.textContent='Kopioitu';clearTimeout(b._t);b._t=setTimeout(()=>{b.textContent=b.dataset.label;},2000);}
-$('share-btn')?.addEventListener('click',e=>{const b=e.currentTarget;if(navigator.share)navigator.share({title:'Pallosalama',text:'Pallosalama soi kerran tunnissa',url:cleanUrl()}).catch(()=>{});else copyText(cleanUrl()).then(()=>copied(b)).catch(()=>{});});
+$('share-btn')?.addEventListener('click',e=>{const b=e.currentTarget;if(navigator.share)navigator.share({title:'Pallosalama',text:'Harri Kalevi Sippola: Pallosalama soi aina tasatunnein',url:cleanUrl()}).catch(()=>{});else copyText(cleanUrl()).then(()=>copied(b)).catch(()=>{});});
 $('copy-link-btn')?.addEventListener('click',e=>{const b=e.currentTarget;copyText(cleanUrl()).then(()=>copied(b)).catch(()=>{});});
 // Contact address is assembled here so it never appears as plain text in the HTML (keeps simple spam bots away).
 (function(){const el=$('contact');if(!el)return;const u=['har','ri'].join(''),d=['pallo','salama','.fi'].join(''),addr=u+'@'+d;const link=document.createElement('a');link.href='mai'+'lto:'+addr;link.textContent=addr;el.appendChild(link);})();
