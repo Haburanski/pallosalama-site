@@ -342,8 +342,9 @@ const params=new URLSearchParams(location.search);
 const langs=(navigator.languages&&navigator.languages.length)?navigator.languages:[navigator.language||'fi'];
 const finnish=langs.some(l=>/^fi\b|-FI$/i.test(String(l)));
 const chinese=!finnish&&langs.some(l=>/^zh\b/i.test(String(l)));
-const T=finnish?{on:'Liity kuunteluun',off:'Poistu kuuntelusta'}:chinese?{on:'加入聆听会',off:'离开'}:{on:'Join the listening session',off:'Leave'};
+const T=finnish?{on:'Liity kuunteluun',off:'Poistu kuuntelusta',hint:'Kuuntelet odotusmusiikkia.'}:chinese?{on:'加入聆听会',off:'离开',hint:'你正在聆听等候音乐。'}:{on:'Join the listening session',off:'Leave',hint:'You are listening to the waiting music.'};
 btn.textContent=T.on;
+{const h=document.getElementById('listen-hint');if(h)h.textContent=T.hint;}
 const isAndroid=/Android/i.test(navigator.userAgent);
 const firefoxAndroid=isAndroid&&/Firefox\//.test(navigator.userAgent);
 // V12.9 analytics (GoatCounter, no cookies). Not loaded at all when any test switch is in the address,
