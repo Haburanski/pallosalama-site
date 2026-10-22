@@ -332,7 +332,7 @@ const params=new URLSearchParams(location.search);
 // (or Finland region), otherwise English. Everything else on the page stays in Finnish.
 const langs=(navigator.languages&&navigator.languages.length)?navigator.languages:[navigator.language||'fi'];
 const finnish=langs.some(l=>/^fi\b|-FI$/i.test(String(l)));
-const T=finnish?{on:'Liity kuunteluun',off:'Poistu kuuntelusta'}:{on:'Join the listening',off:'Leave'};
+const T=finnish?{on:'Liity kuunteluun',off:'Poistu kuuntelusta'}:{on:'Join the listening session',off:'Leave'};
 btn.textContent=T.on;
 const isAndroid=/Android/i.test(navigator.userAgent);
 const firefoxAndroid=isAndroid&&/Firefox\//.test(navigator.userAgent);
