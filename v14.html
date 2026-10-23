@@ -109,6 +109,8 @@ body[data-album="true"]:not([data-held="true"]) .album-view{display:flex;}
 /* Waiting-music line under the join button (designer): shown while the waiting music plays. */
 .wait{margin:0;color:#969696;font-size:1em;line-height:1.45;opacity:0;transition:opacity .8s ease;}
 .wait.on{opacity:1;}
+.status .status-note{display:block;margin-top:.9em;font-weight:400;font-size:.8em;line-height:1.45;color:#969696;max-width:22em;}
+@media (max-width:760px){.status .status-note{margin-left:auto;margin-right:auto;}}
 /* Small note at the bottom while the album plays. */
 .album-note{position:absolute;left:24px;right:24px;bottom:4.5vh;margin:0;text-align:center;font-weight:400;font-size:clamp(13px,.85vw,17px);color:#969696;}
 .album-fallback{display:none;}
@@ -130,7 +132,7 @@ body[data-album="true"]:not([data-held="true"]) .album-view{display:flex;}
   <h1 class="artist">Harri Kalevi Sippola</h1>
   <h2 class="album">Pallosalama</h2>
   <section class="ctrl">
-    <p class="status"><span class="status-intro" id="status-intro">Teos soi aina tasatunnein.</span><br><span class="clock-label" id="clock-label">Seuraava kuuntelu alkaa</span><br><span class="clock" id="clock">&nbsp;</span></p>
+    <p class="status"><span class="status-intro" id="status-intro">Teos soi aina tasatunnein.</span><br><span class="clock-label" id="clock-label">Seuraava kuuntelu alkaa</span><br><span class="clock" id="clock">&nbsp;</span><span class="status-note" id="status-note">Älä päivitä sivua teoksen soidessa, et pääse enää kesken sisään.</span></p>
     <div class="lobby-message" id="lobby-message" aria-live="polite"></div>
     <div class="live-badge" id="live-badge"></div>
     <div class="btns">
@@ -161,7 +163,7 @@ body[data-album="true"]:not([data-held="true"]) .album-view{display:flex;}
   </section>
   <p class="foot">&copy; 2026 Harri Kalevi Sippola</p>
 </main>
-<div class="album-view"><video id="listenvid" src="media/playing.mp4" muted playsinline preload="auto" aria-label="Harri Kalevi Sippola: Pallosalama"></video><span class="album-fallback">Harri Kalevi Sippola: Pallosalama</span><p class="album-note" id="album-note">Älä päivitä sivua teoksen soidessa</p></div>
+<div class="album-view"><video id="listenvid" src="media/playing.mp4" muted playsinline preload="auto" aria-label="Harri Kalevi Sippola: Pallosalama"></video><span class="album-fallback">Harri Kalevi Sippola: Pallosalama</span><p class="album-note" id="album-note">Älä päivitä sivua teoksen soidessa, et pääse enää kesken sisään.</p></div>
 <script>
 // Pallosalama V12.8 (based on V12.7): one continuous file, lobby first (0..3600), album second.
 // Hourly album transition is driven by audio position, NOT a scheduled seek.
@@ -211,7 +213,7 @@ const first=String(langs[0]||'en').toLowerCase().split('-')[0].replace(/^n[bn]$/
 const T=finnish?{on:'Liity kuunteluun',off:'Poistu kuuntelusta',wait:'Kuuntelet odotusmusiikkia'}:chinese?{on:'加入聆听会',off:'离开',wait:'你正在聆听等候音乐'}:MORE[first]?{on:MORE[first][0],off:MORE[first][1],wait:MORE[first][2]}:{on:'Join the listening session',off:'Leave',wait:'Listening to waiting music'};
 {const w=document.getElementById('wait');if(w)w.textContent=T.wait;}
 const ST=finnish?{intro:'Teos soi aina tasatunnein.',label:'Seuraava kuuntelu alkaa',mins:n=>`${n} minuutin kuluttua`,secs:c=>c}:chinese?{intro:'本作品每逢整点播放。',label:'下一场聆听会',mins:n=>`${n} 分钟后开始`,secs:c=>`${c} 后开始`}:{intro:'The piece plays every starting hour.',label:'Next listening session starts',mins:n=>`in ${n} minutes`,secs:c=>`in ${c}`};
-{const n=document.getElementById('album-note');if(n)n.textContent=finnish?'Älä päivitä sivua teoksen soidessa':chinese?'作品播放期间请勿刷新页面':'Please do not refresh the page while the piece is playing';}
+{const txt=finnish?'Älä päivitä sivua teoksen soidessa, et pääse enää kesken sisään.':chinese?'作品播放期间请勿刷新页面，中途无法再次进入。':'Please do not refresh the page while the piece is playing – you cannot rejoin midway.';['album-note','status-note'].forEach(id=>{const n=document.getElementById(id);if(n)n.textContent=txt;});}
 {const i=document.getElementById('status-intro');if(i)i.textContent=ST.intro;if(!finnish)document.getElementById('clock-label').textContent=ST.label;}
 btn.textContent=T.on;
 const isAndroid=/Android/i.test(navigator.userAgent);
