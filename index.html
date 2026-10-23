@@ -141,7 +141,7 @@ body[data-album="true"]:not([data-held="true"]) .album-view{display:flex;}
 <body>
 <div id="blackout"></div>
 <main class="site">
-  <div class="bg" aria-hidden="true"><video id="bgvid" src="media/background.mp4" autoplay loop muted playsinline preload="auto"></video></div>
+  <div class="bg" aria-hidden="true"><video id="bgvid" src="media/background.mp4" poster="media/background_poster.jpg" autoplay loop muted playsinline preload="auto"></video></div>
   <h1 class="artist">Harri Kalevi Sippola</h1>
   <h2 class="album">Pallosalama</h2>
   <section class="ctrl">
@@ -225,13 +225,13 @@ const MORE={sv:['Gå med i lyssningen','Lämna lyssningen','Du lyssnar på vänt
 const first=String(langs[0]||'en').toLowerCase().split('-')[0].replace(/^n[bn]$/,'no');
 const T=finnish?{on:'Liity kuunteluun',off:'Poistu kuuntelusta',wait:'Kuuntelet odotusmusiikkia'}:chinese?{on:'加入聆听会',off:'离开',wait:'你正在聆听等候音乐'}:georgian?{on:'შეუერთდი მოსმენას',off:'მოსმენის დატოვება',wait:'შენ უსმენ ლოდინის მუსიკას'}:MORE[first]?{on:MORE[first][0],off:MORE[first][1],wait:MORE[first][2]}:{on:'Join the listening session',off:'Leave',wait:'Listening to waiting music'};
 {const w=document.getElementById('wait');if(w)w.textContent=T.wait;}
-const ST=finnish?{intro:'Teos soi aina tasatunnein.',label:'Seuraava kuuntelu alkaa',mins:n=>`${n} minuutin kuluttua`,secs:c=>c}:chinese?{intro:'本作品每逢整点播放。',label:'下一场聆听会',mins:n=>`${n} 分钟后开始`,secs:c=>`${c} 后开始`}:georgian?{intro:'ნაწარმოები ჟღერს ყოველი საათის დასაწყისში.',label:'შემდეგი მოსმენა დაიწყება',mins:n=>`${n} წუთში`,secs:c=>c}:{intro:'The piece plays every starting hour.',label:'Next listening session starts',mins:n=>`in ${n} minutes`,secs:c=>`in ${c}`};
+const ST=finnish?{intro:'Teos soi aina tasatunnein.',label:'Seuraava kuuntelu alkaa',mins:n=>`${n} minuutin kuluttua`,secs:c=>c}:chinese?{intro:'本作品每逢整点播放。',label:'下一场聆听会',mins:n=>`${n} 分钟后开始`,secs:c=>`${c} 后开始`}:georgian?{intro:'ნაწარმოები ჟღერს ყოველი საათის დასაწყისში.',label:'შემდეგი მოსმენა დაიწყება',mins:n=>`${n} წუთში`,secs:c=>c}:{intro:'The piece plays every hour.',label:'Next listening session starts',mins:n=>`in ${n} minutes`,secs:c=>`in ${c}`};
 {const txt=finnish?'Voit kuunnella teoksen vain alusta.\nÄlä päivitä sivua teoksen soidessa.':chinese?'作品只能从头开始聆听。\n播放期间请勿刷新页面。':georgian?'ნაწარმოების მოსმენა მხოლოდ თავიდან შეგიძლია.\nნუ განაახლებ გვერდს მისი ჟღერისას.':'You can only listen to the piece from the beginning.\nPlease do not refresh the page while it is playing.';{const n=document.getElementById('status-note');if(n)n.textContent=txt;}}
 /* V14: the rest of the page text follows the phone language too (names stay as they are). */
 const UI=finnish?{lang:'fi',share:'Jaa',copy:'Kopioi linkki',copied:'Kopioitu',duration:'Kesto 34 minuuttia',mastering:'Masterointi',design:'Visuaalinen suunnittelu',shareText:'Harri Kalevi Sippola: Pallosalama soi tasatunnein'}
  :georgian?{lang:'ka',share:'გაზიარება',copy:'ბმულის კოპირება',copied:'დაკოპირდა',duration:'ხანგრძლივობა 34 წუთი',mastering:'მასტერინგი',design:'ვიზუალური დიზაინი',shareText:'Harri Kalevi Sippola: Pallosalama ჟღერს ყოველი საათის დასაწყისში'}
  :chinese?{lang:'zh',share:'分享',copy:'复制链接',copied:'已复制',duration:'时长 34 分钟',mastering:'母带处理',design:'视觉设计',shareText:'Harri Kalevi Sippola：Pallosalama 每逢整点播放'}
- :{lang:'en',share:'Share',copy:'Copy link',copied:'Copied',duration:'Duration 34 minutes',mastering:'Mastering',design:'Visual design',shareText:'Harri Kalevi Sippola: Pallosalama plays every hour, on the hour'};
+ :{lang:'en',share:'Share',copy:'Copy link',copied:'Copied',duration:'Duration 34 minutes',mastering:'Mastering',design:'Visual design',shareText:'Harri Kalevi Sippola: Pallosalama plays every hour'};
 {document.documentElement.lang=UI.lang;const set=(id,t)=>{const e=document.getElementById(id);if(e)e.textContent=t;};set('share-label',UI.share);set('copy-link-btn',UI.copy);set('duration',UI.duration);set('mastering-label',UI.mastering);set('design-label',UI.design);}
 {const i=document.getElementById('status-intro');if(i)i.textContent=ST.intro;if(!finnish)document.getElementById('clock-label').textContent=ST.label;}
 btn.textContent=T.on;
