@@ -128,7 +128,7 @@ body[data-album="true"]:not([data-held="true"]) .album-view{display:flex;}
   <h1 class="artist">Harri Kalevi Sippola</h1>
   <h2 class="album">Pallosalama</h2>
   <section class="ctrl">
-    <p class="status"><span class="status-intro">Teos soi aina tasatunnein.</span><br><span class="clock-label" id="clock-label">Seuraava kuuntelu alkaa</span><br><span class="clock" id="clock">&nbsp;</span></p>
+    <p class="status"><span class="status-intro" id="status-intro">Teos soi aina tasatunnein.</span><br><span class="clock-label" id="clock-label">Seuraava kuuntelu alkaa</span><br><span class="clock" id="clock">&nbsp;</span></p>
     <div class="lobby-message" id="lobby-message" aria-live="polite"></div>
     <div class="live-badge" id="live-badge"></div>
     <div class="btns">
@@ -208,6 +208,8 @@ const MORE={sv:['Gå med i lyssningen','Lämna lyssningen','Du lyssnar på vänt
 const first=String(langs[0]||'en').toLowerCase().split('-')[0].replace(/^n[bn]$/,'no');
 const T=finnish?{on:'Liity kuunteluun',off:'Poistu kuuntelusta',wait:'Kuuntelet odotusmusiikkia'}:chinese?{on:'加入聆听会',off:'离开',wait:'你正在聆听等候音乐'}:MORE[first]?{on:MORE[first][0],off:MORE[first][1],wait:MORE[first][2]}:{on:'Join the listening session',off:'Leave',wait:'Listening to waiting music'};
 {const w=document.getElementById('wait');if(w)w.textContent=T.wait;}
+const ST=finnish?{intro:'Teos soi aina tasatunnein.',label:'Seuraava kuuntelu alkaa',mins:n=>`${n} minuutin kuluttua`,secs:c=>c}:chinese?{intro:'本作品每逢整点播放。',label:'下一场聆听会',mins:n=>`${n} 分钟后开始`,secs:c=>`${c} 后开始`}:{intro:'The piece plays every starting hour.',label:'Next listening session starts',mins:n=>`in ${n} minutes`,secs:c=>`in ${c}`};
+{const i=document.getElementById('status-intro');if(i)i.textContent=ST.intro;if(!finnish)document.getElementById('clock-label').textContent=ST.label;}
 btn.textContent=T.on;
 const isAndroid=/Android/i.test(navigator.userAgent);
 const firefoxAndroid=isAndroid&&/Firefox\//.test(navigator.userAgent);
@@ -535,7 +537,7 @@ function tick(){const t=now();
     a few seconds late crossing into the album does not get the dot. Display-only; touches no audio. */
  {const hs=Math.floor(t/3600)*3600;const showDot=mode!=='ALBUM'&&t<hs+CONFIG.album&&!(armedFor!==null&&armedFor<=t);if(showDot!==lastDot){lastDot=showDot;badge.style.display=showDot?'flex':'none';log('LIVE_DOT',showDot?'shown':'hidden');}}
  if(t>=fadeInUntil){const toAlbum=armedFor!==null?armedFor-t:1e9;const fading=mode==='LOBBY'&&!held&&toAlbum<=CONFIG.visualFade&&toAlbum>-5;const op=fading?Math.min(1,Math.max(0,(CONFIG.visualFade-toAlbum)/CONFIG.visualFade)):0;const want=op.toFixed(2);if(blackout.style.opacity!==want&&!(want==='0.00'&&(blackout.style.opacity==='0'||blackout.style.opacity===''))){blackout.style.opacity=want;if(op>=1&&!blackout.dataset.logged){blackout.dataset.logged='1';log('PRE_ALBUM_FADE','screen black before the album');}}if(op===0)delete blackout.dataset.logged;}
- const target=mode!=='OFF'&&armedFor?armedFor:nextHour(t);/* V12.8: armed & slightly late shows 00 : 00, not the next hour */const rem=Math.max(0,target-t);if(rem>300){clock.textContent=`${Math.ceil(rem/60)} minuutin kuluttua`;}else{const totalSeconds=Math.ceil(rem);const m=Math.floor(totalSeconds/60),s=totalSeconds%60;clock.textContent=[m,s].map(v=>String(v).padStart(2,'0')).join(' : ');}clock.style.display=mode==='ALBUM'?'none':'';label.style.display=mode==='ALBUM'?'none':'';label.textContent='Seuraava kuuntelu alkaa';updateArrow();driveListenVideo();{const w=$('wait');const on=mode==='LOBBY'&&!held;if(w.classList.contains('on')!==on){w.classList.toggle('on',on);w.setAttribute('aria-hidden',on?'false':'true');}}
+ const target=mode!=='OFF'&&armedFor?armedFor:nextHour(t);/* V12.8: armed & slightly late shows 00 : 00, not the next hour */const rem=Math.max(0,target-t);if(rem>300){clock.textContent=ST.mins(Math.ceil(rem/60));}else{const totalSeconds=Math.ceil(rem);const m=Math.floor(totalSeconds/60),s=totalSeconds%60;clock.textContent=ST.secs([m,s].map(v=>String(v).padStart(2,'0')).join(' : '));}clock.style.display=mode==='ALBUM'?'none':'';label.style.display=mode==='ALBUM'?'none':'';label.textContent=ST.label;updateArrow();driveListenVideo();{const w=$('wait');const on=mode==='LOBBY'&&!held;if(w.classList.contains('on')!==on){w.classList.toggle('on',on);w.setAttribute('aria-hidden',on?'false':'true');}}
  if(t-lastProgress>10){lastProgress=t;log('PROGRESS',`starts=${starts} completions=${completions} armed=${armedFor} drift=${mode==='LOBBY'?(a.currentTime-lobbyTarget(t)).toFixed(2):'n/a'}`);}
 }
 ['loadstart','loadedmetadata','canplay','playing','pause','waiting','stalled','suspend','seeking','seeked','ended','error'].forEach(ev=>a.addEventListener(ev,()=>{
