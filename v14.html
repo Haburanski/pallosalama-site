@@ -106,6 +106,9 @@ body[data-album="true"]:not([data-held="true"]) .album-view{display:flex;}
 .info{color:#969696;}
 .info a{color:#969696;}
 .site{min-height:100dvh;}
+/* Waiting-music line under the join button (designer): shown while the waiting music plays. */
+.wait{margin:0;color:#969696;font-size:1em;line-height:1.45;opacity:0;transition:opacity .8s ease;}
+.wait.on{opacity:1;}
 .album-fallback{display:none;}
 .album-view.novideo .album-fallback{display:block;}
 .album-view.novideo video{display:none;}
@@ -130,6 +133,7 @@ body[data-album="true"]:not([data-held="true"]) .album-view{display:flex;}
     <div class="live-badge" id="live-badge"></div>
     <div class="btns">
       <button type="button" class="btn" id="sound-toggle">&#196;&#228;net p&#228;&#228;lle</button>
+      <p class="wait" id="wait" aria-hidden="true">Kuuntelet odotusmusiikkia</p>
       <div class="btnrow">
         <button type="button" class="link" id="share-btn">Jaa</button>
         <button type="button" class="link" id="copy-link-btn">Kopioi linkki</button>
@@ -200,9 +204,10 @@ const params=new URLSearchParams(location.search);
 const langs=(navigator.languages&&navigator.languages.length)?navigator.languages:[navigator.language||'fi'];
 const finnish=langs.some(l=>/^fi\b|-FI$/i.test(String(l)));
 const chinese=!finnish&&langs.some(l=>/^zh\b/i.test(String(l)));
-const MORE={sv:['Gå med i lyssningen','Lämna lyssningen'],no:['Bli med på lyttingen','Forlat lyttingen'],da:['Deltag i lytningen','Forlad lytningen'],de:['Jetzt zuhören','Zuhören beenden'],fr:["Rejoindre l'écoute","Quitter l'écoute"],es:['Unirse a la escucha','Salir de la escucha'],it:["Unisciti all'ascolto","Esci dall'ascolto"],nl:['Doe mee met luisteren','Stop met luisteren'],et:['Liitu kuulamisega','Lahku kuulamisest'],pt:['Entrar na audição','Sair da audição'],pl:['Dołącz do słuchania','Opuść słuchanie'],ru:['Слушать вместе','Выйти'],ja:['リスニングに参加','リスニングを終了']};
+const MORE={sv:['Gå med i lyssningen','Lämna lyssningen','Du lyssnar på väntemusik'],no:['Bli med på lyttingen','Forlat lyttingen','Du hører på ventemusikk'],da:['Deltag i lytningen','Forlad lytningen','Du lytter til ventemusik'],de:['Jetzt zuhören','Zuhören beenden','Du hörst Wartemusik'],fr:["Rejoindre l'écoute","Quitter l'écoute","Vous écoutez la musique d'attente"],es:['Unirse a la escucha','Salir de la escucha','Escuchas la música de espera'],it:["Unisciti all'ascolto","Esci dall'ascolto","Stai ascoltando la musica d'attesa"],nl:['Doe mee met luisteren','Stop met luisteren','Je luistert naar wachtmuziek'],et:['Liitu kuulamisega','Lahku kuulamisest','Kuulad ootemuusikat'],pt:['Entrar na audição','Sair da audição','A ouvir a música de espera'],pl:['Dołącz do słuchania','Opuść słuchanie','Słuchasz muzyki oczekiwania'],ru:['Слушать вместе','Выйти','Играет музыка ожидания'],ja:['リスニングに参加','リスニングを終了','待機中の音楽を再生中']};
 const first=String(langs[0]||'en').toLowerCase().split('-')[0].replace(/^n[bn]$/,'no');
-const T=finnish?{on:'Liity kuunteluun',off:'Poistu kuuntelusta'}:chinese?{on:'加入聆听会',off:'离开'}:MORE[first]?{on:MORE[first][0],off:MORE[first][1]}:{on:'Join the listening session',off:'Leave'};
+const T=finnish?{on:'Liity kuunteluun',off:'Poistu kuuntelusta',wait:'Kuuntelet odotusmusiikkia'}:chinese?{on:'加入聆听会',off:'离开',wait:'你正在聆听等候音乐'}:MORE[first]?{on:MORE[first][0],off:MORE[first][1],wait:MORE[first][2]}:{on:'Join the listening session',off:'Leave',wait:'Listening to waiting music'};
+{const w=document.getElementById('wait');if(w)w.textContent=T.wait;}
 btn.textContent=T.on;
 const isAndroid=/Android/i.test(navigator.userAgent);
 const firefoxAndroid=isAndroid&&/Firefox\//.test(navigator.userAgent);
@@ -530,7 +535,7 @@ function tick(){const t=now();
     a few seconds late crossing into the album does not get the dot. Display-only; touches no audio. */
  {const hs=Math.floor(t/3600)*3600;const showDot=mode!=='ALBUM'&&t<hs+CONFIG.album&&!(armedFor!==null&&armedFor<=t);if(showDot!==lastDot){lastDot=showDot;badge.style.display=showDot?'flex':'none';log('LIVE_DOT',showDot?'shown':'hidden');}}
  if(t>=fadeInUntil){const toAlbum=armedFor!==null?armedFor-t:1e9;const fading=mode==='LOBBY'&&!held&&toAlbum<=CONFIG.visualFade&&toAlbum>-5;const op=fading?Math.min(1,Math.max(0,(CONFIG.visualFade-toAlbum)/CONFIG.visualFade)):0;const want=op.toFixed(2);if(blackout.style.opacity!==want&&!(want==='0.00'&&(blackout.style.opacity==='0'||blackout.style.opacity===''))){blackout.style.opacity=want;if(op>=1&&!blackout.dataset.logged){blackout.dataset.logged='1';log('PRE_ALBUM_FADE','screen black before the album');}}if(op===0)delete blackout.dataset.logged;}
- const target=mode!=='OFF'&&armedFor?armedFor:nextHour(t);/* V12.8: armed & slightly late shows 00 : 00, not the next hour */const rem=Math.max(0,target-t);if(rem>300){clock.textContent=`${Math.ceil(rem/60)} minuutin kuluttua`;}else{const totalSeconds=Math.ceil(rem);const m=Math.floor(totalSeconds/60),s=totalSeconds%60;clock.textContent=[m,s].map(v=>String(v).padStart(2,'0')).join(' : ');}clock.style.display=mode==='ALBUM'?'none':'';label.style.display=mode==='ALBUM'?'none':'';label.textContent='alkaa';updateArrow();driveListenVideo();
+ const target=mode!=='OFF'&&armedFor?armedFor:nextHour(t);/* V12.8: armed & slightly late shows 00 : 00, not the next hour */const rem=Math.max(0,target-t);if(rem>300){clock.textContent=`${Math.ceil(rem/60)} minuutin kuluttua`;}else{const totalSeconds=Math.ceil(rem);const m=Math.floor(totalSeconds/60),s=totalSeconds%60;clock.textContent=[m,s].map(v=>String(v).padStart(2,'0')).join(' : ');}clock.style.display=mode==='ALBUM'?'none':'';label.style.display=mode==='ALBUM'?'none':'';label.textContent='alkaa';updateArrow();driveListenVideo();{const w=$('wait');const on=mode==='LOBBY'&&!held;if(w.classList.contains('on')!==on){w.classList.toggle('on',on);w.setAttribute('aria-hidden',on?'false':'true');}}
  if(t-lastProgress>10){lastProgress=t;log('PROGRESS',`starts=${starts} completions=${completions} armed=${armedFor} drift=${mode==='LOBBY'?(a.currentTime-lobbyTarget(t)).toFixed(2):'n/a'}`);}
 }
 ['loadstart','loadedmetadata','canplay','playing','pause','waiting','stalled','suspend','seeking','seeked','ended','error'].forEach(ev=>a.addEventListener(ev,()=>{
