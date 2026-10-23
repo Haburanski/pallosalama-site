@@ -111,6 +111,10 @@ body[data-album="true"]:not([data-held="true"]) .album-view{display:flex;}
 .wait.on{opacity:1;}
 .status .status-note{display:block;margin-top:.9em;font-weight:400;font-size:.8em;line-height:1.45;color:#969696;max-width:22em;}
 @media (max-width:760px){.status .status-note{margin-left:auto;margin-right:auto;}}
+/* Jaa sits between the note and the join button (23 Oct). */
+.status{margin-bottom:2em;}
+.btnrow{margin:0 0 1.2em;}
+@media (max-width:760px){.status{margin-bottom:1.2em;}.btnrow{margin:0 0 8px;}}
 .album-fallback{display:none;}
 .album-view.novideo .album-fallback{display:block;}
 .album-view.novideo #listenvid{display:none;}
@@ -134,11 +138,11 @@ body[data-album="true"]:not([data-held="true"]) .album-view{display:flex;}
     <div class="lobby-message" id="lobby-message" aria-live="polite"></div>
     <div class="live-badge" id="live-badge"></div>
     <div class="btns">
-      <button type="button" class="btn" id="sound-toggle">&#196;&#228;net p&#228;&#228;lle</button>
-      <p class="wait" id="wait" aria-hidden="true">Kuuntelet odotusmusiikkia</p>
       <div class="btnrow">
         <button type="button" class="link" id="share-btn">Jaa</button>
       </div>
+      <button type="button" class="btn" id="sound-toggle">&#196;&#228;net p&#228;&#228;lle</button>
+      <p class="wait" id="wait" aria-hidden="true">Kuuntelet odotusmusiikkia</p>
     </div>
     <audio id="lobby-audio" preload="auto" playsinline crossorigin="anonymous"></audio>
   </section>
