@@ -134,7 +134,7 @@ body[data-album="true"]:not([data-held="true"]) .album-view{display:flex;}
   <h1 class="artist">Harri Kalevi Sippola</h1>
   <h2 class="album">Pallosalama</h2>
   <section class="ctrl">
-    <p class="status"><span class="status-intro" id="status-intro">Teos soi aina tasatunnein.</span><br><span class="clock-label" id="clock-label">Seuraava kuuntelu alkaa</span><br><span class="clock" id="clock">&nbsp;</span><span class="status-note" id="status-note">Älä päivitä sivua teoksen soidessa, et pääse enää kesken sisään.</span></p>
+    <p class="status"><span class="status-intro" id="status-intro">Teos soi aina tasatunnein.</span><br><span class="clock-label" id="clock-label">Seuraava kuuntelu alkaa</span><br><span class="clock" id="clock">&nbsp;</span><span class="status-note" id="status-note">Älä päivitä sivua teoksen soidessa.</span></p>
     <div class="lobby-message" id="lobby-message" aria-live="polite"></div>
     <div class="live-badge" id="live-badge"></div>
     <div class="btns">
@@ -216,7 +216,7 @@ const first=String(langs[0]||'en').toLowerCase().split('-')[0].replace(/^n[bn]$/
 const T=finnish?{on:'Liity kuunteluun',off:'Poistu kuuntelusta',wait:'Kuuntelet odotusmusiikkia'}:chinese?{on:'加入聆听会',off:'离开',wait:'你正在聆听等候音乐'}:georgian?{on:'შეუერთდი მოსმენას',off:'მოსმენის დატოვება',wait:'შენ უსმენ ლოდინის მუსიკას'}:MORE[first]?{on:MORE[first][0],off:MORE[first][1],wait:MORE[first][2]}:{on:'Join the listening session',off:'Leave',wait:'Listening to waiting music'};
 {const w=document.getElementById('wait');if(w)w.textContent=T.wait;}
 const ST=finnish?{intro:'Teos soi aina tasatunnein.',label:'Seuraava kuuntelu alkaa',mins:n=>`${n} minuutin kuluttua`,secs:c=>c}:chinese?{intro:'本作品每逢整点播放。',label:'下一场聆听会',mins:n=>`${n} 分钟后开始`,secs:c=>`${c} 后开始`}:georgian?{intro:'ნაწარმოები ჟღერს ყოველი საათის დასაწყისში.',label:'შემდეგი მოსმენა დაიწყება',mins:n=>`${n} წუთში`,secs:c=>c}:{intro:'The piece plays every starting hour.',label:'Next listening session starts',mins:n=>`in ${n} minutes`,secs:c=>`in ${c}`};
-{const txt=finnish?'Älä päivitä sivua teoksen soidessa, et pääse enää kesken sisään.':chinese?'作品播放期间请勿刷新页面，中途无法再次进入。':georgian?'ნუ განაახლებ გვერდს ნაწარმოების ჟღერისას – შუაში ვეღარ შემოხვალ.':'Please do not refresh the page while the piece is playing – you cannot rejoin midway.';{const n=document.getElementById('status-note');if(n)n.textContent=txt;}}
+{const txt=finnish?'Älä päivitä sivua teoksen soidessa.':chinese?'作品播放期间请勿刷新页面。':georgian?'ნუ განაახლებ გვერდს ნაწარმოების ჟღერისას.':'Please do not refresh the page while the piece is playing.';{const n=document.getElementById('status-note');if(n)n.textContent=txt;}}
 /* V14: the rest of the page text follows the phone language too (names stay as they are). */
 const UI=finnish?{lang:'fi',share:'Jaa',copy:'Kopioi linkki',copied:'Kopioitu',duration:'Kesto 34 minuuttia',mastering:'Masterointi',design:'Visuaalinen suunnittelu',shareText:'Harri Kalevi Sippola: Pallosalama soi tasatunnein'}
  :georgian?{lang:'ka',share:'გაზიარება',copy:'ბმულის კოპირება',copied:'დაკოპირდა',duration:'ხანგრძლივობა 34 წუთი',mastering:'მასტერინგი',design:'ვიზუალური დიზაინი',shareText:'Harri Kalevi Sippola: Pallosalama ჟღერს ყოველი საათის დასაწყისში'}
