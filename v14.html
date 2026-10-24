@@ -154,7 +154,6 @@ body[data-album="true"]:not([data-held="true"]) .album-view{display:flex;}
   <h1 class="artist">Harri Kalevi Sippola</h1>
   <h2 class="album">Pallosalama</h2>
   <section class="ctrl">
-    <p class="langs" id="langs" aria-label="Kieli / Language"><button type="button" data-lang="fi" lang="fi">FI</button><span aria-hidden="true">·</span><button type="button" data-lang="en" lang="en">EN</button><span aria-hidden="true">·</span><button type="button" data-lang="zh" lang="zh">中文</button><span aria-hidden="true">·</span><button type="button" data-lang="ja" lang="ja">日本語</button><span aria-hidden="true">·</span><button type="button" data-lang="ka" lang="ka">ქართ</button></p>
     <p class="status"><span class="status-intro" id="status-intro">Teos soi aina tasatunnein.</span><br><span class="clock-label" id="clock-label">Seuraava kuuntelu alkaa</span><br><span class="clock" id="clock">&nbsp;</span><span class="status-note" id="status-note">Voit kuunnella teoksen vain alusta.
 Älä päivitä sivua kesken kuuntelun.</span></p>
     <div class="lobby-message" id="lobby-message" aria-live="polite"></div>
@@ -230,11 +229,11 @@ const params=new URLSearchParams(location.search);
 const langs=(navigator.languages&&navigator.languages.length)?navigator.languages:[navigator.language||'fi'];
 /* 24 Oct: language = the visitor's own choice (FI / EN / 中文 / ქართ links, remembered in this browser),
    otherwise the phone language. Switching changes only the texts; the music keeps playing. */
-const autoLang=langs.some(l=>/^fi\b|-FI$/i.test(String(l)))?'fi':/^zh\b/i.test(String(langs[0]))?'zh':/^ja\b/i.test(String(langs[0]))?'ja':/^ka\b/i.test(String(langs[0]))?'ka':'fi';/* 24 Oct: everyone else gets Finnish by default */
+const autoLang=/^zh\b/i.test(String(langs[0]))?'zh':/^ja\b/i.test(String(langs[0]))?'ja':/^ka\b/i.test(String(langs[0]))?'ka':'fi';/* 24 Oct rule: always Finnish, unless the phone is in Chinese, Japanese or Georgian. No language selection. */
 let savedLang=null;try{savedLang=localStorage.getItem('pallosalama-lang');}catch(e){}
 let finnish,chinese,georgian,japanese,first,T,ST,UI;
 function pickLang(code){finnish=code==='fi';chinese=code==='zh';georgian=code==='ka';japanese=code==='ja';first=code;}
-pickLang(['fi','en','zh','ja','ka'].includes(savedLang)?savedLang:autoLang);
+pickLang(autoLang);try{localStorage.removeItem('pallosalama-lang');}catch(e){}
 const MORE={sv:['Gå med i lyssningen','Lämna lyssningen','Spelas nu: Väntemusik'],no:['Bli med på lyttingen','Forlat lyttingen','Spilles nå: Ventemusikk'],da:['Deltag i lytningen','Forlad lytningen','Spiller nu: Ventemusik'],de:['Jetzt zuhören','Zuhören beenden','Jetzt läuft: Wartemusik'],fr:["Rejoindre l'écoute","Quitter l'écoute","En cours : musique d'attente"],es:['Unirse a la escucha','Salir de la escucha','Sonando ahora: música de espera'],it:["Unisciti all'ascolto","Esci dall'ascolto","In riproduzione: musica d'attesa"],nl:['Doe mee met luisteren','Stop met luisteren','Nu speelt: wachtmuziek'],et:['Liitu kuulamisega','Lahku kuulamisest','Praegu mängib: ootemuusika'],pt:['Entrar na audição','Sair da audição','A tocar agora: música de espera'],pl:['Dołącz do słuchania','Opuść słuchanie','Teraz gra: muzyka oczekiwania'],ru:['Слушать вместе','Выйти','Сейчас играет: музыка ожидания'],ja:['リスニングに参加','リスニングを終了','再生中：待機中の音楽']};
 function applyTexts(){
 T=finnish?{on:'Liity kuunteluun',off:'Poistu kuuntelusta',wait:'Nyt soi: Odotusmusiikki'}:japanese?{on:'リスニングに参加',off:'リスニングを終了',wait:'再生中：待機音楽'}:chinese?{on:'加入聆听会',off:'离开',wait:'正在播放：等候音乐'}:georgian?{on:'შეუერთდი მოსმენას',off:'მოსმენის დატოვება',wait:'ახლა ჟღერს: ლოდინის მუსიკა'}:MORE[first]?{on:MORE[first][0],off:MORE[first][1],wait:MORE[first][2]}:{on:'Join the listening session',off:'Leave',wait:'Now playing: Waiting music'};
