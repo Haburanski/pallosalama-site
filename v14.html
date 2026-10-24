@@ -133,6 +133,14 @@ body[data-album="true"]:not([data-held="true"]) .album-view{display:flex;}
 @media (hover:hover){.langs button:hover{color:#fff;}}
 .langs button:focus-visible{outline:2px solid #fff;outline-offset:3px;}
 @media (max-width:760px){.langs{justify-content:center;margin-bottom:1.1em;}}
+/* 24 Oct: the join button shows a speaker instead of words (same in every language; the words stay as its
+   accessible name). Not joined / paused: speaker with sound waves. Listening: crossed speaker = press to leave. */
+#sound-toggle{position:relative;font-size:0;color:#1b1512;}
+#sound-toggle::before{content:"";width:30px;height:30px;background-color:currentColor;
+  -webkit-mask:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M4%209.5h3.5L12%205.5v13l-4.5-4H4z%22/%3E%3Cpath%20d%3D%22M15.5%209a4%204%200%200%201%200%206%22/%3E%3Cpath%20d%3D%22M18%206.5a7.5%207.5%200%200%201%200%2011%22/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M4%209.5h3.5L12%205.5v13l-4.5-4H4z%22/%3E%3Cpath%20d%3D%22M15.5%209a4%204%200%200%201%200%206%22/%3E%3Cpath%20d%3D%22M18%206.5a7.5%207.5%200%200%201%200%2011%22/%3E%3C/svg%3E") center/contain no-repeat;}
+body[data-sound="on"]:not([data-held="true"]) #sound-toggle{color:#fff;}
+body[data-sound="on"]:not([data-held="true"]) #sound-toggle::before{-webkit-mask-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M4%209.5h3.5L12%205.5v13l-4.5-4H4z%22/%3E%3Cpath%20d%3D%22M16%209.5l5%205M21%209.5l-5%205%22/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M4%209.5h3.5L12%205.5v13l-4.5-4H4z%22/%3E%3Cpath%20d%3D%22M16%209.5l5%205M21%209.5l-5%205%22/%3E%3C/svg%3E");}
+@media (hover:hover){body[data-sound="on"]:not([data-held="true"]) #sound-toggle:hover{color:#1b1512;}}
 .album-fallback{display:none;}
 .album-view.novideo .album-fallback{display:block;}
 .album-view.novideo #listenvid{display:none;}
@@ -154,7 +162,7 @@ body[data-album="true"]:not([data-held="true"]) .album-view{display:flex;}
   <h1 class="artist">Harri Kalevi Sippola</h1>
   <h2 class="album">Pallosalama</h2>
   <section class="ctrl">
-    <p class="langs" id="langs" aria-label="Kieli / Language"><button type="button" data-lang="fi" lang="fi">FI</button><span aria-hidden="true">·</span><button type="button" data-lang="en" lang="en">EN</button><span aria-hidden="true">·</span><button type="button" data-lang="zh" lang="zh">中文</button><span aria-hidden="true">·</span><button type="button" data-lang="ja" lang="ja">日本語</button><span aria-hidden="true">·</span><button type="button" data-lang="ka" lang="ka">ქართ</button></p>
+    <p class="langs" id="langs" aria-label="Kieli / Language"><button type="button" data-lang="fi" lang="fi">FI</button><span aria-hidden="true">·</span><button type="button" data-lang="zh" lang="zh">中文</button><span aria-hidden="true">·</span><button type="button" data-lang="ja" lang="ja">日本語</button><span aria-hidden="true">·</span><button type="button" data-lang="ka" lang="ka">ქართ</button></p>
     <p class="status"><span class="status-intro" id="status-intro">Teos soi aina tasatunnein.</span><br><span class="clock-label" id="clock-label">Seuraava kuuntelu alkaa</span><br><span class="clock" id="clock">&nbsp;</span><span class="status-note" id="status-note">Voit kuunnella teoksen vain alusta.
 Älä päivitä sivua kesken kuuntelun.</span></p>
     <div class="lobby-message" id="lobby-message" aria-live="polite"></div>
@@ -234,7 +242,7 @@ const autoLang=langs.some(l=>/^fi\b|-FI$/i.test(String(l)))?'fi':/^zh\b/i.test(S
 let savedLang=null;try{savedLang=localStorage.getItem('pallosalama-lang');}catch(e){}
 let finnish,chinese,georgian,japanese,first,T,ST,UI;
 function pickLang(code){finnish=code==='fi';chinese=code==='zh';georgian=code==='ka';japanese=code==='ja';first=code;}
-pickLang(['fi','en','zh','ja','ka'].includes(savedLang)?savedLang:autoLang);
+pickLang(['fi','zh','ja','ka'].includes(savedLang)?savedLang:autoLang);/* 24 Oct: only fi / zh / ja / ka */
 const MORE={sv:['Gå med i lyssningen','Lämna lyssningen','Spelas nu: Väntemusik'],no:['Bli med på lyttingen','Forlat lyttingen','Spilles nå: Ventemusikk'],da:['Deltag i lytningen','Forlad lytningen','Spiller nu: Ventemusik'],de:['Jetzt zuhören','Zuhören beenden','Jetzt läuft: Wartemusik'],fr:["Rejoindre l'écoute","Quitter l'écoute","En cours : musique d'attente"],es:['Unirse a la escucha','Salir de la escucha','Sonando ahora: música de espera'],it:["Unisciti all'ascolto","Esci dall'ascolto","In riproduzione: musica d'attesa"],nl:['Doe mee met luisteren','Stop met luisteren','Nu speelt: wachtmuziek'],et:['Liitu kuulamisega','Lahku kuulamisest','Praegu mängib: ootemuusika'],pt:['Entrar na audição','Sair da audição','A tocar agora: música de espera'],pl:['Dołącz do słuchania','Opuść słuchanie','Teraz gra: muzyka oczekiwania'],ru:['Слушать вместе','Выйти','Сейчас играет: музыка ожидания'],ja:['リスニングに参加','リスニングを終了','再生中：待機中の音楽']};
 function applyTexts(){
 T=finnish?{on:'Liity kuunteluun',off:'Poistu kuuntelusta',wait:'Nyt soi: Odotusmusiikki'}:japanese?{on:'リスニングに参加',off:'リスニングを終了',wait:'再生中：待機音楽'}:chinese?{on:'加入聆听会',off:'离开',wait:'正在播放：等候音乐'}:georgian?{on:'შეუერთდი მოსმენას',off:'მოსმენის დატოვება',wait:'ახლა ჟღერს: ლოდინის მუსიკა'}:MORE[first]?{on:MORE[first][0],off:MORE[first][1],wait:MORE[first][2]}:{on:'Join the listening session',off:'Leave',wait:'Now playing: Waiting music'};
