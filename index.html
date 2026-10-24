@@ -158,8 +158,7 @@ body.no-album-video .album-note{display:block;}
   <h1 class="artist">Harri Kalevi Sippola</h1>
   <h2 class="album">Pallosalama</h2>
   <section class="ctrl">
-    <p class="status"><span class="status-intro" id="status-intro">Teos soi aina tasatunnein.</span><br><span class="clock-label" id="clock-label">Seuraava kuuntelu alkaa</span><br><span class="clock" id="clock">&nbsp;</span><span class="status-note" id="status-note">Voit kuunnella teoksen vain alusta.
-Älä päivitä sivua kesken kuuntelun.</span></p>
+    <p class="status"><span class="status-intro" id="status-intro">Teos soi aina tasatunnein.</span><br><span class="clock-label" id="clock-label">Seuraava kuuntelu alkaa</span><br><span class="clock" id="clock">&nbsp;</span><span class="status-note" id="status-note">Voit kuunnella teoksen vain alusta.</span></p>
     <div class="lobby-message" id="lobby-message" aria-live="polite"></div>
     <div class="live-badge" id="live-badge"></div>
     <div class="btns">
@@ -224,7 +223,7 @@ body.no-album-video .album-note{display:block;}
 // V12.9 (20 Oct, hosting move): the MP3 lives in Cloudflare R2 (too big for page hosting). It is a different
 // address than the page, so the audio element asks for it with CORS (crossorigin) - without that, Web Audio
 // (Android Chrome, iPhone fade path) would play silence. The R2 bucket has a matching CORS rule.
-const CONFIG={albumVideo:false,file:'https://pub-0c9d256591844e5baf3b4855be8c043d.r2.dev/Pallosalama_lobbyfirst.mp3',lobby:3600,album:2031,cycle:3600,fadeIn:3,resumeFade:3,backstep:2,version:'12.9',build:'2026-10-25-screennote3',visualFade:7,lobbyFade:5,nameFadeAt:45,nameFadeDur:20,pauseGrace:30,trackStarts:[],driftThreshold:3,quietDriftThreshold:1,quietFrom:2025,quietTo:2042,driftBoundaryGuard:30,driftCooldown:60,maxSeekCorrections:3};
+const CONFIG={albumVideo:false,file:'https://pub-0c9d256591844e5baf3b4855be8c043d.r2.dev/Pallosalama_lobbyfirst.mp3',lobby:3600,album:2031,cycle:3600,fadeIn:3,resumeFade:3,backstep:2,version:'12.9',build:'2026-10-25-screennote4',visualFade:7,lobbyFade:5,nameFadeAt:45,nameFadeDur:20,pauseGrace:30,trackStarts:[],driftThreshold:3,quietDriftThreshold:1,quietFrom:2025,quietTo:2042,driftBoundaryGuard:30,driftCooldown:60,maxSeekCorrections:3};
 if(!CONFIG.albumVideo)document.body.classList.add('no-album-video');
 const $=id=>document.getElementById(id);
 const a=$('lobby-audio'),btn=$('sound-toggle'),clock=$('clock'),label=$('clock-label'),message=$('lobby-message'),badge=$('live-badge'),blackout=$('blackout');
@@ -245,7 +244,7 @@ function applyTexts(){
 T=finnish?{on:'Liity kuunteluun',off:'Poistu kuuntelusta',wait:'Nyt soi: Odotusmusiikki'}:japanese?{on:'リスニングに参加',off:'リスニングを終了',wait:'再生中：待機音楽'}:chinese?{on:'加入聆听会',off:'离开',wait:'正在播放：等候音乐'}:georgian?{on:'შეუერთდი მოსმენას',off:'მოსმენის დატოვება',wait:'ახლა ჟღერს: ლოდინის მუსიკა'}:MORE[first]?{on:MORE[first][0],off:MORE[first][1],wait:MORE[first][2]}:{on:'Join the listening session',off:'Leave',wait:'Now playing: Waiting music'};
 {const w=document.getElementById('wait');if(w)w.textContent=T.wait;}
 ST=finnish?{intro:'Teos soi aina tasatunnein.',label:'Seuraava kuuntelu alkaa',mins:n=>`${n} minuutin kuluttua`,secs:c=>c}:japanese?{intro:'作品は毎正時に流れます。',label:'次のリスニングは',mins:n=>`${n} 分後に始まります`,secs:c=>`${c} 後に始まります`}:chinese?{intro:'本作品每逢整点播放。',label:'下一场聆听会',mins:n=>`${n} 分钟后开始`,secs:c=>`${c} 后开始`}:georgian?{intro:'ნაწარმოები ჟღერს ყოველი საათის დასაწყისში.',label:'შემდეგი მოსმენა დაიწყება',mins:n=>`${n} წუთში`,secs:c=>c}:{intro:'The piece plays every hour.',label:'Next listening session starts',mins:n=>`in ${n} minutes`,secs:c=>`in ${c}`};
-{const txt=finnish?'Voit kuunnella teoksen vain alusta.\nÄlä päivitä sivua kesken kuuntelun.':japanese?'作品は最初からしか聴けません。\n再生中はページを更新しないでください。':chinese?'作品只能从头开始聆听。\n聆听期间请勿刷新页面。':georgian?'ნაწარმოების მოსმენა მხოლოდ თავიდან შეგიძლია.\nნუ განაახლებ გვერდს მისი ჟღერისას.':'You can only listen to the piece from the beginning.\nPlease do not refresh the page during the listening session.';statusNoteDefault=txt;{const n=document.getElementById('status-note');if(n)n.textContent=txt;}{const an=document.getElementById('album-note');if(an)an.textContent=finnish?'Älä päivitä sivua kuuntelun aikana':(txt.split('\n')[1]||'').replace(/[.。]$/,'');}}
+{const txt=finnish?'Voit kuunnella teoksen vain alusta.':japanese?'作品は最初からしか聴けません。\n再生中はページを更新しないでください。':chinese?'作品只能从头开始聆听。\n聆听期间请勿刷新页面。':georgian?'ნაწარმოების მოსმენა მხოლოდ თავიდან შეგიძლია.\nნუ განაახლებ გვერდს მისი ჟღერისას.':'You can only listen to the piece from the beginning.\nPlease do not refresh the page during the listening session.';statusNoteDefault=txt;{const n=document.getElementById('status-note');if(n)n.textContent=txt;}{const an=document.getElementById('album-note');if(an)an.textContent=finnish?'Älä päivitä sivua kuuntelun aikana':(txt.split('\n')[1]||'').replace(/[.。]$/,'');}}
 /* V14: the rest of the page text follows the phone language too (names stay as they are). */
 UI=finnish?{lang:'fi',share:'Jaa',copy:'Kopioi linkki',copied:'Kopioitu',duration:'Kesto 34 minuuttia',mastering:'Masterointi',design:'Visuaalinen suunnittelu',shareText:'Harri Kalevi Sippola: Pallosalama soi tasatunnein'}
  :japanese?{lang:'ja',share:'共有',copy:'リンクをコピー',copied:'コピーしました',duration:'再生時間 34 分',mastering:'マスタリング',design:'ビジュアルデザイン',shareText:'Harri Kalevi Sippola：Pallosalama は毎正時に流れます'}
