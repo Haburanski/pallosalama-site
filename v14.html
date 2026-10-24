@@ -126,6 +126,13 @@ body[data-album="true"]:not([data-held="true"]) .album-view{display:flex;}
 .status{margin-bottom:1.7em;}
 .btnrow{margin-bottom:2.4em;}
 @media (max-width:760px){.status .status-note{margin-top:1.1em;}.status{margin-bottom:1.3em;}.btnrow{margin-bottom:18px;}}
+/* Language links above the status text. */
+.langs{margin:0 0 1.6em;display:flex;gap:.5em;align-items:center;color:#969696;font-size:.85em;}
+.langs button{background:none;border:0;padding:4px 2px;margin:0;font:inherit;color:#969696;cursor:pointer;}
+.langs button.active{color:#fff;text-decoration:underline;text-underline-offset:.3em;text-decoration-thickness:1px;}
+@media (hover:hover){.langs button:hover{color:#fff;}}
+.langs button:focus-visible{outline:2px solid #fff;outline-offset:3px;}
+@media (max-width:760px){.langs{justify-content:center;margin-bottom:1.1em;}}
 .album-fallback{display:none;}
 .album-view.novideo .album-fallback{display:block;}
 .album-view.novideo #listenvid{display:none;}
@@ -147,6 +154,7 @@ body[data-album="true"]:not([data-held="true"]) .album-view{display:flex;}
   <h1 class="artist">Harri Kalevi Sippola</h1>
   <h2 class="album">Pallosalama</h2>
   <section class="ctrl">
+    <p class="langs" id="langs" aria-label="Kieli / Language"><button type="button" data-lang="fi" lang="fi">FI</button><span aria-hidden="true">·</span><button type="button" data-lang="en" lang="en">EN</button><span aria-hidden="true">·</span><button type="button" data-lang="zh" lang="zh">中文</button><span aria-hidden="true">·</span><button type="button" data-lang="ka" lang="ka">ქართ</button></p>
     <p class="status"><span class="status-intro" id="status-intro">Teos soi aina tasatunnein.</span><br><span class="clock-label" id="clock-label">Seuraava kuuntelu alkaa</span><br><span class="clock" id="clock">&nbsp;</span><span class="status-note" id="status-note">Voit kuunnella teoksen vain alusta.
 Älä päivitä sivua kesken kuuntelun.</span></p>
     <div class="lobby-message" id="lobby-message" aria-live="polite"></div>
@@ -220,23 +228,31 @@ const params=new URLSearchParams(location.search);
 // V12.9: only the sound button follows the phone's language: Finnish if any of the phone's languages is Finnish
 // (or Finland region), otherwise English. Everything else on the page stays in Finnish.
 const langs=(navigator.languages&&navigator.languages.length)?navigator.languages:[navigator.language||'fi'];
-const finnish=langs.some(l=>/^fi\b|-FI$/i.test(String(l)));
-const chinese=!finnish&&langs.some(l=>/^zh\b/i.test(String(l)));
-const georgian=!finnish&&!chinese&&langs.some(l=>/^ka\b/i.test(String(l)));
+/* 24 Oct: language = the visitor's own choice (FI / EN / 中文 / ქართ links, remembered in this browser),
+   otherwise the phone language. Switching changes only the texts; the music keeps playing. */
+const autoLang=langs.some(l=>/^fi\b|-FI$/i.test(String(l)))?'fi':langs.some(l=>/^zh\b/i.test(String(l)))?'zh':langs.some(l=>/^ka\b/i.test(String(l)))?'ka':String(langs[0]||'en').toLowerCase().split('-')[0].replace(/^n[bn]$/,'no');
+let savedLang=null;try{savedLang=localStorage.getItem('pallosalama-lang');}catch(e){}
+let finnish,chinese,georgian,first,T,ST,UI;
+function pickLang(code){finnish=code==='fi';chinese=code==='zh';georgian=code==='ka';first=code;}
+pickLang(['fi','en','zh','ka'].includes(savedLang)?savedLang:autoLang);
 const MORE={sv:['Gå med i lyssningen','Lämna lyssningen','Spelas nu: Väntemusik'],no:['Bli med på lyttingen','Forlat lyttingen','Spilles nå: Ventemusikk'],da:['Deltag i lytningen','Forlad lytningen','Spiller nu: Ventemusik'],de:['Jetzt zuhören','Zuhören beenden','Jetzt läuft: Wartemusik'],fr:["Rejoindre l'écoute","Quitter l'écoute","En cours : musique d'attente"],es:['Unirse a la escucha','Salir de la escucha','Sonando ahora: música de espera'],it:["Unisciti all'ascolto","Esci dall'ascolto","In riproduzione: musica d'attesa"],nl:['Doe mee met luisteren','Stop met luisteren','Nu speelt: wachtmuziek'],et:['Liitu kuulamisega','Lahku kuulamisest','Praegu mängib: ootemuusika'],pt:['Entrar na audição','Sair da audição','A tocar agora: música de espera'],pl:['Dołącz do słuchania','Opuść słuchanie','Teraz gra: muzyka oczekiwania'],ru:['Слушать вместе','Выйти','Сейчас играет: музыка ожидания'],ja:['リスニングに参加','リスニングを終了','再生中：待機中の音楽']};
-const first=String(langs[0]||'en').toLowerCase().split('-')[0].replace(/^n[bn]$/,'no');
-const T=finnish?{on:'Liity kuunteluun',off:'Poistu kuuntelusta',wait:'Nyt soi: Odotusmusiikki'}:chinese?{on:'加入聆听会',off:'离开',wait:'正在播放：等候音乐'}:georgian?{on:'შეუერთდი მოსმენას',off:'მოსმენის დატოვება',wait:'ახლა ჟღერს: ლოდინის მუსიკა'}:MORE[first]?{on:MORE[first][0],off:MORE[first][1],wait:MORE[first][2]}:{on:'Join the listening session',off:'Leave',wait:'Now playing: Waiting music'};
+function applyTexts(){
+T=finnish?{on:'Liity kuunteluun',off:'Poistu kuuntelusta',wait:'Nyt soi: Odotusmusiikki'}:chinese?{on:'加入聆听会',off:'离开',wait:'正在播放：等候音乐'}:georgian?{on:'შეუერთდი მოსმენას',off:'მოსმენის დატოვება',wait:'ახლა ჟღერს: ლოდინის მუსიკა'}:MORE[first]?{on:MORE[first][0],off:MORE[first][1],wait:MORE[first][2]}:{on:'Join the listening session',off:'Leave',wait:'Now playing: Waiting music'};
 {const w=document.getElementById('wait');if(w)w.textContent=T.wait;}
-const ST=finnish?{intro:'Teos soi aina tasatunnein.',label:'Seuraava kuuntelu alkaa',mins:n=>`${n} minuutin kuluttua`,secs:c=>c}:chinese?{intro:'本作品每逢整点播放。',label:'下一场聆听会',mins:n=>`${n} 分钟后开始`,secs:c=>`${c} 后开始`}:georgian?{intro:'ნაწარმოები ჟღერს ყოველი საათის დასაწყისში.',label:'შემდეგი მოსმენა დაიწყება',mins:n=>`${n} წუთში`,secs:c=>c}:{intro:'The piece plays every hour.',label:'Next listening session starts',mins:n=>`in ${n} minutes`,secs:c=>`in ${c}`};
+ST=finnish?{intro:'Teos soi aina tasatunnein.',label:'Seuraava kuuntelu alkaa',mins:n=>`${n} minuutin kuluttua`,secs:c=>c}:chinese?{intro:'本作品每逢整点播放。',label:'下一场聆听会',mins:n=>`${n} 分钟后开始`,secs:c=>`${c} 后开始`}:georgian?{intro:'ნაწარმოები ჟღერს ყოველი საათის დასაწყისში.',label:'შემდეგი მოსმენა დაიწყება',mins:n=>`${n} წუთში`,secs:c=>c}:{intro:'The piece plays every hour.',label:'Next listening session starts',mins:n=>`in ${n} minutes`,secs:c=>`in ${c}`};
 {const txt=finnish?'Voit kuunnella teoksen vain alusta.\nÄlä päivitä sivua kesken kuuntelun.':chinese?'作品只能从头开始聆听。\n聆听期间请勿刷新页面。':georgian?'ნაწარმოების მოსმენა მხოლოდ თავიდან შეგიძლია.\nნუ განაახლებ გვერდს მისი ჟღერისას.':'You can only listen to the piece from the beginning.\nPlease do not refresh the page during the listening session.';{const n=document.getElementById('status-note');if(n)n.textContent=txt;}}
 /* V14: the rest of the page text follows the phone language too (names stay as they are). */
-const UI=finnish?{lang:'fi',share:'Jaa',copy:'Kopioi linkki',copied:'Kopioitu',duration:'Kesto 34 minuuttia',mastering:'Masterointi',design:'Visuaalinen suunnittelu',shareText:'Harri Kalevi Sippola: Pallosalama soi tasatunnein'}
+UI=finnish?{lang:'fi',share:'Jaa',copy:'Kopioi linkki',copied:'Kopioitu',duration:'Kesto 34 minuuttia',mastering:'Masterointi',design:'Visuaalinen suunnittelu',shareText:'Harri Kalevi Sippola: Pallosalama soi tasatunnein'}
  :georgian?{lang:'ka',share:'გაზიარება',copy:'ბმულის კოპირება',copied:'დაკოპირდა',duration:'ხანგრძლივობა 34 წუთი',mastering:'მასტერინგი',design:'ვიზუალური დიზაინი',shareText:'Harri Kalevi Sippola: Pallosalama ჟღერს ყოველი საათის დასაწყისში'}
  :chinese?{lang:'zh',share:'分享',copy:'复制链接',copied:'已复制',duration:'时长 34 分钟',mastering:'母带处理',design:'视觉设计',shareText:'Harri Kalevi Sippola：Pallosalama 每逢整点播放'}
  :{lang:'en',share:'Share',copy:'Copy link',copied:'Copied',duration:'Duration 34 minutes',mastering:'Mastering',design:'Visual design',shareText:'Harri Kalevi Sippola: Pallosalama plays every hour'};
 {document.documentElement.lang=UI.lang;const set=(id,t)=>{const e=document.getElementById(id);if(e)e.textContent=t;};set('share-label',UI.share);set('copy-link-btn',UI.copy);set('duration',UI.duration);set('mastering-label',UI.mastering);set('design-label',UI.design);}
-{const i=document.getElementById('status-intro');if(i)i.textContent=ST.intro;if(!finnish)document.getElementById('clock-label').textContent=ST.label;}
+{const i=document.getElementById('status-intro');if(i)i.textContent=ST.intro;document.getElementById('clock-label').textContent=ST.label;}
+document.querySelectorAll('#langs [data-lang]').forEach(b=>{const on=b.dataset.lang===(finnish?'fi':chinese?'zh':georgian?'ka':'en');b.classList.toggle('active',on);b.setAttribute('aria-pressed',on?'true':'false');});
+}
+applyTexts();
 btn.textContent=T.on;
+document.querySelectorAll('#langs [data-lang]').forEach(b=>b.addEventListener('click',()=>{const c=b.dataset.lang;try{localStorage.setItem('pallosalama-lang',c);}catch(e){}pickLang(c);applyTexts();btn.textContent=(document.body.dataset.sound==='on'&&document.body.dataset.held!=='true')?T.off:T.on;}));
 const isAndroid=/Android/i.test(navigator.userAgent);
 const firefoxAndroid=isAndroid&&/Firefox\//.test(navigator.userAgent);
 // V12.9 analytics (GoatCounter, no cookies). Not loaded at all when any test switch is in the address,
