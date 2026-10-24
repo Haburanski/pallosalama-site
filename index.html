@@ -134,10 +134,6 @@ body[data-album="true"]:not([data-held="true"]) .album-view{display:flex;}
 .langs button:focus-visible{outline:2px solid #fff;outline-offset:3px;}
 @media (max-width:760px){.langs{justify-content:center;margin-bottom:1.1em;}}
 .album-fallback{display:none;}
-/* 25 Oct (Harri): album video off for now (CONFIG.albumVideo). During the album: black + one grey line at the bottom. */
-body.no-album-video .album-view #listenvid,body.no-album-video .album-view .album-fallback{display:none!important;}
-.album-note{display:none;position:absolute;left:0;right:0;bottom:max(36px,env(safe-area-inset-bottom));margin:0;padding:0 24px;font-weight:400;font-size:15px;line-height:1.5;color:#969696;}
-body.no-album-video .album-note{display:block;}
 .album-view.novideo .album-fallback{display:block;}
 .album-view.novideo #listenvid{display:none;}
 #listenvid{width:clamp(320px,36vw,720px);height:auto;display:block;mix-blend-mode:screen;opacity:0;transition:opacity 2s ease;}
@@ -158,7 +154,8 @@ body.no-album-video .album-note{display:block;}
   <h1 class="artist">Harri Kalevi Sippola</h1>
   <h2 class="album">Pallosalama</h2>
   <section class="ctrl">
-    <p class="status"><span class="status-intro" id="status-intro">Teos soi aina tasatunnein.</span><br><span class="clock-label" id="clock-label">Seuraava kuuntelu alkaa</span><br><span class="clock" id="clock">&nbsp;</span><span class="status-note" id="status-note" style="display:none"></span></p>
+    <p class="status"><span class="status-intro" id="status-intro">Teos soi aina tasatunnein.</span><br><span class="clock-label" id="clock-label">Seuraava kuuntelu alkaa</span><br><span class="clock" id="clock">&nbsp;</span><span class="status-note" id="status-note">Voit kuunnella teoksen vain alusta.
+Älä päivitä sivua kesken kuuntelun.</span></p>
     <div class="lobby-message" id="lobby-message" aria-live="polite"></div>
     <div class="live-badge" id="live-badge"></div>
     <div class="btns">
@@ -187,7 +184,7 @@ body.no-album-video .album-note{display:block;}
   </section>
   <p class="foot">&copy; 2026 Harri Kalevi Sippola</p>
 </main>
-<div class="album-view"><video id="listenvid" src="media/playing.mp4" muted playsinline preload="none" aria-label="Harri Kalevi Sippola: Pallosalama"></video><span class="album-fallback">Harri Kalevi Sippola: Pallosalama</span><p class="album-note" id="album-note">Älä päivitä sivua kuuntelun aikana</p></div>
+<div class="album-view"><video id="listenvid" src="media/playing.mp4" muted playsinline preload="auto" aria-label="Harri Kalevi Sippola: Pallosalama"></video><span class="album-fallback">Harri Kalevi Sippola: Pallosalama</span></div>
 <script>
 // Pallosalama V12.8 (based on V12.7): one continuous file, lobby first (0..3600), album second.
 // Hourly album transition is driven by audio position, NOT a scheduled seek.
@@ -223,8 +220,7 @@ body.no-album-video .album-note{display:block;}
 // V12.9 (20 Oct, hosting move): the MP3 lives in Cloudflare R2 (too big for page hosting). It is a different
 // address than the page, so the audio element asks for it with CORS (crossorigin) - without that, Web Audio
 // (Android Chrome, iPhone fade path) would play silence. The R2 bucket has a matching CORS rule.
-const CONFIG={albumVideo:false,file:'https://pub-0c9d256591844e5baf3b4855be8c043d.r2.dev/Pallosalama_lobbyfirst.mp3',lobby:3600,album:2031,cycle:3600,fadeIn:3,resumeFade:3,backstep:2,version:'12.9',build:'2026-10-25-screennote5',visualFade:7,lobbyFade:5,nameFadeAt:45,nameFadeDur:20,pauseGrace:30,trackStarts:[],driftThreshold:3,quietDriftThreshold:1,quietFrom:2025,quietTo:2042,driftBoundaryGuard:30,driftCooldown:60,maxSeekCorrections:3};
-if(!CONFIG.albumVideo)document.body.classList.add('no-album-video');
+const CONFIG={file:'https://pub-0c9d256591844e5baf3b4855be8c043d.r2.dev/Pallosalama_lobbyfirst.mp3',lobby:3600,album:2031,cycle:3600,fadeIn:8,resumeFade:3,backstep:2,version:'12.9',build:'2026-10-23-design-v14',visualFade:7,lobbyFade:5,nameFadeAt:45,nameFadeDur:20,pauseGrace:30,trackStarts:[],driftThreshold:3,quietDriftThreshold:1,quietFrom:2025,quietTo:2042,driftBoundaryGuard:30,driftCooldown:60,maxSeekCorrections:3};
 const $=id=>document.getElementById(id);
 const a=$('lobby-audio'),btn=$('sound-toggle'),clock=$('clock'),label=$('clock-label'),message=$('lobby-message'),badge=$('live-badge'),blackout=$('blackout');
 const params=new URLSearchParams(location.search);
@@ -239,12 +235,11 @@ let finnish,chinese,georgian,japanese,first,T,ST,UI;
 function pickLang(code){finnish=code==='fi';chinese=code==='zh';georgian=code==='ka';japanese=code==='ja';first=code;}
 pickLang(autoLang);try{localStorage.removeItem('pallosalama-lang');}catch(e){}
 const MORE={sv:['Gå med i lyssningen','Lämna lyssningen','Spelas nu: Väntemusik'],no:['Bli med på lyttingen','Forlat lyttingen','Spilles nå: Ventemusikk'],da:['Deltag i lytningen','Forlad lytningen','Spiller nu: Ventemusik'],de:['Jetzt zuhören','Zuhören beenden','Jetzt läuft: Wartemusik'],fr:["Rejoindre l'écoute","Quitter l'écoute","En cours : musique d'attente"],es:['Unirse a la escucha','Salir de la escucha','Sonando ahora: música de espera'],it:["Unisciti all'ascolto","Esci dall'ascolto","In riproduzione: musica d'attesa"],nl:['Doe mee met luisteren','Stop met luisteren','Nu speelt: wachtmuziek'],et:['Liitu kuulamisega','Lahku kuulamisest','Praegu mängib: ootemuusika'],pt:['Entrar na audição','Sair da audição','A tocar agora: música de espera'],pl:['Dołącz do słuchania','Opuść słuchanie','Teraz gra: muzyka oczekiwania'],ru:['Слушать вместе','Выйти','Сейчас играет: музыка ожидания'],ja:['リスニングに参加','リスニングを終了','再生中：待機中の音楽']};
-var statusNoteDefault='';
 function applyTexts(){
 T=finnish?{on:'Liity kuunteluun',off:'Poistu kuuntelusta',wait:'Nyt soi: Odotusmusiikki'}:japanese?{on:'リスニングに参加',off:'リスニングを終了',wait:'再生中：待機音楽'}:chinese?{on:'加入聆听会',off:'离开',wait:'正在播放：等候音乐'}:georgian?{on:'შეუერთდი მოსმენას',off:'მოსმენის დატოვება',wait:'ახლა ჟღერს: ლოდინის მუსიკა'}:MORE[first]?{on:MORE[first][0],off:MORE[first][1],wait:MORE[first][2]}:{on:'Join the listening session',off:'Leave',wait:'Now playing: Waiting music'};
 {const w=document.getElementById('wait');if(w)w.textContent=T.wait;}
 ST=finnish?{intro:'Teos soi aina tasatunnein.',label:'Seuraava kuuntelu alkaa',mins:n=>`${n} minuutin kuluttua`,secs:c=>c}:japanese?{intro:'作品は毎正時に流れます。',label:'次のリスニングは',mins:n=>`${n} 分後に始まります`,secs:c=>`${c} 後に始まります`}:chinese?{intro:'本作品每逢整点播放。',label:'下一场聆听会',mins:n=>`${n} 分钟后开始`,secs:c=>`${c} 后开始`}:georgian?{intro:'ნაწარმოები ჟღერს ყოველი საათის დასაწყისში.',label:'შემდეგი მოსმენა დაიწყება',mins:n=>`${n} წუთში`,secs:c=>c}:{intro:'The piece plays every hour.',label:'Next listening session starts',mins:n=>`in ${n} minutes`,secs:c=>`in ${c}`};
-{const txt=finnish?'Voit kuunnella teoksen vain alusta.':japanese?'作品は最初からしか聴けません。\n再生中はページを更新しないでください。':chinese?'作品只能从头开始聆听。\n聆听期间请勿刷新页面。':georgian?'ნაწარმოების მოსმენა მხოლოდ თავიდან შეგიძლია.\nნუ განაახლებ გვერდს მისი ჟღერისას.':'You can only listen to the piece from the beginning.\nPlease do not refresh the page during the listening session.';/* 25 Oct (Harri): no note before joining. txt is still used for the album screen line in other languages. */statusNoteDefault='';{const an=document.getElementById('album-note');if(an)an.textContent=finnish?'Älä päivitä sivua kuuntelun aikana':(txt.split('\n')[1]||'').replace(/[.。]$/,'');}}
+{const txt=finnish?'Voit kuunnella teoksen vain alusta.\nÄlä päivitä sivua kesken kuuntelun.':japanese?'作品は最初からしか聴けません。\n再生中はページを更新しないでください。':chinese?'作品只能从头开始聆听。\n聆听期间请勿刷新页面。':georgian?'ნაწარმოების მოსმენა მხოლოდ თავიდან შეგიძლია.\nნუ განაახლებ გვერდს მისი ჟღერისას.':'You can only listen to the piece from the beginning.\nPlease do not refresh the page during the listening session.';{const n=document.getElementById('status-note');if(n)n.textContent=txt;}}
 /* V14: the rest of the page text follows the phone language too (names stay as they are). */
 UI=finnish?{lang:'fi',share:'Jaa',copy:'Kopioi linkki',copied:'Kopioitu',duration:'Kesto 34 minuuttia',mastering:'Masterointi',design:'Visuaalinen suunnittelu',shareText:'Harri Kalevi Sippola: Pallosalama soi tasatunnein'}
  :japanese?{lang:'ja',share:'共有',copy:'リンクをコピー',copied:'コピーしました',duration:'再生時間 34 分',mastering:'マスタリング',design:'ビジュアルデザイン',shareText:'Harri Kalevi Sippola：Pallosalama は毎正時に流れます'}
@@ -545,7 +540,7 @@ function updateArrow(){let cur=-1;if(mode==='ALBUM'&&CONFIG.trackStarts.length){
 /* V14: designer's 'playing' video during the album (display only, never touches the audio). */
 const lv=$('listenvid'),albumView=document.querySelector('.album-view');let lvRun=false;
 lv.addEventListener('error',()=>albumView.classList.add('novideo'));
-function driveListenVideo(){if(!CONFIG.albumVideo)return;const p=a.currentTime-CONFIG.lobby;const inAlbum=mode==='ALBUM'&&!held;const show=inAlbum&&p>=5&&p<CONFIG.nameFadeAt;lv.classList.toggle('show',show);/* 24 Oct: the name fades away slowly from 45 s; then only black */
+function driveListenVideo(){const p=a.currentTime-CONFIG.lobby;const inAlbum=mode==='ALBUM'&&!held;const show=inAlbum&&p>=5&&p<CONFIG.nameFadeAt;lv.classList.toggle('show',show);/* 24 Oct: the name fades away slowly from 45 s; then only black */
  if(inAlbum&&p>=5){if(!lvRun){lvRun=true;try{const d=lv.duration;if(d&&p-5>=d-0.05)lv.currentTime=d;else{lv.currentTime=Math.max(0,p-5);const q=lv.play();if(q&&q.catch)q.catch(()=>{});}}catch(e){}}}
  else if(lvRun&&mode!=='ALBUM'){lvRun=false;try{lv.pause();lv.currentTime=0;}catch(e){}}}
 function tick(){const t=now();rearmIfHourPassed('tick');
@@ -587,7 +582,7 @@ function tick(){const t=now();rearmIfHourPassed('tick');
     a few seconds late crossing into the album does not get the dot. Display-only; touches no audio. */
  {const hs=Math.floor(t/3600)*3600;const showDot=mode!=='ALBUM'&&t<hs+CONFIG.album&&!(armedFor!==null&&armedFor<=t);if(showDot!==lastDot){lastDot=showDot;badge.style.display=showDot?'flex':'none';log('LIVE_DOT',showDot?'shown':'hidden');}}
  if(t>=fadeInUntil){const toAlbum=armedFor!==null?armedFor-t:1e9;const fading=mode==='LOBBY'&&!held&&toAlbum<=CONFIG.visualFade&&toAlbum>-5;const op=fading?Math.min(1,Math.max(0,(CONFIG.visualFade-toAlbum)/CONFIG.visualFade)):0;const want=op.toFixed(2);if(blackout.style.opacity!==want&&!(want==='0.00'&&(blackout.style.opacity==='0'||blackout.style.opacity===''))){blackout.style.opacity=want;if(op>=1&&!blackout.dataset.logged){blackout.dataset.logged='1';log('PRE_ALBUM_FADE','screen black before the album');}}if(op===0)delete blackout.dataset.logged;}
- const target=mode!=='OFF'&&armedFor?armedFor:nextHour(t);/* V12.8: armed & slightly late shows 00 : 00, not the next hour */const rem=Math.max(0,target-t);if(rem>300){clock.textContent=ST.mins(Math.ceil(rem/60));}else{const totalSeconds=Math.ceil(rem);const m=Math.floor(totalSeconds/60),s=totalSeconds%60;clock.textContent=ST.secs([m,s].map(v=>String(v).padStart(2,'0')).join(' : '));}/* 25 Oct (Harri): a listener who has joined (any time, phone or computer) is told the screen can be turned off. Not joined: the normal note. */{const joinedSoon=mode!=='OFF'&&finnish;const want=joinedSoon?'Voit sammuttaa laitteesi näytön, teos alkaa ajallaan.':statusNoteDefault;const sn=$('status-note');if(sn){if(sn.textContent!==want)sn.textContent=want;sn.style.display=want?'':'none';}}clock.style.display=mode==='ALBUM'?'none':'';label.style.display=mode==='ALBUM'?'none':'';label.textContent=ST.label;updateArrow();driveListenVideo();{const w=$('wait');const on=mode==='LOBBY'&&!held;if(w.classList.contains('on')!==on){w.classList.toggle('on',on);w.setAttribute('aria-hidden',on?'false':'true');}}
+ const target=mode!=='OFF'&&armedFor?armedFor:nextHour(t);/* V12.8: armed & slightly late shows 00 : 00, not the next hour */const rem=Math.max(0,target-t);if(rem>300){clock.textContent=ST.mins(Math.ceil(rem/60));}else{const totalSeconds=Math.ceil(rem);const m=Math.floor(totalSeconds/60),s=totalSeconds%60;clock.textContent=ST.secs([m,s].map(v=>String(v).padStart(2,'0')).join(' : '));}clock.style.display=mode==='ALBUM'?'none':'';label.style.display=mode==='ALBUM'?'none':'';label.textContent=ST.label;updateArrow();driveListenVideo();{const w=$('wait');const on=mode==='LOBBY'&&!held;if(w.classList.contains('on')!==on){w.classList.toggle('on',on);w.setAttribute('aria-hidden',on?'false':'true');}}
  if(t-lastProgress>10){lastProgress=t;log('PROGRESS',`starts=${starts} completions=${completions} armed=${armedFor} drift=${mode==='LOBBY'?(a.currentTime-lobbyTarget(t)).toFixed(2):'n/a'}`);}
 }
 ['loadstart','loadedmetadata','canplay','playing','pause','waiting','stalled','suspend','seeking','seeked','ended','error'].forEach(ev=>a.addEventListener(ev,()=>{
