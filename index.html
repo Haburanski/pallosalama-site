@@ -147,6 +147,11 @@ body.no-album-video .album-view #listenvid,body.no-album-video .album-view .albu
   .btn,#sound-toggle{height:48px;width:auto;min-width:150px;padding:0 28px;}
   .btnrow{justify-content:center;width:100%;margin-top:10px;}
 }
+/* 25 Oct (Harri): join button right after the countdown; then the note, then Jaa. */
+.btns .note-p{margin:0;}
+.btns .note-p .status-note{margin-top:.3em;}
+.btns .btnrow{margin:.6em 0 2.4em;}
+@media (max-width:760px){.btns .btnrow{margin:4px 0 18px;}}
 </style>
 </head>
 <body>
@@ -156,16 +161,17 @@ body.no-album-video .album-view #listenvid,body.no-album-video .album-view .albu
   <h1 class="artist">Harri Kalevi Sippola</h1>
   <h2 class="album">Pallosalama</h2>
   <section class="ctrl">
-    <p class="status"><span class="status-intro" id="status-intro">Teos soi aina tasatunnein.</span><br><span class="clock-label" id="clock-label">Seuraava kuuntelu alkaa</span><br><span class="clock" id="clock">&nbsp;</span><span class="status-note" id="status-note">Voit kuunnella teoksen vain alusta.
-Älä päivitä sivua kesken kuuntelun.</span></p>
+    <p class="status"><span class="status-intro" id="status-intro">Teos soi aina tasatunnein.</span><br><span class="clock-label" id="clock-label">Seuraava kuuntelu alkaa</span><br><span class="clock" id="clock">&nbsp;</span></p>
     <div class="lobby-message" id="lobby-message" aria-live="polite"></div>
     <div class="live-badge" id="live-badge"></div>
     <div class="btns">
+      <button type="button" class="btn" id="sound-toggle">&#196;&#228;net p&#228;&#228;lle</button>
+      <p class="wait" id="wait" aria-hidden="true">Nyt soi: Odotusmusiikki</p>
+      <p class="status note-p"><span class="status-note" id="status-note">Voit kuunnella teoksen vain alusta.
+Älä päivitä sivua kesken kuuntelun.</span></p>
       <div class="btnrow">
         <button type="button" class="link share" id="share-btn"><svg class="share-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V3.5M7.5 8 12 3.5 16.5 8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M8 11.5H5.5v9h13v-9H16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="lbl" id="share-label">Jaa</span></button>
       </div>
-      <button type="button" class="btn" id="sound-toggle">&#196;&#228;net p&#228;&#228;lle</button>
-      <p class="wait" id="wait" aria-hidden="true">Nyt soi: Odotusmusiikki</p>
     </div>
     <audio id="lobby-audio" preload="auto" playsinline crossorigin="anonymous"></audio>
   </section>
@@ -222,7 +228,7 @@ body.no-album-video .album-view #listenvid,body.no-album-video .album-view .albu
 // V12.9 (20 Oct, hosting move): the MP3 lives in Cloudflare R2 (too big for page hosting). It is a different
 // address than the page, so the audio element asks for it with CORS (crossorigin) - without that, Web Audio
 // (Android Chrome, iPhone fade path) would play silence. The R2 bucket has a matching CORS rule.
-const CONFIG={albumVideo:false,file:'https://pub-0c9d256591844e5baf3b4855be8c043d.r2.dev/Pallosalama_lobbyfirst.mp3',lobby:3600,album:2031,cycle:3600,fadeIn:3,resumeFade:3,backstep:2,version:'12.9',build:'2026-10-25-joinednote',visualFade:7,lobbyFade:5,nameFadeAt:45,nameFadeDur:20,pauseGrace:30,trackStarts:[],driftThreshold:3,quietDriftThreshold:1,quietFrom:2025,quietTo:2042,driftBoundaryGuard:30,driftCooldown:60,maxSeekCorrections:3};
+const CONFIG={albumVideo:false,file:'https://pub-0c9d256591844e5baf3b4855be8c043d.r2.dev/Pallosalama_lobbyfirst.mp3',lobby:3600,album:2031,cycle:3600,fadeIn:3,resumeFade:3,backstep:2,version:'12.9',build:'2026-10-25-buttonfirst',visualFade:7,lobbyFade:5,nameFadeAt:45,nameFadeDur:20,pauseGrace:30,trackStarts:[],driftThreshold:3,quietDriftThreshold:1,quietFrom:2025,quietTo:2042,driftBoundaryGuard:30,driftCooldown:60,maxSeekCorrections:3};
 if(!CONFIG.albumVideo)document.body.classList.add('no-album-video');
 const $=id=>document.getElementById(id);
 const a=$('lobby-audio'),btn=$('sound-toggle'),clock=$('clock'),label=$('clock-label'),message=$('lobby-message'),badge=$('live-badge'),blackout=$('blackout');
