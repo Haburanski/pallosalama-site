@@ -574,7 +574,7 @@ function driveListenVideo(){if(!CONFIG.albumVideo)return;const p=a.currentTime-C
 let lastLockTitle='';
 function lockTitle(rem){if(!('mediaSession'in navigator)||mode==='OFF')return;
  let title='Harri Kalevi Sippola: Pallosalama',artist='';
- if(mode==='LOBBY'&&rem>0){const n=Math.max(1,Math.ceil(rem/60));title=finnish?`Pallosalama alkaa ${n} minuutin kuluttua`:`Pallosalama · ${ST.mins(n)}`;artist=finnish?'Nyt soi: odotusmusiikki':(T.wait||'');}
+ if(mode==='LOBBY'&&rem>0){const n=Math.max(1,Math.ceil(rem/60));title=finnish?`Pallosalama ${n} min kuluttua. Nyt soi: Odotusmusiikki`:`Pallosalama · ${ST.mins(n)}. ${T.wait||''}`;artist='';}
  const key=title+'|'+artist;if(key===lastLockTitle)return;lastLockTitle=key;
  try{navigator.mediaSession.metadata=new MediaMetadata({title:title,artist:artist});}catch(e){}}
 function tick(){const t=now();rearmIfHourPassed('tick');
