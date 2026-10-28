@@ -256,7 +256,7 @@ var statusNoteDefault='';
 let noteTarget=null;
 /* 25 Oct (Harri): the note area keeps the height of its longest text, so 'Kutsu kuunteluun' never moves.
    Before joining the note sits one row higher (in the empty row where 'Nyt soi' appears after joining). */
-const JOINED_NOTE='Voit sammuttaa laitteesi näytön. Teos alkaa ajallaan.';let noteJoined=null,noteLift=0;
+const JOINED_NOTE='Voit sammuttaa laitteesi näytön.\nTeos alkaa ajallaan.';let noteJoined=null,noteLift=0;
 function placeNote(sn){sn.style.position='relative';sn.style.top=noteJoined?'0px':(-noteLift)+'px';}
 function reserveNote(){const sn=$('status-note'),w=$('wait');if(!sn||!w)return;const m=sn.cloneNode(false);m.removeAttribute('id');m.style.cssText='position:absolute;visibility:hidden;left:0;right:0;top:0;pointer-events:none;transition:none;min-height:0';sn.parentNode.appendChild(m);let h=0;for(const t of [statusNoteDefault,finnish?JOINED_NOTE:statusNoteDefault]){m.textContent=t;h=Math.max(h,m.getBoundingClientRect().height);}m.remove();sn.style.minHeight=Math.ceil(h)+'px';const top0=sn.style.top;sn.style.top='0px';noteLift=Math.max(0,sn.getBoundingClientRect().top-w.getBoundingClientRect().top);sn.style.top=top0;placeNote(sn);}
 function setNote(sn,want,joined){const key=want+'|'+joined;if(noteTarget===key)return;const first=noteTarget===null;noteTarget=key;if(first){noteJoined=joined;if(sn.textContent!==want)sn.textContent=want;placeNote(sn);return;}sn.style.transition='opacity .6s ease';sn.style.opacity='0';clearTimeout(sn._t);sn._t=setTimeout(()=>{sn.textContent=want;noteJoined=joined;placeNote(sn);sn.style.opacity='1';},600);}
