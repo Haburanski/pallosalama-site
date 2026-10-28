@@ -573,10 +573,10 @@ function driveListenVideo(){if(!CONFIG.albumVideo)return;const p=a.currentTime-C
    during the album 'Pallosalama'. Only touches the Media Session text, never the audio. */
 let lastLockTitle='';
 function lockTitle(rem){if(!('mediaSession'in navigator)||mode==='OFF')return;
- let title='Pallosalama';
- if(mode==='LOBBY'&&rem>0){const n=Math.max(1,Math.ceil(rem/60));title=finnish?`Pallosalama alkaa ${n} minuutin kuluttua`:`Pallosalama · ${ST.mins(n)}`;}
- if(title===lastLockTitle)return;lastLockTitle=title;
- try{navigator.mediaSession.metadata=new MediaMetadata({title:title,artist:'Harri Kalevi Sippola'});}catch(e){}}
+ let title='Harri Kalevi Sippola: Pallosalama',artist='';
+ if(mode==='LOBBY'&&rem>0){const n=Math.max(1,Math.ceil(rem/60));title=finnish?`Pallosalama alkaa ${n} minuutin kuluttua`:`Pallosalama · ${ST.mins(n)}`;artist=finnish?'Nyt soi: odotusmusiikki':(T.wait||'');}
+ const key=title+'|'+artist;if(key===lastLockTitle)return;lastLockTitle=key;
+ try{navigator.mediaSession.metadata=new MediaMetadata({title:title,artist:artist});}catch(e){}}
 function tick(){const t=now();rearmIfHourPassed('tick');
  // V12.9 fade (lobby tap fade, return fade, silent probe): start once audio flows, then follow progress.
  if(fadePendingSince!==null)maybeBeginFade('tick');
