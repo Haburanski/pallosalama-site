@@ -542,7 +542,7 @@ function recover(reason){
  attempt();
 }
 
-function on(){if(mode!=='OFF')return;returningToLobby=false;mode='LOBBY';document.body.dataset.sound='on';arm(now());a.crossOrigin='anonymous';btn.textContent=T.off;gcEvent('sound-on','Äänet päälle painettu');listenedSec=0;nextListenMark=10;a.src=CONFIG.file;a.preload='auto';a.loop=false;setupGain();setOutputGain(0);if(audioCtx){audioCtx.resume().then(()=>log('WEB_AUDIO_RESUMED',audioCtx.state)).catch(e=>log('WEB_AUDIO_RESUME_ERROR',String(e)));}enteredAt=now();initializing=true;initialSeekIssued=false;seekCorrections=0;volumeReady=false;lastVisualMode='';visual(false);startLobbySeek('initial clock-aligned lobby');log('SOUND_ON',CONFIG.file);
+function on(){if(mode!=='OFF')return;lastLockTitle='';returningToLobby=false;mode='LOBBY';document.body.dataset.sound='on';arm(now());a.crossOrigin='anonymous';btn.textContent=T.off;gcEvent('sound-on','Äänet päälle painettu');listenedSec=0;nextListenMark=10;a.src=CONFIG.file;a.preload='auto';a.loop=false;setupGain();setOutputGain(0);if(audioCtx){audioCtx.resume().then(()=>log('WEB_AUDIO_RESUMED',audioCtx.state)).catch(e=>log('WEB_AUDIO_RESUME_ERROR',String(e)));}enteredAt=now();initializing=true;initialSeekIssued=false;seekCorrections=0;volumeReady=false;lastVisualMode='';visual(false);startLobbySeek('initial clock-aligned lobby');log('SOUND_ON',CONFIG.file);
  // V12.8: iOS browsers (Safari and Chrome on iPhone are both WebKit) will not load media
  // data for an element that was not started inside the tap, so the clock-aligned seek
  // never completes. Start playback here, synchronously in the tap; the lobby's opening
@@ -569,6 +569,14 @@ lv.addEventListener('error',()=>albumView.classList.add('novideo'));
 function driveListenVideo(){if(!CONFIG.albumVideo)return;const p=a.currentTime-CONFIG.lobby;const inAlbum=mode==='ALBUM'&&!held;const show=inAlbum&&p>=5&&p<CONFIG.nameFadeAt;lv.classList.toggle('show',show);/* 24 Oct: the name fades away slowly from 45 s; then only black */
  if(inAlbum&&p>=5){if(!lvRun){lvRun=true;try{const d=lv.duration;if(d&&p-5>=d-0.05)lv.currentTime=d;else{lv.currentTime=Math.max(0,p-5);const q=lv.play();if(q&&q.catch)q.catch(()=>{});}}catch(e){}}}
  else if(lvRun&&mode!=='ALBUM'){lvRun=false;try{lv.pause();lv.currentTime=0;}catch(e){}}}
+/* 29 Oct: lock-screen title follows what plays: while waiting 'Pallosalama alkaa N minuutin kuluttua' (updated once a minute),
+   during the album 'Pallosalama'. Only touches the Media Session text, never the audio. */
+let lastLockTitle='';
+function lockTitle(rem){if(!('mediaSession'in navigator)||mode==='OFF')return;
+ let title='Pallosalama';
+ if(mode==='LOBBY'&&rem>0){const n=Math.max(1,Math.ceil(rem/60));title=finnish?`Pallosalama alkaa ${n} minuutin kuluttua`:`Pallosalama · ${ST.mins(n)}`;}
+ if(title===lastLockTitle)return;lastLockTitle=title;
+ try{navigator.mediaSession.metadata=new MediaMetadata({title:title,artist:'Harri Kalevi Sippola'});}catch(e){}}
 function tick(){const t=now();rearmIfHourPassed('tick');
  // V12.9 fade (lobby tap fade, return fade, silent probe): start once audio flows, then follow progress.
  if(fadePendingSince!==null)maybeBeginFade('tick');
@@ -608,7 +616,7 @@ function tick(){const t=now();rearmIfHourPassed('tick');
     a few seconds late crossing into the album does not get the dot. Display-only; touches no audio. */
  {const hs=Math.floor(t/3600)*3600;const showDot=mode!=='ALBUM'&&t<hs+CONFIG.album&&!(armedFor!==null&&armedFor<=t);if(showDot!==lastDot){lastDot=showDot;badge.style.display=showDot?'flex':'none';log('LIVE_DOT',showDot?'shown':'hidden');}}
  if(t>=fadeInUntil){const toAlbum=armedFor!==null?armedFor-t:1e9;const fading=mode==='LOBBY'&&!held&&toAlbum<=CONFIG.visualFade&&toAlbum>-5;const op=fading?Math.min(1,Math.max(0,(CONFIG.visualFade-toAlbum)/CONFIG.visualFade)):0;const want=op.toFixed(2);if(blackout.style.opacity!==want&&!(want==='0.00'&&(blackout.style.opacity==='0'||blackout.style.opacity===''))){blackout.style.opacity=want;if(op>=1&&!blackout.dataset.logged){blackout.dataset.logged='1';log('PRE_ALBUM_FADE','screen black before the album');}}if(op===0)delete blackout.dataset.logged;}
- const target=mode!=='OFF'&&armedFor?armedFor:nextHour(t);/* V12.8: armed & slightly late shows 00 : 00, not the next hour */const rem=Math.max(0,target-t);if(rem>300){clock.textContent=ST.mins(Math.ceil(rem/60));}else{const totalSeconds=Math.ceil(rem);const m=Math.floor(totalSeconds/60),s=totalSeconds%60;clock.textContent=ST.secs([m,s].map(v=>String(v).padStart(2,'0')).join(' : '));}/* 25 Oct (Harri): after joining, the note under the countdown changes (Finnish). Not joined: the normal note. */{const joined=mode!=='OFF';const want=(joined&&finnish)?JOINED_NOTE:statusNoteDefault;const sn=$('status-note');if(sn&&want)setNote(sn,want,joined);}clock.style.display=mode==='ALBUM'?'none':'';label.style.display=mode==='ALBUM'?'none':'';label.textContent=ST.label;updateArrow();driveListenVideo();{const w=$('wait');const on=mode==='LOBBY'&&!held;if(w.classList.contains('on')!==on){w.classList.toggle('on',on);w.setAttribute('aria-hidden',on?'false':'true');}}
+ const target=mode!=='OFF'&&armedFor?armedFor:nextHour(t);/* V12.8: armed & slightly late shows 00 : 00, not the next hour */const rem=Math.max(0,target-t);lockTitle(rem);if(rem>300){clock.textContent=ST.mins(Math.ceil(rem/60));}else{const totalSeconds=Math.ceil(rem);const m=Math.floor(totalSeconds/60),s=totalSeconds%60;clock.textContent=ST.secs([m,s].map(v=>String(v).padStart(2,'0')).join(' : '));}/* 25 Oct (Harri): after joining, the note under the countdown changes (Finnish). Not joined: the normal note. */{const joined=mode!=='OFF';const want=(joined&&finnish)?JOINED_NOTE:statusNoteDefault;const sn=$('status-note');if(sn&&want)setNote(sn,want,joined);}clock.style.display=mode==='ALBUM'?'none':'';label.style.display=mode==='ALBUM'?'none':'';label.textContent=ST.label;updateArrow();driveListenVideo();{const w=$('wait');const on=mode==='LOBBY'&&!held;if(w.classList.contains('on')!==on){w.classList.toggle('on',on);w.setAttribute('aria-hidden',on?'false':'true');}}
  if(t-lastProgress>10){lastProgress=t;log('PROGRESS',`starts=${starts} completions=${completions} armed=${armedFor} drift=${mode==='LOBBY'?(a.currentTime-lobbyTarget(t)).toFixed(2):'n/a'}`);}
 }
 ['loadstart','loadedmetadata','canplay','playing','pause','waiting','stalled','suspend','seeking','seeked','ended','error'].forEach(ev=>a.addEventListener(ev,()=>{
