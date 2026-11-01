@@ -241,7 +241,7 @@ body.no-album-video .album-view #listenvid,body.no-album-video .album-view .albu
 // V12.9 (20 Oct, hosting move): the MP3 lives in Cloudflare R2 (too big for page hosting). It is a different
 // address than the page, so the audio element asks for it with CORS (crossorigin) - without that, Web Audio
 // (Android Chrome, iPhone fade path) would play silence. The R2 bucket has a matching CORS rule.
-const CONFIG={albumVideo:false,file:'https://audio.pallosalama.fi/Pallosalama_master3.mp3',lobby:3600,album:2009,cycle:3600,fadeIn:2,resumeFade:3,backstep:2,version:'12.9',build:'2026-11-01-fade2',visualFade:7,lobbyFade:5,nameFadeAt:45,nameFadeDur:20,pauseGrace:30,trackStarts:[],driftThreshold:3,quietDriftThreshold:1,quietFrom:2004,quietTo:2021,driftBoundaryGuard:30,driftCooldown:60,maxSeekCorrections:3};
+const CONFIG={albumVideo:false,file:'https://audio.pallosalama.fi/Pallosalama_master3.mp3',lobby:3600,album:2009,cycle:3600,fadeIn:2,resumeFade:3,backstep:2,version:'12.9',build:'2026-11-01-bogusend',visualFade:7,lobbyFade:5,nameFadeAt:45,nameFadeDur:20,pauseGrace:30,trackStarts:[],driftThreshold:3,quietDriftThreshold:1,quietFrom:2004,quietTo:2021,driftBoundaryGuard:30,driftCooldown:60,maxSeekCorrections:3};
 if(!CONFIG.albumVideo)document.body.classList.add('no-album-video');
 const $=id=>document.getElementById(id);
 const a=$('lobby-audio'),btn=$('sound-toggle'),clock=$('clock'),label=$('clock-label'),message=$('lobby-message'),badge=$('live-badge'),blackout=$('blackout');
@@ -427,7 +427,7 @@ function fullOutput(){
 const session=new Date().toISOString();
 function snapshot(){return `hidden=${document.hidden} mode=${mode} pos=${a.currentTime.toFixed(2)} paused=${a.paused} ready=${a.readyState} network=${a.networkState} error=${a.error?.code||'none'}`;}
 function log(type,info=''){history.push(`${new Date().toISOString()} | ${type} | ${info} | ${snapshot()}`);history=history.slice(-3000);try{localStorage.setItem(key,JSON.stringify(history));}catch(e){}if(panel){panel.querySelector('pre').textContent=history.slice(-45).join('\n');panel.querySelector('#v12status').textContent=`${history.length} saved events`;}}
-let seekIssuedAt=0,lastSeekLatency=0,seekCorrections=0,lastStuckPlay=0;
+let lastBogusEnded=-1e9;let seekIssuedAt=0,lastSeekLatency=0,seekCorrections=0,lastStuckPlay=0;
 function seek(pos,why){seekingPurpose=why;seekUntil=now()+5;seekIssuedAt=now();try{a.currentTime=pos;log('SEEK_SET',`${why} target=${pos.toFixed(3)}`);}catch(e){log('SEEK_ERROR',`${why}: ${e}`);}}
 function play(why){try{const p=a.play();log('PLAY_REQUEST',why);p?.then(()=>log('PLAY_RESOLVED',why)).catch(e=>log('PLAY_REJECTED',`${why}: ${e}`));}catch(e){log('PLAY_ERROR',String(e));}}
 // V12.8: lobby position is measured against the hour this session is armed for.
@@ -609,6 +609,8 @@ function tick(){const t=now();rearmIfHourPassed('tick');
   // V12.8 watchdog (observed on iPhone 17.6 / Chrome iOS): a seek on a paused element can wait
   // forever for data. If stuck >6 s, ask the element to play so the browser fetches data.
   if(initializing&&initialSeekIssued&&a.seeking&&a.paused&&t-seekIssuedAt>6&&t-lastStuckPlay>6){lastStuckPlay=t;log('SEEK_STUCK_PAUSED',`waited=${(t-seekIssuedAt).toFixed(1)}s ready=${a.readyState}`);play('stuck seek: start playback so media loads');}
+  /* 1 Nov: start stuck paused (e.g. after a bogus 'ended' in an in-app browser) -> ask the element to play again. */
+  if(initializing&&a.paused&&!held&&!a.seeking&&t-enteredAt>6&&t-lastStuckPlay>6){lastStuckPlay=t;log('INIT_STUCK_PAUSED',`ready=${a.readyState} pos=${a.currentTime.toFixed(2)}`);play('start stuck paused: play again');}
   // A seek at the end of the MP3 can cause Chrome to pause while hidden.
   // Try to resume the existing media element first. Do NOT call load() in a
   // background tab: Chrome can classify the restarted source as power-save media.
@@ -649,7 +651,7 @@ function tick(){const t=now();rearmIfHourPassed('tick');
  }
  if(ev==='seeking'&&mode==='ALBUM'&&!recovering&&now()>seekUntil){log('ALBUM_UNAUTHORIZED_SEEK',`requested=${a.currentTime.toFixed(2)}`);seek(Math.max(CONFIG.lobby,lastGoodAlbum-CONFIG.backstep),'restore album position');}
  if(ev==='ended'&&mode==='ALBUM')completeAlbum();
- if(ev==='ended'&&mode==='LOBBY'&&!returningToLobby)enterLobby('unexpected file end');
+ if(ev==='ended'&&mode==='LOBBY'&&!returningToLobby){/* 1 Nov (iPhone, Instagram): iOS can report 'ended' right after the first seek, far from the real end. Then seek again and play. */if(a.currentTime<CONFIG.lobby+CONFIG.album-5){const t=now();if(t-lastBogusEnded>2){lastBogusEnded=t;log('BOGUS_ENDED',`pos=${a.currentTime.toFixed(2)} ready=${a.readyState}: seek again and play`);seek(lobbyTarget(t),'after bogus ended');play('after bogus ended');}}else enterLobby('unexpected file end');}
 }));
 a.addEventListener('timeupdate',()=>{if(fadePendingSince!==null)maybeBeginFade('timeupdate');});
 document.addEventListener('visibilitychange',()=>{log('VISIBILITY',`${document.hidden?'hidden':'visible'} audioContext=${audioCtx?.state||'none'}`);if(!document.hidden){resumeCtx('visible');lastVisualMode='';visual(mode==='ALBUM');if(held&&holdKind==='soft')resumeHeld('page visible again');tick();}});
