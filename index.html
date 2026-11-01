@@ -242,7 +242,7 @@ body.no-album-video .album-view #listenvid,body.no-album-video .album-view .albu
 // V12.9 (20 Oct, hosting move): the MP3 lives in Cloudflare R2 (too big for page hosting). It is a different
 // address than the page, so the audio element asks for it with CORS (crossorigin) - without that, Web Audio
 // (Android Chrome, iPhone fade path) would play silence. The R2 bucket has a matching CORS rule.
-const CONFIG={albumVideo:false,file:'https://audio.pallosalama.fi/Pallosalama_master3.mp3',lobby:3600,album:2009,cycle:3600,fadeIn:2,resumeFade:3,backstep:2,version:'12.9',build:'2026-11-01-https',visualFade:7,lobbyFade:5,nameFadeAt:45,nameFadeDur:20,pauseGrace:30,trackStarts:[],driftThreshold:3,quietDriftThreshold:1,quietFrom:2004,quietTo:2021,driftBoundaryGuard:30,driftCooldown:60,maxSeekCorrections:3};
+const CONFIG={albumVideo:false,file:'https://audio.pallosalama.fi/Pallosalama_master3.mp3',lobby:3600,album:2009,cycle:3600,fadeIn:2,resumeFade:3,backstep:2,version:'12.9',build:'2026-11-01-inappfade',visualFade:7,lobbyFade:5,nameFadeAt:45,nameFadeDur:20,pauseGrace:30,trackStarts:[],driftThreshold:3,quietDriftThreshold:1,quietFrom:2004,quietTo:2021,driftBoundaryGuard:30,driftCooldown:60,maxSeekCorrections:3};
 if(!CONFIG.albumVideo)document.body.classList.add('no-album-video');
 const $=id=>document.getElementById(id);
 const a=$('lobby-audio'),btn=$('sound-toggle'),clock=$('clock'),label=$('clock-label'),message=$('lobby-message'),badge=$('live-badge'),blackout=$('blackout');
@@ -385,8 +385,8 @@ const isIOS=/iPhone|iPad|iPod/i.test(navigator.userAgent)||(navigator.platform==
 /* 1 Nov: in-app browsers (Instagram, Facebook, Messenger, other app web views) play the audio element, but sound routed through Web Audio
    can come out silent there (Instagram, Android + iPhone, launch day). They use the phone's plain audio player instead:
    Android with an element-volume fade, iPhone without a fade (iPhone ignores element volume). */
-const inApp=/Instagram|FBAN|FBAV|FB_IAB|FBIOS|Messenger|; wv\)/i.test(navigator.userAgent);
-const iosFadeTest=isIOS&&!params.has('iosnative')&&!inApp;
+/* (later the same day) the real Instagram cause was http:// (fixed by the https redirect); in-app browsers use the normal paths again, with the fade. inApp is kept only for the report. */const inApp=/Instagram|FBAN|FBAV|FB_IAB|FBIOS|Messenger|; wv\)/i.test(navigator.userAgent);
+const iosFadeTest=isIOS&&!params.has('iosnative');
 const nativeIPhoneAudio=isIOS&&!iosFadeTest;
 let lastCtxResume=0;
 function resumeCtx(why){if(!audioCtx||mode==='OFF'||audioCtx.state==='running'||audioCtx.state==='closed')return;if(now()-lastCtxResume<2)return;lastCtxResume=now();log('WEB_AUDIO_RESUME_ATTEMPT',`${why} state=${audioCtx.state}`);audioCtx.resume().then(()=>log('WEB_AUDIO_RESUMED',audioCtx.state)).catch(e=>log('WEB_AUDIO_RESUME_ERROR',String(e)));}
@@ -401,7 +401,7 @@ function setupGain(){
  // (A/B/C test 18 Oct, Android 16 / Firefox 158: default and latencyHint 'playback' crackled,
  // native element did not). Firefox Android therefore uses the native element + element-volume
  // fade. ?webaudio forces the Web Audio path back on for comparison.
- if(params.has('nowebaudio')||inApp||(firefoxAndroid&&!params.has('webaudio'))){fadeFallback=true;log('WEB_AUDIO_DISABLED',inApp?'in-app browser: native element, element volume fade':firefoxAndroid?'Firefox Android: native element, element volume fade':'?nowebaudio test switch: element volume fade');return;}
+ if(params.has('nowebaudio')||(firefoxAndroid&&!params.has('webaudio'))){fadeFallback=true;log('WEB_AUDIO_DISABLED',inApp?'in-app browser: native element, element volume fade':firefoxAndroid?'Firefox Android: native element, element volume fade':'?nowebaudio test switch: element volume fade');return;}
  try{
   const AC=window.AudioContext||window.webkitAudioContext;
   if(!AC)throw new Error('Web Audio unavailable');
