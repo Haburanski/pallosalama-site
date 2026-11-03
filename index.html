@@ -166,12 +166,22 @@ body.no-album-video .album-view #listenvid,body.no-album-video .album-view .albu
 .wait{color:#fff;}
 /* 30 Oct (Harri): 'Nyt soi' is shown above the button now, not below it. */
 #wait{display:none!important;}
-/* 3 Nov (Harri): after an accidental reload during the album: the album's black screen, 'Jatka Pallosalamaa?' in white in the middle,
+/* 3 Nov (Harri): after an accidental reload during the album: the album's black screen, 'Jatka kuuntelua' in white in the middle,
    'Ethän päivitä sivua kuuntelun aikana.' at the bottom. */
 #rejoin-btn{display:none;}
-body[data-rejoin="true"] .site{display:none;}
+/* 3 Nov (Harri): the big name texts stay on the black 'Jatka kuuntelua' screen, in their lobby positions. */
+body[data-rejoin="true"] .site > :not(.artist):not(.album),body[data-rejoinout="true"] .site > :not(.artist):not(.album){display:none!important;}
+body[data-rejoin="true"] .artist,body[data-rejoin="true"] .album,body[data-rejoinout="true"] .artist,body[data-rejoinout="true"] .album{z-index:10;}
+/* They fade in with the button and fade out when the album continues (1.5 s). */
+body[data-rejoin="true"] .artist,body[data-rejoin="true"] .album{animation:namesIn 1.5s ease both;}
+body[data-rejoinout="true"] .site{display:grid!important;}
+@media (max-width:760px){body[data-rejoinout="true"] .site{display:block!important;}}
+body[data-rejoinout="true"] .artist,body[data-rejoinout="true"] .album{animation:namesOut 1.5s ease both;}
+@keyframes namesIn{from{opacity:0;}to{opacity:1;}}
+@keyframes namesOut{from{opacity:1;}to{opacity:0;}}
 body[data-rejoin="true"] .album-view{display:flex;}
-body[data-rejoin="true"] #rejoin-btn{display:flex;background-size:100% 100%;color:#1b1512;font-family:var(--rejoin-font,inherit);font-weight:400;font-size:16px;width:auto;min-width:150px;height:48px;padding:0 28px;}
+body[data-rejoin="true"] #rejoin-btn{display:flex;background-size:100% 100%;color:#1b1512;font-family:var(--rejoin-font,inherit);font-weight:400;font-size:clamp(15px,1.05vw,21px);width:auto;min-width:13.5em;height:4em;padding:0 1.8em;}
+@media (max-width:760px){body[data-rejoin="true"] #rejoin-btn{font-size:16px;min-width:150px;height:48px;padding:0 28px;}}
 </style>
 </head>
 <body>
@@ -212,7 +222,7 @@ body[data-rejoin="true"] #rejoin-btn{display:flex;background-size:100% 100%;colo
   </section>
   <p class="foot">&copy; 2026 Harri Kalevi Sippola</p>
 </main>
-<div class="album-view"><video id="listenvid" src="media/playing.mp4" muted playsinline preload="none" aria-label="Harri Kalevi Sippola: Pallosalama"></video><span class="album-fallback">Harri Kalevi Sippola: Pallosalama</span><button type="button" class="btn" id="rejoin-btn">Jatka Pallosalamaa?</button><p class="album-note" id="album-note">Ethän päivitä sivua kuuntelun aikana.</p></div>
+<div class="album-view"><video id="listenvid" src="media/playing.mp4" muted playsinline preload="none" aria-label="Harri Kalevi Sippola: Pallosalama"></video><span class="album-fallback">Harri Kalevi Sippola: Pallosalama</span><button type="button" class="btn" id="rejoin-btn">Jatka kuuntelua</button><p class="album-note" id="album-note">Ethän päivitä sivua kuuntelun aikana.</p></div>
 <script>
 // Pallosalama V12.8 (based on V12.7): one continuous file, lobby first (0..3600), album second.
 // Hourly album transition is driven by audio position, NOT a scheduled seek.
@@ -248,7 +258,7 @@ body[data-rejoin="true"] #rejoin-btn{display:flex;background-size:100% 100%;colo
 // V12.9 (20 Oct, hosting move): the MP3 lives in Cloudflare R2 (too big for page hosting). It is a different
 // address than the page, so the audio element asks for it with CORS (crossorigin) - without that, Web Audio
 // (Android Chrome, iPhone fade path) would play silence. The R2 bucket has a matching CORS rule.
-const CONFIG={rejoin:true,albumVideo:false,file:'https://audio.pallosalama.fi/Pallosalama_master3.mp3',lobby:3600,album:2009,cycle:3600,fadeIn:2,resumeFade:3,backstep:2,version:'12.9',build:'2026-11-03-jatka-pallosalamaa',visualFade:7,lobbyFade:5,nameFadeAt:45,nameFadeDur:20,pauseGrace:30,trackStarts:[],driftThreshold:3,quietDriftThreshold:1,quietFrom:2004,quietTo:2021,driftBoundaryGuard:30,driftCooldown:60,maxSeekCorrections:3};
+const CONFIG={rejoin:true,albumVideo:false,file:'https://audio.pallosalama.fi/Pallosalama_master3.mp3',lobby:3600,album:2009,cycle:3600,fadeIn:2,resumeFade:3,backstep:2,version:'12.9',build:'2026-11-03-rejoin-final',visualFade:7,lobbyFade:5,nameFadeAt:45,nameFadeDur:20,pauseGrace:30,trackStarts:[],driftThreshold:3,quietDriftThreshold:1,quietFrom:2004,quietTo:2021,driftBoundaryGuard:30,driftCooldown:60,maxSeekCorrections:3};
 if(!CONFIG.albumVideo)document.body.classList.add('no-album-video');
 const $=id=>document.getElementById(id);
 const a=$('lobby-audio'),btn=$('sound-toggle'),clock=$('clock'),label=$('clock-label'),message=$('lobby-message'),badge=$('live-badge'),blackout=$('blackout');
@@ -573,7 +583,7 @@ function off(){cancelRecovery();if(mode==='ALBUM')forgetAlbum('left the session'
 /* 1 Nov: leaving the session fades the sound out over 0.25 s before pausing (an instant pause glitched on iPhone). */
 let offToken=0;
 function fadeOutThenPause(){const tk=++offToken;if(gainNode&&audioCtx&&!a.paused){try{const t=audioCtx.currentTime;gainNode.gain.cancelScheduledValues(t);gainNode.gain.setValueAtTime(gainNode.gain.value,t);gainNode.gain.linearRampToValueAtTime(0,t+0.25);}catch(e){}setTimeout(()=>{if(tk!==offToken||mode!=='OFF')return;a.pause();fullOutput();},320);}else{a.pause();fullOutput();}}
-/* 3 Nov (Harri): someone who was in this hour's album and reloads the page by mistake gets 'Jatka Pallosalamaa?'.
+/* 3 Nov (Harri): someone who was in this hour's album and reloads the page by mistake gets 'Jatka kuuntelua'.
    The album then continues from the shared moment (where everyone else is now), not from where they left:
    same timing as everyone, same return to the lobby. Remembered only in this browser, only during that album. */
 const REJOIN_KEY='pallosalama_in_album';
@@ -583,7 +593,7 @@ function rememberAlbum(h){if(!rejoinOn)return;try{localStorage.setItem(REJOIN_KE
 function forgetAlbum(why){try{if(localStorage.getItem(REJOIN_KEY)){localStorage.removeItem(REJOIN_KEY);log('REJOIN_FORGET',why);}}catch(e){}rejoinOffer=null;}
 function albumClockPos(h){return CONFIG.lobby+(now()-h);}
 function rejoinValid(h){const p=albumClockPos(h);return p>=CONFIG.lobby+2&&p<CONFIG.lobby+CONFIG.album-15;}
-function rejoinText(){return finnish?'Jatka Pallosalamaa?':(UI&&UI.lang==='en')?'Continue Pallosalama?':T.on;}
+function rejoinText(){return finnish?'Jatka kuuntelua':(UI&&UI.lang==='en')?'Continue listening':T.on;}
 if(rejoinOn){try{const v=JSON.parse(localStorage.getItem(REJOIN_KEY)||'null');if(v&&typeof v.hour==='number'){if(rejoinValid(v.hour)){rejoinOffer=v.hour;log('REJOIN_OFFER',`was in the album of ${new Date(v.hour*1000).toISOString()}, now at album ${(albumClockPos(v.hour)-CONFIG.lobby).toFixed(0)} s`);}else localStorage.removeItem(REJOIN_KEY);}}catch(e){}}
 function rejoin(h){
  if(mode!=='OFF')return;
@@ -592,8 +602,8 @@ function rejoin(h){
  mode='ALBUM';armedFor=h;activeHour=h;albumConfirmed=true;rejoinOffer=null;
  const target=Math.min(albumClockPos(h),CONFIG.lobby+CONFIG.album-1);
  lastGoodAlbum=target;lastPosition=0;lastAdvanceAt=now();
- visual(true);rejoinPending=true;
- log('REJOIN',`album continues from the shared moment: album ${(target-CONFIG.lobby).toFixed(1)} s`);gcEvent('rejoin','Jatka Pallosalamaa painettu');
+ document.body.dataset.rejoinout='true';setTimeout(()=>{document.body.dataset.rejoinout='false';},1600);visual(true);rejoinPending=true;
+ log('REJOIN',`album continues from the shared moment: album ${(target-CONFIG.lobby).toFixed(1)} s`);gcEvent('rejoin','Jatka kuuntelua painettu');
  if(a.readyState>=1)rejoinSeek();
 }
 function rejoinSeek(){if(!rejoinPending||mode!=='ALBUM')return;rejoinPending=false;const target=Math.min(albumClockPos(activeHour),CONFIG.lobby+CONFIG.album-1);lastGoodAlbum=target;seek(target,'rejoin album');}
