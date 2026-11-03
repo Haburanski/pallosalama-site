@@ -242,7 +242,7 @@ body.no-album-video .album-view #listenvid,body.no-album-video .album-view .albu
 // V12.9 (20 Oct, hosting move): the MP3 lives in Cloudflare R2 (too big for page hosting). It is a different
 // address than the page, so the audio element asks for it with CORS (crossorigin) - without that, Web Audio
 // (Android Chrome, iPhone fade path) would play silence. The R2 bucket has a matching CORS rule.
-const CONFIG={albumVideo:false,file:'https://audio.pallosalama.fi/Pallosalama_master3.mp3',lobby:3600,album:2009,cycle:3600,fadeIn:2,resumeFade:3,backstep:2,version:'12.9',build:'2026-11-01-inappfade',visualFade:7,lobbyFade:5,nameFadeAt:45,nameFadeDur:20,pauseGrace:30,trackStarts:[],driftThreshold:3,quietDriftThreshold:1,quietFrom:2004,quietTo:2021,driftBoundaryGuard:30,driftCooldown:60,maxSeekCorrections:3};
+const CONFIG={rejoin:false,albumVideo:false,file:'https://audio.pallosalama.fi/Pallosalama_master3.mp3',lobby:3600,album:2009,cycle:3600,fadeIn:2,resumeFade:3,backstep:2,version:'12.9',build:'2026-11-03-rejoin',visualFade:7,lobbyFade:5,nameFadeAt:45,nameFadeDur:20,pauseGrace:30,trackStarts:[],driftThreshold:3,quietDriftThreshold:1,quietFrom:2004,quietTo:2021,driftBoundaryGuard:30,driftCooldown:60,maxSeekCorrections:3};
 if(!CONFIG.albumVideo)document.body.classList.add('no-album-video');
 const $=id=>document.getElementById(id);
 const a=$('lobby-audio'),btn=$('sound-toggle'),clock=$('clock'),label=$('clock-label'),message=$('lobby-message'),badge=$('live-badge'),blackout=$('blackout');
@@ -304,7 +304,7 @@ function gcEvent(name,title){gc(name,gcPrefix+title,true);}
 if(!testSwitch){try{window.goatcounter={no_onload:true};const sc=document.createElement('script');sc.async=true;sc.src='https://gc.zgo.at/count.js';sc.dataset.goatcounter='https://harrikalevisippola.goatcounter.com/count';sc.onload=gcFlush;document.head.appendChild(sc);gc(mainSite?'/':location.hostname+'/','Pallosalama',false);}catch(e){}}
 // V12.8 test clock: ?hourin=N shifts this page's clock so the next hour is N seconds away.
 const hourIn=Number(params.get('hourin'));
-const clockOffset=(hourIn>=10&&hourIn<=3600)?(()=>{const r=Date.now()/1000;return (Math.floor(r/3600)*3600+3600-r)-hourIn;})():0;
+const clockOffset=(hourIn>=10&&hourIn<=3600)?(()=>{try{const k='pallosalama_test_clock',sv=sessionStorage.getItem(k);if(sv!==null&&params.has('rejoin'))return Number(sv);const r=Date.now()/1000;const o=(Math.floor(r/3600)*3600+3600-r)-hourIn;sessionStorage.setItem(k,String(o));return o;}catch(e){const r=Date.now()/1000;return (Math.floor(r/3600)*3600+3600-r)-hourIn;}})():0;
 const now=()=>Date.now()/1000+clockOffset, nextHour=t=>Math.floor(t/3600)*3600+3600;
 const key='pallosalama_v12_diagnostics';
 let history=[];try{history=JSON.parse(localStorage.getItem(key)||'[]');if(!Array.isArray(history))history=[];}catch(e){}
@@ -481,8 +481,8 @@ function arm(t){armedFor=nextHour(t);log('ARMED_FOR',new Date(armedFor*1000).toI
 function rearmIfHourPassed(why){if(mode==='LOBBY'&&held&&armedFor!==null&&now()>armedFor+CONFIG.pauseGrace){log('REARM_AFTER_PAUSE',`${why}: hour ${new Date(armedFor*1000).toISOString()} passed during the pause`);arm(now());}}
 function enterLobby(why){cancelRecovery();returningToLobby=(why==='album completed');returnLobbySince=now();returnLobbyRetries=0;mode='LOBBY';albumConfirmed=false;activeHour=null;lastVisualMode='';visual(false);arm(now());enteredAt=now();volumeReady=false;cancelFade();/* Do not mute before seek: keep the media session audible/active while locked. */initializing=true;initialSeekIssued=false;seekCorrections=0;lastAdvanceAt=now();lastPosition=a.currentTime;startLobbySeek(why);log('ENTER_LOBBY',why);}
 function enterAlbum(){if(mode!=='LOBBY')return;const t=now();const due=armedFor!==null&&t>=armedFor-3&&t<armedFor+CONFIG.album; if(!due){log('ALBUM_GATE_BLOCK',`armed=${armedFor} now=${t}`);enterLobby('unauthorized boundary');return;}
- cancelRecovery();mode='ALBUM';activeHour=armedFor;starts++;albumConfirmed=true;lastGoodAlbum=Math.max(CONFIG.lobby,a.currentTime);lastPosition=a.currentTime;lastAdvanceAt=t;cancelFade();volumeReady=true;fullOutput();visual(true);log('ALBUM_START_NATURAL',`hour=${new Date(activeHour*1000).toISOString()} lateness=${(t-activeHour).toFixed(2)}s`);gcEvent('album-start','Albumi alkoi');}
-function completeAlbum(){if(mode!=='ALBUM')return;completions++;log('ALBUM_COMPLETE',`pos=${a.currentTime.toFixed(2)}`);gcEvent('album-complete','Albumi kuunneltu loppuun');/* 1 Nov: iPhone glitch at the jump back to the lobby -> silent during the jump, short fade in after (see RETURN_LOBBY). */if(isIOS&&gainNode){setOutputGain(0);log('IOS_RETURN_MUTE','gain 0 during the jump back to the lobby');}enterLobby('album completed');}
+ cancelRecovery();mode='ALBUM';activeHour=armedFor;starts++;albumConfirmed=true;lastGoodAlbum=Math.max(CONFIG.lobby,a.currentTime);lastPosition=a.currentTime;lastAdvanceAt=t;cancelFade();volumeReady=true;fullOutput();visual(true);log('ALBUM_START_NATURAL',`hour=${new Date(activeHour*1000).toISOString()} lateness=${(t-activeHour).toFixed(2)}s`);gcEvent('album-start','Albumi alkoi');rememberAlbum(activeHour);}
+function completeAlbum(){if(mode!=='ALBUM')return;completions++;forgetAlbum('album complete');log('ALBUM_COMPLETE',`pos=${a.currentTime.toFixed(2)}`);gcEvent('album-complete','Albumi kuunneltu loppuun');/* 1 Nov: iPhone glitch at the jump back to the lobby -> silent during the jump, short fade in after (see RETURN_LOBBY). */if(isIOS&&gainNode){setOutputGain(0);log('IOS_RETURN_MUTE','gain 0 during the jump back to the lobby');}enterLobby('album completed');}
 // V12.5: preserve the active media source during background recovery. Chrome on
 // Android can reject load() while locked even after a previously playable MP3.
 // V12.7: lobby-only wall-clock correction. Strictly separate from playback recovery.
@@ -563,11 +563,35 @@ function on(){if(mode!=='OFF')return;lastLockTitle='';returningToLobby=false;mod
  // seconds are near-silent, and the seek then happens on an already-playing element.
  /* 1 Nov: start playback inside the tap on every phone (was iPhone only). In-app browsers such as Instagram's only allow sound that starts directly in the tap; output is silent until the fade. */if(isIOS)a.volume=1;play('start inside the tap (all browsers)');setTimeout(()=>gcEvent('sound-on','Äänet päälle painettu'),0);
  if('mediaSession'in navigator){try{navigator.mediaSession.metadata=new MediaMetadata({title:'Pallosalama',artist:'Harri Kalevi Sippola'});navigator.mediaSession.setActionHandler('play',()=>{if(mode==='OFF')return;if(held)resumeHeld('lock screen / headset play');else play('media play');});navigator.mediaSession.setActionHandler('pause',()=>{log('MEDIA_PAUSE','OS media control');if(mode==='OFF')return;deliberatePauseAt=now();a.pause();hold('lock screen / headset pause');});setMS('playing');}catch(e){log('MEDIA_SESSION_ERROR',String(e));}}}
-function off(){cancelRecovery();returningToLobby=false;held=false;holdKind='';clearAutoResume();document.body.dataset.held='false';setMS('none');mode='OFF';document.body.dataset.sound='off';armedFor=null;activeHour=null;cancelFade();fadeOutThenPause();visual(false);btn.textContent=T.on;log('SOUND_OFF');}
+function off(){cancelRecovery();if(mode==='ALBUM')forgetAlbum('left the session');returningToLobby=false;held=false;holdKind='';clearAutoResume();document.body.dataset.held='false';setMS('none');mode='OFF';document.body.dataset.sound='off';armedFor=null;activeHour=null;cancelFade();fadeOutThenPause();visual(false);btn.textContent=T.on;log('SOUND_OFF');}
 /* 1 Nov: leaving the session fades the sound out over 0.25 s before pausing (an instant pause glitched on iPhone). */
 let offToken=0;
 function fadeOutThenPause(){const tk=++offToken;if(gainNode&&audioCtx&&!a.paused){try{const t=audioCtx.currentTime;gainNode.gain.cancelScheduledValues(t);gainNode.gain.setValueAtTime(gainNode.gain.value,t);gainNode.gain.linearRampToValueAtTime(0,t+0.25);}catch(e){}setTimeout(()=>{if(tk!==offToken||mode!=='OFF')return;a.pause();fullOutput();},320);}else{a.pause();fullOutput();}}
-btn.addEventListener('click',()=>{if(mode==='OFF')on();else if(held)resumeHeld('page button');else off();});
+/* 3 Nov (Harri): someone who was in this hour's album and reloads the page by mistake gets 'Jatka kuuntelua?'.
+   The album then continues from the shared moment (where everyone else is now), not from where they left:
+   same timing as everyone, same return to the lobby. Remembered only in this browser, only during that album. */
+const REJOIN_KEY='pallosalama_in_album';
+const rejoinOn=CONFIG.rejoin||params.has('rejoin');
+let rejoinOffer=null,rejoinPending=false;
+function rememberAlbum(h){if(!rejoinOn)return;try{localStorage.setItem(REJOIN_KEY,JSON.stringify({hour:h}));}catch(e){}}
+function forgetAlbum(why){try{if(localStorage.getItem(REJOIN_KEY)){localStorage.removeItem(REJOIN_KEY);log('REJOIN_FORGET',why);}}catch(e){}rejoinOffer=null;}
+function albumClockPos(h){return CONFIG.lobby+(now()-h);}
+function rejoinValid(h){const p=albumClockPos(h);return p>=CONFIG.lobby+2&&p<CONFIG.lobby+CONFIG.album-15;}
+function rejoinText(){return finnish?'Jatka kuuntelua?':(UI&&UI.lang==='en')?'Continue listening?':T.on;}
+if(rejoinOn){try{const v=JSON.parse(localStorage.getItem(REJOIN_KEY)||'null');if(v&&typeof v.hour==='number'){if(rejoinValid(v.hour)){rejoinOffer=v.hour;log('REJOIN_OFFER',`was in the album of ${new Date(v.hour*1000).toISOString()}, now at album ${(albumClockPos(v.hour)-CONFIG.lobby).toFixed(0)} s`);}else localStorage.removeItem(REJOIN_KEY);}}catch(e){}}
+function rejoin(h){
+ if(mode!=='OFF')return;
+ on();/* the normal start: audio set up and started inside the tap (silent until the fade) */
+ cancelFade();setOutputGain(0);initializing=false;initialSeekIssued=true;
+ mode='ALBUM';armedFor=h;activeHour=h;albumConfirmed=true;rejoinOffer=null;
+ const target=Math.min(albumClockPos(h),CONFIG.lobby+CONFIG.album-1);
+ lastGoodAlbum=target;lastPosition=0;lastAdvanceAt=now();
+ visual(true);rejoinPending=true;
+ log('REJOIN',`album continues from the shared moment: album ${(target-CONFIG.lobby).toFixed(1)} s`);gcEvent('rejoin','Jatka kuuntelua painettu');
+ if(a.readyState>=1)rejoinSeek();
+}
+function rejoinSeek(){if(!rejoinPending||mode!=='ALBUM')return;rejoinPending=false;const target=Math.min(albumClockPos(activeHour),CONFIG.lobby+CONFIG.album-1);lastGoodAlbum=target;seek(target,'rejoin album');}
+btn.addEventListener('click',()=>{if(mode==='OFF'){if(rejoinOffer!==null&&rejoinValid(rejoinOffer))rejoin(rejoinOffer);else on();}else if(held)resumeHeld('page button');else off();});
 // V12.9: share text + a quiet "Kopioitu" on the pressed button when the link was copied.
 const cleanUrl=()=>location.href.split(/[?#]/)[0];
 function copyText(txt){return new Promise((res,rej)=>{const fallback=()=>{try{const ta=document.createElement('textarea');ta.value=txt;ta.setAttribute('readonly','');ta.style.cssText='position:fixed;top:-1000px;opacity:0';document.body.appendChild(ta);ta.select();const ok=document.execCommand&&document.execCommand('copy');ta.remove();ok?res():rej();}catch(e){rej(e);}};if(navigator.clipboard?.writeText)navigator.clipboard.writeText(txt).then(res,fallback);else fallback();});}
@@ -635,14 +659,14 @@ function tick(){const t=now();rearmIfHourPassed('tick');
     a few seconds late crossing into the album does not get the dot. Display-only; touches no audio. */
  {const hs=Math.floor(t/3600)*3600;const showDot=mode!=='ALBUM'&&t<hs+CONFIG.album&&!(armedFor!==null&&armedFor<=t);if(showDot!==lastDot){lastDot=showDot;badge.style.display=showDot?'flex':'none';log('LIVE_DOT',showDot?'shown':'hidden');}}
  if(t>=fadeInUntil){const toAlbum=armedFor!==null?armedFor-t:1e9;const fading=mode==='LOBBY'&&!held&&toAlbum<=CONFIG.visualFade&&toAlbum>-5;const op=fading?Math.min(1,Math.max(0,(CONFIG.visualFade-toAlbum)/CONFIG.visualFade)):0;const want=op.toFixed(2);if(blackout.style.opacity!==want&&!(want==='0.00'&&(blackout.style.opacity==='0'||blackout.style.opacity===''))){blackout.style.opacity=want;if(op>=1&&!blackout.dataset.logged){blackout.dataset.logged='1';log('PRE_ALBUM_FADE','screen black before the album');}}if(op===0)delete blackout.dataset.logged;}
- const target=mode!=='OFF'&&armedFor?armedFor:nextHour(t);/* V12.8: armed & slightly late shows 00 : 00, not the next hour */const rem=Math.max(0,target-t);lockTitle(rem);if(rem>300){clock.textContent=ST.mins(Math.ceil(rem/60));}else{const totalSeconds=Math.ceil(rem);const m=Math.floor(totalSeconds/60),s=totalSeconds%60;clock.textContent=ST.secs([m,s].map(v=>String(v).padStart(2,'0')).join(' : '));}/* 25 Oct (Harri): after joining, the note under the countdown changes (Finnish). Not joined: the normal note. */{const joined=mode!=='OFF';const want=joined?joinedText():statusNoteDefault;const sn=$('status-note');if(sn&&want)setNote(sn,want,joined);}clock.style.display=mode==='ALBUM'?'none':'';label.style.display=mode==='ALBUM'?'none':'';/* 30 Oct (Harri): after joining, the text above the button reads 'Nyt soi: Odotusmusiikki.' / 'Pallosalama alkaa' / countdown (cross-fade). */{const j=mode==='LOBBY'&&!held;const en=UI&&UI.lang==='en';const lab=j?(finnish?'Pallosalama alkaa':en?'Pallosalama starts':ST.label):ST.label;const it=j?(finnish?'Nyt soi: Odotusmusiikki.':en?'Now playing: Waiting music.':T.wait):ST.intro;fadeSwap(label,lab);fadeSwap($('status-intro'),it);}updateArrow();driveListenVideo();{const w=$('wait');const on=mode==='LOBBY'&&!held;if(w.classList.contains('on')!==on){w.classList.toggle('on',on);w.setAttribute('aria-hidden',on?'false':'true');}}
+ const target=mode!=='OFF'&&armedFor?armedFor:nextHour(t);/* V12.8: armed & slightly late shows 00 : 00, not the next hour */const rem=Math.max(0,target-t);lockTitle(rem);if(rem>300){clock.textContent=ST.mins(Math.ceil(rem/60));}else{const totalSeconds=Math.ceil(rem);const m=Math.floor(totalSeconds/60),s=totalSeconds%60;clock.textContent=ST.secs([m,s].map(v=>String(v).padStart(2,'0')).join(' : '));}/* 25 Oct (Harri): after joining, the note under the countdown changes (Finnish). Not joined: the normal note. */{const joined=mode!=='OFF';const want=joined?joinedText():statusNoteDefault;const sn=$('status-note');if(sn&&want)setNote(sn,want,joined);}if(rejoinOffer!==null&&mode==='OFF'&&!rejoinValid(rejoinOffer)){forgetAlbum('album over');btn.textContent=T.on;}{const off2=rejoinOffer!==null&&mode==='OFF';if(off2&&btn.textContent!==rejoinText())btn.textContent=rejoinText();const sn=$('status-note');if(sn)sn.style.visibility=off2?'hidden':'';}clock.style.display=(mode==='ALBUM'||(rejoinOffer!==null&&mode==='OFF'))?'none':'';label.style.display=(mode==='ALBUM'||(rejoinOffer!==null&&mode==='OFF'))?'none':'';/* 30 Oct (Harri): after joining, the text above the button reads 'Nyt soi: Odotusmusiikki.' / 'Pallosalama alkaa' / countdown (cross-fade). */{const j=mode==='LOBBY'&&!held;const en=UI&&UI.lang==='en';const lab=j?(finnish?'Pallosalama alkaa':en?'Pallosalama starts':ST.label):ST.label;const it=j?(finnish?'Nyt soi: Odotusmusiikki.':en?'Now playing: Waiting music.':T.wait):ST.intro;fadeSwap(label,lab);fadeSwap($('status-intro'),it);}updateArrow();driveListenVideo();{const w=$('wait');const on=mode==='LOBBY'&&!held;if(w.classList.contains('on')!==on){w.classList.toggle('on',on);w.setAttribute('aria-hidden',on?'false':'true');}}
  if(t-lastProgress>10){lastProgress=t;log('PROGRESS',`starts=${starts} completions=${completions} armed=${armedFor} drift=${mode==='LOBBY'?(a.currentTime-lobbyTarget(t)).toFixed(2):'n/a'}`);}
 }
 ['loadstart','loadedmetadata','canplay','playing','pause','waiting','stalled','suspend','seeking','seeked','ended','error'].forEach(ev=>a.addEventListener(ev,()=>{
  log('PLAYER_'+ev.toUpperCase());
- if(ev==='loadedmetadata')startLobbySeek('loadedmetadata');
+ if(ev==='loadedmetadata'){startLobbySeek('loadedmetadata');rejoinSeek();}
  // V12.8: verify/measure the finished seek BEFORE confirmLobbySeek may issue a correction seek.
- if(ev==='seeked'){lastSeekLatency=now()-seekIssuedAt;log('SEEK_VERIFIED',`${seekingPurpose} pos=${a.currentTime.toFixed(2)} latency=${lastSeekLatency.toFixed(2)}s`);if(seekingPurpose==='lobby drift correction')log('LOBBY_DRIFT_CORRECTED',`residual=${(a.currentTime-lobbyTarget(now())).toFixed(2)}`);seekingPurpose='';lastAdvanceAt=now();lastPosition=a.currentTime;}
+ if(ev==='seeked'&&seekingPurpose==='rejoin album'){requestFade(CONFIG.fadeIn,0.05,'rejoin');lastAdvanceAt=now();}if(ev==='seeked'){lastSeekLatency=now()-seekIssuedAt;log('SEEK_VERIFIED',`${seekingPurpose} pos=${a.currentTime.toFixed(2)} latency=${lastSeekLatency.toFixed(2)}s`);if(seekingPurpose==='lobby drift correction')log('LOBBY_DRIFT_CORRECTED',`residual=${(a.currentTime-lobbyTarget(now())).toFixed(2)}`);seekingPurpose='';lastAdvanceAt=now();lastPosition=a.currentTime;}
  if(ev==='seeked'&&mode==='LOBBY'&&initializing)confirmLobbySeek();
  if(ev==='playing'){hasPlayed=true;lastAdvanceAt=now();lastPosition=a.currentTime;if(returningToLobby)log('RETURN_LOBBY_PLAYING');if(held){held=false;holdKind='';clearAutoResume();heldUI();setMS('playing');log('RESUMED_BY_BROWSER','e.g. after a call; continuing from current position');}if(fadePendingSince!==null)maybeBeginFade('playing');}
  if(ev==='error'&&mode!=='OFF'&&!recovering)recover('media error '+a.error?.code);
@@ -651,7 +675,7 @@ function tick(){const t=now();rearmIfHourPassed('tick');
    else onOutsidePause();
  }
  if(ev==='seeking'&&mode==='ALBUM'&&!recovering&&now()>seekUntil){log('ALBUM_UNAUTHORIZED_SEEK',`requested=${a.currentTime.toFixed(2)}`);seek(Math.max(CONFIG.lobby,lastGoodAlbum-CONFIG.backstep),'restore album position');}
- if(ev==='ended'&&mode==='ALBUM')completeAlbum();
+ if(ev==='ended'&&mode==='ALBUM'){if(a.currentTime<CONFIG.lobby+CONFIG.album-5&&activeHour!==null){const t=now();if(t-lastBogusEnded>2){lastBogusEnded=t;log('BOGUS_ENDED',`album pos=${a.currentTime.toFixed(2)}: seek again and play`);seek(Math.max(CONFIG.lobby,Math.min(albumClockPos(activeHour),lastGoodAlbum)),'album after bogus ended');play('album after bogus ended');}}else completeAlbum();}
  if(ev==='ended'&&mode==='LOBBY'&&!returningToLobby){/* 1 Nov (iPhone, Instagram): iOS can report 'ended' right after the first seek, far from the real end. Then seek again and play. */if(a.currentTime<CONFIG.lobby+CONFIG.album-5){const t=now();if(t-lastBogusEnded>2){lastBogusEnded=t;log('BOGUS_ENDED',`pos=${a.currentTime.toFixed(2)} ready=${a.readyState}: seek again and play`);seek(lobbyTarget(t),'after bogus ended');play('after bogus ended');}}else enterLobby('unexpected file end');}
 }));
 a.addEventListener('timeupdate',()=>{if(fadePendingSince!==null)maybeBeginFade('timeupdate');});
