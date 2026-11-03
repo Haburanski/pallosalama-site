@@ -166,6 +166,12 @@ body.no-album-video .album-view #listenvid,body.no-album-video .album-view .albu
 .wait{color:#fff;}
 /* 30 Oct (Harri): 'Nyt soi' is shown above the button now, not below it. */
 #wait{display:none!important;}
+/* 3 Nov (Harri): after an accidental reload during the album: the album's black screen, 'Jatka kuuntelua' in white in the middle,
+   'Ethän päivitä sivua kuuntelun aikana.' at the bottom. */
+#rejoin-btn{display:none;}
+body[data-rejoin="true"] .site{display:none;}
+body[data-rejoin="true"] .album-view{display:flex;}
+body[data-rejoin="true"] #rejoin-btn{display:flex;background-size:100% 100%;color:#1b1512;font-family:var(--rejoin-font,inherit);font-weight:400;font-size:16px;width:auto;min-width:150px;height:48px;padding:0 28px;}
 </style>
 </head>
 <body>
@@ -206,7 +212,7 @@ body.no-album-video .album-view #listenvid,body.no-album-video .album-view .albu
   </section>
   <p class="foot">&copy; 2026 Harri Kalevi Sippola</p>
 </main>
-<div class="album-view"><video id="listenvid" src="media/playing.mp4" muted playsinline preload="none" aria-label="Harri Kalevi Sippola: Pallosalama"></video><span class="album-fallback">Harri Kalevi Sippola: Pallosalama</span><p class="album-note" id="album-note">Ethän päivitä sivua kuuntelun aikana.</p></div>
+<div class="album-view"><video id="listenvid" src="media/playing.mp4" muted playsinline preload="none" aria-label="Harri Kalevi Sippola: Pallosalama"></video><span class="album-fallback">Harri Kalevi Sippola: Pallosalama</span><button type="button" class="btn" id="rejoin-btn">Jatka kuuntelua</button><p class="album-note" id="album-note">Ethän päivitä sivua kuuntelun aikana.</p></div>
 <script>
 // Pallosalama V12.8 (based on V12.7): one continuous file, lobby first (0..3600), album second.
 // Hourly album transition is driven by audio position, NOT a scheduled seek.
@@ -242,7 +248,7 @@ body.no-album-video .album-view #listenvid,body.no-album-video .album-view .albu
 // V12.9 (20 Oct, hosting move): the MP3 lives in Cloudflare R2 (too big for page hosting). It is a different
 // address than the page, so the audio element asks for it with CORS (crossorigin) - without that, Web Audio
 // (Android Chrome, iPhone fade path) would play silence. The R2 bucket has a matching CORS rule.
-const CONFIG={rejoin:true,albumVideo:false,file:'https://audio.pallosalama.fi/Pallosalama_master3.mp3',lobby:3600,album:2009,cycle:3600,fadeIn:2,resumeFade:3,backstep:2,version:'12.9',build:'2026-11-03-rejoin-on',visualFade:7,lobbyFade:5,nameFadeAt:45,nameFadeDur:20,pauseGrace:30,trackStarts:[],driftThreshold:3,quietDriftThreshold:1,quietFrom:2004,quietTo:2021,driftBoundaryGuard:30,driftCooldown:60,maxSeekCorrections:3};
+const CONFIG={rejoin:true,albumVideo:false,file:'https://audio.pallosalama.fi/Pallosalama_master3.mp3',lobby:3600,album:2009,cycle:3600,fadeIn:2,resumeFade:3,backstep:2,version:'12.9',build:'2026-11-03-rejoin-black',visualFade:7,lobbyFade:5,nameFadeAt:45,nameFadeDur:20,pauseGrace:30,trackStarts:[],driftThreshold:3,quietDriftThreshold:1,quietFrom:2004,quietTo:2021,driftBoundaryGuard:30,driftCooldown:60,maxSeekCorrections:3};
 if(!CONFIG.albumVideo)document.body.classList.add('no-album-video');
 const $=id=>document.getElementById(id);
 const a=$('lobby-audio'),btn=$('sound-toggle'),clock=$('clock'),label=$('clock-label'),message=$('lobby-message'),badge=$('live-badge'),blackout=$('blackout');
@@ -567,7 +573,7 @@ function off(){cancelRecovery();if(mode==='ALBUM')forgetAlbum('left the session'
 /* 1 Nov: leaving the session fades the sound out over 0.25 s before pausing (an instant pause glitched on iPhone). */
 let offToken=0;
 function fadeOutThenPause(){const tk=++offToken;if(gainNode&&audioCtx&&!a.paused){try{const t=audioCtx.currentTime;gainNode.gain.cancelScheduledValues(t);gainNode.gain.setValueAtTime(gainNode.gain.value,t);gainNode.gain.linearRampToValueAtTime(0,t+0.25);}catch(e){}setTimeout(()=>{if(tk!==offToken||mode!=='OFF')return;a.pause();fullOutput();},320);}else{a.pause();fullOutput();}}
-/* 3 Nov (Harri): someone who was in this hour's album and reloads the page by mistake gets 'Jatka kuuntelua?'.
+/* 3 Nov (Harri): someone who was in this hour's album and reloads the page by mistake gets 'Jatka kuuntelua'.
    The album then continues from the shared moment (where everyone else is now), not from where they left:
    same timing as everyone, same return to the lobby. Remembered only in this browser, only during that album. */
 const REJOIN_KEY='pallosalama_in_album';
@@ -577,7 +583,7 @@ function rememberAlbum(h){if(!rejoinOn)return;try{localStorage.setItem(REJOIN_KE
 function forgetAlbum(why){try{if(localStorage.getItem(REJOIN_KEY)){localStorage.removeItem(REJOIN_KEY);log('REJOIN_FORGET',why);}}catch(e){}rejoinOffer=null;}
 function albumClockPos(h){return CONFIG.lobby+(now()-h);}
 function rejoinValid(h){const p=albumClockPos(h);return p>=CONFIG.lobby+2&&p<CONFIG.lobby+CONFIG.album-15;}
-function rejoinText(){return finnish?'Jatka kuuntelua?':(UI&&UI.lang==='en')?'Continue listening?':T.on;}
+function rejoinText(){return finnish?'Jatka kuuntelua':(UI&&UI.lang==='en')?'Continue listening':T.on;}
 if(rejoinOn){try{const v=JSON.parse(localStorage.getItem(REJOIN_KEY)||'null');if(v&&typeof v.hour==='number'){if(rejoinValid(v.hour)){rejoinOffer=v.hour;log('REJOIN_OFFER',`was in the album of ${new Date(v.hour*1000).toISOString()}, now at album ${(albumClockPos(v.hour)-CONFIG.lobby).toFixed(0)} s`);}else localStorage.removeItem(REJOIN_KEY);}}catch(e){}}
 function rejoin(h){
  if(mode!=='OFF')return;
@@ -591,6 +597,8 @@ function rejoin(h){
  if(a.readyState>=1)rejoinSeek();
 }
 function rejoinSeek(){if(!rejoinPending||mode!=='ALBUM')return;rejoinPending=false;const target=Math.min(albumClockPos(activeHour),CONFIG.lobby+CONFIG.album-1);lastGoodAlbum=target;seek(target,'rejoin album');}
+if(rejoinOffer!==null){document.body.dataset.rejoin='true';try{document.documentElement.style.setProperty('--rejoin-font',getComputedStyle(btn).fontFamily);}catch(e){}}
+$('rejoin-btn')?.addEventListener('click',()=>{if(mode!=='OFF')return;if(rejoinOffer!==null&&rejoinValid(rejoinOffer))rejoin(rejoinOffer);else{document.body.dataset.rejoin='false';on();}});
 btn.addEventListener('click',()=>{if(mode==='OFF'){if(rejoinOffer!==null&&rejoinValid(rejoinOffer))rejoin(rejoinOffer);else on();}else if(held)resumeHeld('page button');else off();});
 // V12.9: share text + a quiet "Kopioitu" on the pressed button when the link was copied.
 const cleanUrl=()=>location.href.split(/[?#]/)[0];
@@ -659,7 +667,7 @@ function tick(){const t=now();rearmIfHourPassed('tick');
     a few seconds late crossing into the album does not get the dot. Display-only; touches no audio. */
  {const hs=Math.floor(t/3600)*3600;const showDot=mode!=='ALBUM'&&t<hs+CONFIG.album&&!(armedFor!==null&&armedFor<=t);if(showDot!==lastDot){lastDot=showDot;badge.style.display=showDot?'flex':'none';log('LIVE_DOT',showDot?'shown':'hidden');}}
  if(t>=fadeInUntil){const toAlbum=armedFor!==null?armedFor-t:1e9;const fading=mode==='LOBBY'&&!held&&toAlbum<=CONFIG.visualFade&&toAlbum>-5;const op=fading?Math.min(1,Math.max(0,(CONFIG.visualFade-toAlbum)/CONFIG.visualFade)):0;const want=op.toFixed(2);if(blackout.style.opacity!==want&&!(want==='0.00'&&(blackout.style.opacity==='0'||blackout.style.opacity===''))){blackout.style.opacity=want;if(op>=1&&!blackout.dataset.logged){blackout.dataset.logged='1';log('PRE_ALBUM_FADE','screen black before the album');}}if(op===0)delete blackout.dataset.logged;}
- const target=mode!=='OFF'&&armedFor?armedFor:nextHour(t);/* V12.8: armed & slightly late shows 00 : 00, not the next hour */const rem=Math.max(0,target-t);lockTitle(rem);if(rem>300){clock.textContent=ST.mins(Math.ceil(rem/60));}else{const totalSeconds=Math.ceil(rem);const m=Math.floor(totalSeconds/60),s=totalSeconds%60;clock.textContent=ST.secs([m,s].map(v=>String(v).padStart(2,'0')).join(' : '));}/* 25 Oct (Harri): after joining, the note under the countdown changes (Finnish). Not joined: the normal note. */{const joined=mode!=='OFF';const want=joined?joinedText():statusNoteDefault;const sn=$('status-note');if(sn&&want)setNote(sn,want,joined);}if(rejoinOffer!==null&&mode==='OFF'&&!rejoinValid(rejoinOffer)){forgetAlbum('album over');btn.textContent=T.on;}{const off2=rejoinOffer!==null&&mode==='OFF';if(off2&&btn.textContent!==rejoinText())btn.textContent=rejoinText();const sn=$('status-note');if(sn)sn.style.visibility=off2?'hidden':'';}clock.style.display=(mode==='ALBUM'||(rejoinOffer!==null&&mode==='OFF'))?'none':'';label.style.display=(mode==='ALBUM'||(rejoinOffer!==null&&mode==='OFF'))?'none':'';/* 30 Oct (Harri): after joining, the text above the button reads 'Nyt soi: Odotusmusiikki.' / 'Pallosalama alkaa' / countdown (cross-fade). */{const j=mode==='LOBBY'&&!held;const en=UI&&UI.lang==='en';const lab=j?(finnish?'Pallosalama alkaa':en?'Pallosalama starts':ST.label):ST.label;const it=j?(finnish?'Nyt soi: Odotusmusiikki.':en?'Now playing: Waiting music.':T.wait):ST.intro;fadeSwap(label,lab);fadeSwap($('status-intro'),it);}updateArrow();driveListenVideo();{const w=$('wait');const on=mode==='LOBBY'&&!held;if(w.classList.contains('on')!==on){w.classList.toggle('on',on);w.setAttribute('aria-hidden',on?'false':'true');}}
+ const target=mode!=='OFF'&&armedFor?armedFor:nextHour(t);/* V12.8: armed & slightly late shows 00 : 00, not the next hour */const rem=Math.max(0,target-t);lockTitle(rem);if(rem>300){clock.textContent=ST.mins(Math.ceil(rem/60));}else{const totalSeconds=Math.ceil(rem);const m=Math.floor(totalSeconds/60),s=totalSeconds%60;clock.textContent=ST.secs([m,s].map(v=>String(v).padStart(2,'0')).join(' : '));}/* 25 Oct (Harri): after joining, the note under the countdown changes (Finnish). Not joined: the normal note. */{const joined=mode!=='OFF';const want=joined?joinedText():statusNoteDefault;const sn=$('status-note');if(sn&&want)setNote(sn,want,joined);}if(rejoinOffer!==null&&mode==='OFF'&&!rejoinValid(rejoinOffer)){forgetAlbum('album over');btn.textContent=T.on;}{const off2=rejoinOffer!==null&&mode==='OFF';document.body.dataset.rejoin=off2?'true':'false';{const rb=$('rejoin-btn');if(rb&&off2&&rb.textContent!==rejoinText())rb.textContent=rejoinText();}if(off2&&btn.textContent!==rejoinText())btn.textContent=rejoinText();const sn=$('status-note');if(sn)sn.style.visibility=off2?'hidden':'';}clock.style.display=(mode==='ALBUM'||(rejoinOffer!==null&&mode==='OFF'))?'none':'';label.style.display=(mode==='ALBUM'||(rejoinOffer!==null&&mode==='OFF'))?'none':'';/* 30 Oct (Harri): after joining, the text above the button reads 'Nyt soi: Odotusmusiikki.' / 'Pallosalama alkaa' / countdown (cross-fade). */{const j=mode==='LOBBY'&&!held;const en=UI&&UI.lang==='en';const lab=j?(finnish?'Pallosalama alkaa':en?'Pallosalama starts':ST.label):ST.label;const it=j?(finnish?'Nyt soi: Odotusmusiikki.':en?'Now playing: Waiting music.':T.wait):ST.intro;fadeSwap(label,lab);fadeSwap($('status-intro'),it);}updateArrow();driveListenVideo();{const w=$('wait');const on=mode==='LOBBY'&&!held;if(w.classList.contains('on')!==on){w.classList.toggle('on',on);w.setAttribute('aria-hidden',on?'false':'true');}}
  if(t-lastProgress>10){lastProgress=t;log('PROGRESS',`starts=${starts} completions=${completions} armed=${armedFor} drift=${mode==='LOBBY'?(a.currentTime-lobbyTarget(t)).toFixed(2):'n/a'}`);}
 }
 ['loadstart','loadedmetadata','canplay','playing','pause','waiting','stalled','suspend','seeking','seeked','ended','error'].forEach(ev=>a.addEventListener(ev,()=>{
