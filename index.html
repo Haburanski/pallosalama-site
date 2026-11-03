@@ -3,11 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pallosalama</title>
-<script>/* 1 Nov: Instagram opens the link as http://. The MP3 only plays for https pages (CORS), so move to https first. */if(location.protocol==='http:'&&/(^|\.)pallosalama\.fi$/i.test(location.hostname)){location.replace('https://'+location.host+location.pathname+location.search+location.hash);}</script>
+<title>Harri Kalevi Sippola: Pallosalama</title>
+<link rel="canonical" href="https://pallosalama.fi/">
+<script>/* 1 Nov: Instagram opens the link as http://. The MP3 only plays for https pages (CORS), so move to https first.
+   3 Nov: www.pallosalama.fi moves to pallosalama.fi (one address for search engines). */(function(){const h=location.hostname.toLowerCase();if(!/(^|\.)pallosalama\.fi$/.test(h))return;const host=h==='www.pallosalama.fi'?'pallosalama.fi':location.host;if(location.protocol==='http:'||host!==location.host)location.replace('https://'+host+location.pathname+location.search+location.hash);})();</script>
 <link rel="icon" href="favicon.ico" sizes="any">
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <link rel="icon" type="image/png" sizes="48x48" href="favicon-48.png">
+<link rel="icon" type="image/png" sizes="96x96" href="favicon-96.png">
+<link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="description" content="Pallosalama soi aina tasatunnein. Liity kuunteluun!">
 <meta property="og:type" content="website">
@@ -190,7 +194,7 @@ body[data-rejoin="true"] #rejoin-btn{display:flex;background-size:100% 100%;colo
   <div class="bg" aria-hidden="true"><video id="bgvid" src="media/background.mp4" poster="media/background_poster.jpg" autoplay loop muted playsinline preload="auto"></video></div>
   <h1 class="artist">Harri Kalevi Sippola</h1>
   <h2 class="album">Pallosalama</h2>
-  <section class="ctrl">
+  <section class="ctrl" data-nosnippet>
     <div class="langs" id="langs" role="group" aria-label="Kieli / Language"><button type="button" data-lang="fi">FI</button><span aria-hidden="true">/</span><button type="button" data-lang="en">EN</button></div>
     <p class="status"><span class="status-intro" id="status-intro">Teos soi aina tasatunnein.</span><br><span class="clock-label" id="clock-label">Seuraava kuuntelu alkaa</span><br><span class="clock" id="clock">&nbsp;</span></p>
     <div class="lobby-message" id="lobby-message" aria-live="polite"></div>
@@ -222,7 +226,7 @@ body[data-rejoin="true"] #rejoin-btn{display:flex;background-size:100% 100%;colo
   </section>
   <p class="foot">&copy; 2026 Harri Kalevi Sippola</p>
 </main>
-<div class="album-view"><video id="listenvid" src="media/playing.mp4" muted playsinline preload="none" aria-label="Harri Kalevi Sippola: Pallosalama"></video><span class="album-fallback">Harri Kalevi Sippola: Pallosalama</span><button type="button" class="btn" id="rejoin-btn">Jatka kuuntelua</button><p class="album-note" id="album-note">Ethän päivitä sivua kuuntelun aikana.</p></div>
+<div class="album-view" data-nosnippet><video id="listenvid" src="media/playing.mp4" muted playsinline preload="none" aria-label="Harri Kalevi Sippola: Pallosalama"></video><span class="album-fallback">Harri Kalevi Sippola: Pallosalama</span><button type="button" class="btn" id="rejoin-btn">Jatka kuuntelua</button><p class="album-note" id="album-note">Ethän päivitä sivua kuuntelun aikana.</p></div>
 <script>
 // Pallosalama V12.8 (based on V12.7): one continuous file, lobby first (0..3600), album second.
 // Hourly album transition is driven by audio position, NOT a scheduled seek.
@@ -258,7 +262,7 @@ body[data-rejoin="true"] #rejoin-btn{display:flex;background-size:100% 100%;colo
 // V12.9 (20 Oct, hosting move): the MP3 lives in Cloudflare R2 (too big for page hosting). It is a different
 // address than the page, so the audio element asks for it with CORS (crossorigin) - without that, Web Audio
 // (Android Chrome, iPhone fade path) would play silence. The R2 bucket has a matching CORS rule.
-const CONFIG={rejoin:true,albumVideo:false,file:'https://audio.pallosalama.fi/Pallosalama_master3.mp3',lobby:3600,album:2009,cycle:3600,fadeIn:2,resumeFade:3,backstep:2,version:'12.9',build:'2026-11-03-rejoin-final',visualFade:7,lobbyFade:5,nameFadeAt:45,nameFadeDur:20,pauseGrace:30,trackStarts:[],driftThreshold:3,quietDriftThreshold:1,quietFrom:2004,quietTo:2021,driftBoundaryGuard:30,driftCooldown:60,maxSeekCorrections:3};
+const CONFIG={rejoin:true,albumVideo:false,file:'https://audio.pallosalama.fi/Pallosalama_master3.mp3',lobby:3600,album:2009,cycle:3600,fadeIn:2,resumeFade:3,backstep:2,version:'12.9',build:'2026-11-03-seo',visualFade:7,lobbyFade:5,nameFadeAt:45,nameFadeDur:20,pauseGrace:30,trackStarts:[],driftThreshold:3,quietDriftThreshold:1,quietFrom:2004,quietTo:2021,driftBoundaryGuard:30,driftCooldown:60,maxSeekCorrections:3};
 if(!CONFIG.albumVideo)document.body.classList.add('no-album-video');
 const $=id=>document.getElementById(id);
 const a=$('lobby-audio'),btn=$('sound-toggle'),clock=$('clock'),label=$('clock-label'),message=$('lobby-message'),badge=$('live-badge'),blackout=$('blackout');
