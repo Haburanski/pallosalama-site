@@ -179,13 +179,17 @@ body[data-album="true"] .album-note,body[data-rejoin="true"] .album-note{animati
    'Ethän päivitä sivua kuuntelun aikana.' at the bottom. */
 #rejoin-btn{display:none;}
 /* 3 Nov (Harri): the big name texts stay on the black 'Jatka kuuntelua' screen, in their lobby positions. */
-body[data-rejoin="true"] .site > :not(.artist):not(.album),body[data-rejoinout="true"] .site > :not(.artist):not(.album){display:none!important;}
+body[data-rejoin="true"] .site > :not(.artist):not(.album):not(.bg),body[data-rejoinout="true"] .site > :not(.artist):not(.album):not(.bg){display:none!important;}
+/* 12 Nov (Harri): the video is on the 'Jatka kuuntelua' screen too: in 1 s; after the tap names + video fade to black in 2.5 s. */
+body[data-rejoin="true"] .bg{z-index:5;animation:namesIn 1s ease both;}
+body[data-rejoin="true"] .album-view{z-index:20;background:transparent;}
+body[data-rejoinout="true"] .bg{z-index:5;animation:namesOut 2.5s ease both;}
 body[data-rejoin="true"] .artist,body[data-rejoin="true"] .album,body[data-rejoinout="true"] .artist,body[data-rejoinout="true"] .album{z-index:10;}
 /* They fade in with the button and fade out when the album continues (1.5 s). */
 body[data-rejoin="true"] .artist,body[data-rejoin="true"] .album{animation:namesIn 1.5s ease both;}
 body[data-rejoinout="true"] .site{display:grid!important;}
 @media (max-width:760px){body[data-rejoinout="true"] .site{display:block!important;}}
-body[data-rejoinout="true"] .artist,body[data-rejoinout="true"] .album{animation:namesOut 1.5s ease both;}
+body[data-rejoinout="true"] .artist,body[data-rejoinout="true"] .album{animation:namesOut 2.5s ease both;}
 @keyframes namesIn{from{opacity:0;}to{opacity:1;}}
 @keyframes namesOut{from{opacity:1;}to{opacity:0;}}
 body[data-rejoin="true"] .album-view{display:flex;}
@@ -267,7 +271,7 @@ body[data-rejoin="true"] #rejoin-btn{display:flex;background-size:100% 100%;colo
 // V12.9 (20 Oct, hosting move): the MP3 lives in Cloudflare R2 (too big for page hosting). It is a different
 // address than the page, so the audio element asks for it with CORS (crossorigin) - without that, Web Audio
 // (Android Chrome, iPhone fade path) would play silence. The R2 bucket has a matching CORS rule.
-const CONFIG={rejoin:true,albumVideo:false,file:'https://audio.pallosalama.fi/Pallosalama_master4.mp3',lobby:3600,album:2009,cycle:3600,fadeIn:2,resumeFade:3,backstep:2,version:'12.9',build:'2026-11-12-prefade3',visualFade:3,uiFadeAt:10,uiFadeEnd:5,lobbyFade:5,nameFadeAt:45,nameFadeDur:20,pauseGrace:30,trackStarts:[],driftThreshold:3,quietDriftThreshold:1,quietFrom:2004,quietTo:2021,driftBoundaryGuard:30,driftCooldown:60,maxSeekCorrections:3};
+const CONFIG={rejoin:true,albumVideo:false,file:'https://audio.pallosalama.fi/Pallosalama_master4.mp3',lobby:3600,album:2009,cycle:3600,fadeIn:2,resumeFade:3,backstep:2,version:'12.9',build:'2026-11-12-rejoinvideo',visualFade:3,uiFadeAt:10,uiFadeEnd:5,lobbyFade:5,nameFadeAt:45,nameFadeDur:20,pauseGrace:30,trackStarts:[],driftThreshold:3,quietDriftThreshold:1,quietFrom:2004,quietTo:2021,driftBoundaryGuard:30,driftCooldown:60,maxSeekCorrections:3};
 if(!CONFIG.albumVideo)document.body.classList.add('no-album-video');
 const $=id=>document.getElementById(id);
 const a=$('lobby-audio'),btn=$('sound-toggle'),clock=$('clock'),label=$('clock-label'),message=$('lobby-message'),badge=$('live-badge'),blackout=$('blackout');
@@ -621,7 +625,7 @@ function rejoin(h){
  mode='ALBUM';armedFor=h;activeHour=h;albumConfirmed=true;rejoinOffer=null;
  const target=Math.min(albumClockPos(h),CONFIG.lobby+CONFIG.album-1);
  lastGoodAlbum=target;lastPosition=0;lastAdvanceAt=now();
- document.body.dataset.rejoinout='true';setTimeout(()=>{document.body.dataset.rejoinout='false';},1600);visual(true);rejoinPending=true;
+ document.body.dataset.rejoinout='true';setTimeout(()=>{document.body.dataset.rejoinout='false';},2600);visual(true);rejoinPending=true;
  log('REJOIN',`album continues from the shared moment: album ${(target-CONFIG.lobby).toFixed(1)} s`);gcEvent('rejoin','Jatka kuuntelua painettu');
  if(a.readyState>=1)rejoinSeek();
 }
