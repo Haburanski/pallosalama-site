@@ -245,6 +245,12 @@ body.rejoin-edit{user-select:none;-webkit-user-select:none;}
 </main>
 <div class="album-view" data-nosnippet><video id="listenvid" src="media/playing.mp4" muted playsinline preload="none" aria-label="Harri Kalevi Sippola: Pallosalama"></video><span class="album-fallback">Harri Kalevi Sippola: Pallosalama</span><button type="button" class="btn" id="rejoin-btn">Jatka kuuntelua</button><p class="album-note" id="album-note">Ethän päivitä sivua kuuntelun aikana.</p>
 <p class="album-note rejoin-foot" id="rejoin-foot">&copy; 2026 Harri Kalevi Sippola</p></div>
+<script>/* 20 Nov (Harri): ?virheet shows script errors + browser info on the screen (for TV browsers without a debug panel). Old-style JS on purpose. */
+(function(){if(location.search.indexOf('virheet')<0)return;var lines=[],box=null;function show(t){lines.push(t);if(!box){box=document.createElement('pre');box.style.cssText='position:fixed;left:0;right:0;bottom:0;max-height:60%;overflow:auto;z-index:99999;margin:0;padding:12px;background:#ffeb3b;color:#000;font:16px/1.35 monospace;white-space:pre-wrap';(document.body||document.documentElement).appendChild(box);}box.textContent=lines.join('\n');}
+show('SELAIN: '+navigator.userAgent);show('ruutu '+screen.width+'x'+screen.height+' ikkuna '+innerWidth+'x'+innerHeight);
+window.addEventListener('error',function(e){if(e.message)show('VIRHE: '+e.message+' (rivi '+e.lineno+':'+e.colno+')');else if(e.target&&(e.target.src||e.target.href))show('ei latautunut: '+(e.target.src||e.target.href));},true);
+window.addEventListener('unhandledrejection',function(e){show('PROMISE: '+(e.reason&&e.reason.message||e.reason));});
+setTimeout(function(){var v=document.getElementById('bgvid');if(v)show('video: paused='+v.paused+' ready='+v.readyState+' error='+(v.error&&v.error.code)+' w='+v.getBoundingClientRect().width+' h='+v.getBoundingClientRect().height+' display='+getComputedStyle(v).display);var c=document.getElementById('clock');show('ajastin: "'+(c&&c.textContent)+'" nappi: "'+(document.getElementById('sound-toggle')||{}).textContent+'"');show('grid='+(window.CSS&&CSS.supports&&CSS.supports('display','grid')));},4000);})();</script>
 <script>
 // Pallosalama V12.8 (based on V12.7): one continuous file, lobby first (0..3600), album second.
 // Hourly album transition is driven by audio position, NOT a scheduled seek.
@@ -280,7 +286,7 @@ body.rejoin-edit{user-select:none;-webkit-user-select:none;}
 // V12.9 (20 Oct, hosting move): the MP3 lives in Cloudflare R2 (too big for page hosting). It is a different
 // address than the page, so the audio element asks for it with CORS (crossorigin) - without that, Web Audio
 // (Android Chrome, iPhone fade path) would play silence. The R2 bucket has a matching CORS rule.
-const CONFIG={rejoin:true,albumVideo:false,file:'https://audio.pallosalama.fi/Pallosalama_master4.mp3',lobby:3600,album:2009,cycle:3600,fadeIn:2,resumeFade:3,backstep:2,version:'12.9',build:'2026-11-20-oldbrowsers',visualFade:3,uiFadeAt:10,uiFadeEnd:5,lobbyFade:5,nameFadeAt:45,nameFadeDur:20,pauseGrace:30,trackStarts:[],driftThreshold:3,quietDriftThreshold:1,quietFrom:2004,quietTo:2021,driftBoundaryGuard:30,driftCooldown:60,maxSeekCorrections:3};
+const CONFIG={rejoin:true,albumVideo:false,file:'https://audio.pallosalama.fi/Pallosalama_master4.mp3',lobby:3600,album:2009,cycle:3600,fadeIn:2,resumeFade:3,backstep:2,version:'12.9',build:'2026-11-20-virheet',visualFade:3,uiFadeAt:10,uiFadeEnd:5,lobbyFade:5,nameFadeAt:45,nameFadeDur:20,pauseGrace:30,trackStarts:[],driftThreshold:3,quietDriftThreshold:1,quietFrom:2004,quietTo:2021,driftBoundaryGuard:30,driftCooldown:60,maxSeekCorrections:3};
 if(!CONFIG.albumVideo)document.body.classList.add('no-album-video');
 const $=id=>document.getElementById(id);
 const a=$('lobby-audio'),btn=$('sound-toggle'),clock=$('clock'),label=$('clock-label'),message=$('lobby-message'),badge=$('live-badge'),blackout=$('blackout');
