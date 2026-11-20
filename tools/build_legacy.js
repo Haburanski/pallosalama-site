@@ -11,6 +11,7 @@ if(!m)throw new Error('main script not found');
 const out=babel.transformSync(m[1],{presets:[[presetEnv,{targets:{ie:'11'},modules:false,bugfixes:true}]],sourceType:'script',compact:false,comments:false});
 const poly=`/* polyfills for old browsers */
 (function(){if(window.NodeList&&!NodeList.prototype.forEach)NodeList.prototype.forEach=Array.prototype.forEach;
+if(window.Symbol&&Symbol.iterator){[window.NodeList,window.HTMLCollection].forEach(function(C){if(C&&!C.prototype[Symbol.iterator])C.prototype[Symbol.iterator]=Array.prototype[Symbol.iterator];});}
 if(!Object.entries)Object.entries=function(o){return Object.keys(o).map(function(k){return [k,o[k]];});};
 if(!Object.values)Object.values=function(o){return Object.keys(o).map(function(k){return o[k];});};
 if(!String.prototype.padStart)String.prototype.padStart=function(n,c){var s=String(this);c=c==null?' ':String(c);while(s.length<n)s=c+s;return s.slice(-Math.max(n,String(this).length));};
