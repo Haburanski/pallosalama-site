@@ -792,7 +792,7 @@ var CONFIG = {
   resumeFade: 3,
   backstep: 2,
   version: '12.9',
-  build: '2026-11-20-tvstill',
+  build: '2026-11-21-rejoinnote',
   visualFade: 3,
   uiFadeAt: 10,
   uiFadeEnd: 5,
@@ -1802,6 +1802,7 @@ function enterAlbum() {
 function completeAlbum() {
   if (mode !== 'ALBUM') return;
   completions++;
+  document.body.classList.remove('rejoined');
   forgetAlbum('album complete');
   log('ALBUM_COMPLETE', "pos=".concat(a.currentTime.toFixed(2)));
   gcEvent('album-complete', 'Albumi kuunneltu loppuun');
@@ -1950,6 +1951,7 @@ function on() {
 }
 function off() {
   cancelRecovery();
+  document.body.classList.remove('rejoined');
   if (mode === 'ALBUM') forgetAlbum('left the session');
   returningToLobby = false;
   held = false;
@@ -2104,6 +2106,7 @@ function rejoin(h) {
   lastGoodAlbum = target;
   lastPosition = 0;
   lastAdvanceAt = now();
+  document.body.classList.add('rejoined');
   document.body.dataset.rejoinout = 'true';
   setTimeout(function () {
     document.body.dataset.rejoinout = 'false';
