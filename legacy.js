@@ -792,7 +792,7 @@ var CONFIG = {
   resumeFade: 3,
   backstep: 2,
   version: '12.9',
-  build: '2026-11-21-rejoinnote',
+  build: '2026-11-21-credits',
   visualFade: 3,
   uiFadeAt: 10,
   uiFadeEnd: 5,
@@ -1119,6 +1119,7 @@ function applyTexts() {
     copy: 'Kopioi linkki',
     copied: 'Kopioitu',
     duration: 'Kesto 34 minuuttia',
+    music: 'Musiikki ja sanat',
     mastering: 'Masterointi',
     design: 'Visuaalinen suunnittelu',
     shareText: ''
@@ -1128,6 +1129,7 @@ function applyTexts() {
     copy: 'リンクをコピー',
     copied: 'コピーしました',
     duration: '再生時間 34 分',
+    music: '作詞・作曲',
     mastering: 'マスタリング',
     design: 'ビジュアルデザイン',
     shareText: ''
@@ -1137,6 +1139,7 @@ function applyTexts() {
     copy: 'लिङ्क कपी गर्नुहोस्',
     copied: 'कपी भयो',
     duration: 'अवधि 34 मिनेट',
+    music: 'संगीत र शब्द',
     mastering: 'मास्टरिङ',
     design: 'भिजुअल डिजाइन',
     shareText: ''
@@ -1146,6 +1149,7 @@ function applyTexts() {
     copy: 'ბმულის კოპირება',
     copied: 'დაკოპირდა',
     duration: 'ხანგრძლივობა 34 წუთი',
+    music: 'მუსიკა და ტექსტი',
     mastering: 'მასტერინგი',
     design: 'ვიზუალური დიზაინი',
     shareText: ''
@@ -1155,6 +1159,7 @@ function applyTexts() {
     copy: '复制链接',
     copied: '已复制',
     duration: '时长 34 分钟',
+    music: '词曲',
     mastering: '母带处理',
     design: '视觉设计',
     shareText: ''
@@ -1164,6 +1169,7 @@ function applyTexts() {
     copy: 'Copy link',
     copied: 'Copied',
     duration: 'Duration 34 minutes',
+    music: 'Music and lyrics',
     mastering: 'Mastering',
     design: 'Visual design',
     shareText: ''
@@ -1178,6 +1184,7 @@ function applyTexts() {
     set('share-label', UI.share);
     set('copy-link-btn', UI.copy);
     set('duration', UI.duration);
+    set('music-label', UI.music);
     set('mastering-label', UI.mastering);
     set('design-label', UI.design);
   }
