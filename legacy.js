@@ -792,7 +792,7 @@ var CONFIG = {
   resumeFade: 3,
   backstep: 2,
   version: '12.9',
-  build: '2026-11-26-musicwords',
+  build: '2026-11-26-wordsmusic',
   visualFade: 3,
   uiFadeAt: 10,
   uiFadeEnd: 5,
@@ -1185,7 +1185,7 @@ function applyTexts() {
     copy: 'Copy link',
     copied: 'Copied',
     duration: 'Duration 34 minutes',
-    music: 'Music and words',
+    music: 'Words and music',
     mastering: 'Mastering',
     design: 'Visual design',
     shareText: ''
