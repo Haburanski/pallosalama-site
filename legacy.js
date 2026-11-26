@@ -792,7 +792,7 @@ var CONFIG = {
   resumeFade: 3,
   backstep: 2,
   version: '12.9',
-  build: '2026-11-26-wordsmusic',
+  build: '2026-11-26-zhname',
   visualFade: 3,
   uiFadeAt: 10,
   uiFadeEnd: 5,
@@ -1201,6 +1201,9 @@ function applyTexts() {
     set('copy-link-btn', UI.copy);
     set('duration', UI.duration);
     set('music-label', UI.music);
+    document.querySelectorAll('.zh-name').forEach(function (e) {
+      e.textContent = chinese ? ' 哈瑞' : '';
+    });
     set('mastering-label', UI.mastering);
     set('design-label', UI.design);
   }
