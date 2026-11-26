@@ -792,7 +792,7 @@ var CONFIG = {
   resumeFade: 3,
   backstep: 2,
   version: '12.9',
-  build: '2026-11-27-zhname2',
+  build: '2026-11-27-sanatjamusiikki',
   visualFade: 3,
   uiFadeAt: 10,
   uiFadeEnd: 5,
@@ -1135,7 +1135,7 @@ function applyTexts() {
     copy: 'Kopioi linkki',
     copied: 'Kopioitu',
     duration: 'Kesto 34 minuuttia',
-    music: 'Musiikki ja sanat',
+    music: 'Sanat ja musiikki',
     mastering: 'Masterointi',
     design: 'Visuaalinen suunnittelu',
     shareText: ''
