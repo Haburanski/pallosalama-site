@@ -792,7 +792,7 @@ var CONFIG = {
   resumeFade: 3,
   backstep: 2,
   version: '12.9',
-  build: '2026-11-26-nonote',
+  build: '2026-11-26-haruman',
   visualFade: 3,
   uiFadeAt: 10,
   uiFadeEnd: 5,
@@ -823,6 +823,7 @@ var a = $('lobby-audio'),
 var params = new URLSearchParams(location.search);
 var langs = navigator.languages && navigator.languages.length ? navigator.languages : [navigator.language || 'fi'];
 var autoLang = /^zh\b/i.test(String(langs[0])) ? 'zh' : /^ja\b/i.test(String(langs[0])) ? 'ja' : /^ka\b/i.test(String(langs[0])) ? 'ka' : /^ne\b/i.test(String(langs[0])) ? 'ne' : 'fi';
+var allLangs = /\/haruman(\.html)?\/?$/.test(location.pathname);
 var savedLang = null;
 try {
   savedLang = localStorage.getItem('pallosalama-lang');
@@ -836,7 +837,7 @@ function pickLang(code) {
   nepali = code === 'ne';
   first = code;
 }
-pickLang(savedLang === 'fi' || savedLang === 'en' || savedLang && savedLang === autoLang ? savedLang : autoLang);
+pickLang(savedLang === 'fi' || savedLang === 'en' || savedLang && savedLang === autoLang || allLangs && ['ja', 'zh', 'ka', 'ne'].indexOf(savedLang) >= 0 ? savedLang : autoLang);
 {
   var NAMES = {
     zh: '中文',
@@ -856,6 +857,21 @@ pickLang(savedLang === 'fi' || savedLang === 'en' || savedLang && savedLang === 
     sep.textContent = '/';
     box.insertBefore(sep, box.firstChild);
     box.insertBefore(b, sep);
+  }
+  if (box && allLangs) {
+    ['ja', 'zh', 'ka', 'ne'].forEach(function (c) {
+      if (box.querySelector('[data-lang="' + c + '"]')) return;
+      var sep = document.createElement('span');
+      sep.setAttribute('aria-hidden', 'true');
+      sep.textContent = '/';
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.dataset.lang = c;
+      b.textContent = NAMES[c];
+      b.lang = c;
+      box.appendChild(sep);
+      box.appendChild(b);
+    });
   }
 }
 var MORE = {
@@ -1223,7 +1239,7 @@ var firefoxAndroid = isAndroid && /Firefox\//.test(navigator.userAgent);
 var reportMode = params.has('report');
 var testSwitch = ['rejoinedit', 'hourin', 'debug', 'latency', 'nowebaudio', 'webaudio', 'iosfade', 'iosnative'].some(function (k) {
   return params.has(k);
-});
+}) || allLangs;
 var mainSite = /^(www\.)?pallosalama\.fi$/i.test(location.hostname);
 var gcPrefix = mainSite ? '' : location.hostname + ' ';
 var gcQueue = [];

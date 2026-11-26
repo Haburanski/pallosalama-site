@@ -308,7 +308,7 @@ setTimeout(function(){var v=document.getElementById('bgvid');if(v)show('video: p
 // V12.9 (20 Oct, hosting move): the MP3 lives in Cloudflare R2 (too big for page hosting). It is a different
 // address than the page, so the audio element asks for it with CORS (crossorigin) - without that, Web Audio
 // (Android Chrome, iPhone fade path) would play silence. The R2 bucket has a matching CORS rule.
-const CONFIG={rejoin:true,albumVideo:false,file:'https://audio.pallosalama.fi/Pallosalama_master4.mp3',lobby:3600,album:2009,cycle:3600,fadeIn:2,resumeFade:3,backstep:2,version:'12.9',build:'2026-11-26-nonote',visualFade:3,uiFadeAt:10,uiFadeEnd:5,lobbyFade:5,nameFadeAt:45,nameFadeDur:20,pauseGrace:30,trackStarts:[],driftThreshold:3,quietDriftThreshold:1,quietFrom:2004,quietTo:2021,driftBoundaryGuard:30,driftCooldown:60,maxSeekCorrections:3};
+const CONFIG={rejoin:true,albumVideo:false,file:'https://audio.pallosalama.fi/Pallosalama_master4.mp3',lobby:3600,album:2009,cycle:3600,fadeIn:2,resumeFade:3,backstep:2,version:'12.9',build:'2026-11-26-haruman',visualFade:3,uiFadeAt:10,uiFadeEnd:5,lobbyFade:5,nameFadeAt:45,nameFadeDur:20,pauseGrace:30,trackStarts:[],driftThreshold:3,quietDriftThreshold:1,quietFrom:2004,quietTo:2021,driftBoundaryGuard:30,driftCooldown:60,maxSeekCorrections:3};
 if(!CONFIG.albumVideo)document.body.classList.add('no-album-video');
 const $=id=>document.getElementById(id);
 const a=$('lobby-audio'),btn=$('sound-toggle'),clock=$('clock'),label=$('clock-label'),message=$('lobby-message'),badge=$('live-badge'),blackout=$('blackout');
@@ -319,12 +319,14 @@ const langs=(navigator.languages&&navigator.languages.length)?navigator.language
 /* 24 Oct: language = the visitor's own choice (FI / EN / 中文 / ქართ links, remembered in this browser),
    otherwise the phone language. Switching changes only the texts; the music keeps playing. */
 const autoLang=/^zh\b/i.test(String(langs[0]))?'zh':/^ja\b/i.test(String(langs[0]))?'ja':/^ka\b/i.test(String(langs[0]))?'ka':/^ne\b/i.test(String(langs[0]))?'ne':'fi';/* 8 Nov (Harri): Nepali added. *//* 24 Oct rule: always Finnish, unless the phone is in Chinese, Japanese or Georgian. No language selection. */
+/* 26 Nov (Harri): pallosalama.fi/haruman (haruman.html, a copy made by tools/build_legacy.js) offers every language; not linked anywhere, not indexed, no analytics. */
+const allLangs=/\/haruman(\.html)?\/?$/.test(location.pathname);
 let savedLang=null;try{savedLang=localStorage.getItem('pallosalama-lang');}catch(e){}
 let finnish,chinese,georgian,japanese,nepali,first,T,ST,UI;
 function pickLang(code){finnish=code==='fi';chinese=code==='zh';georgian=code==='ka';japanese=code==='ja';nepali=code==='ne';first=code;}
-/* 30 Oct (Harri): FI / EN links above the status text; the choice is remembered in this browser. */pickLang((savedLang==='fi'||savedLang==='en'||(savedLang&&savedLang===autoLang))?savedLang:autoLang);
+/* 30 Oct (Harri): FI / EN links above the status text; the choice is remembered in this browser. */pickLang((savedLang==='fi'||savedLang==='en'||(savedLang&&savedLang===autoLang)||(allLangs&&['ja','zh','ka','ne'].indexOf(savedLang)>=0))?savedLang:autoLang);
 /* 30 Oct (Harri): on a phone whose language has a translated page (Chinese, Japanese, Georgian), that language is offered first: e.g. 日本語 / FI / EN. */
-{const NAMES={zh:'中文',ja:'日本語',ka:'ქართული',ne:'नेपाली'};const box=document.getElementById('langs');if(box&&NAMES[autoLang]){const b=document.createElement('button');b.type='button';b.dataset.lang=autoLang;b.textContent=NAMES[autoLang];b.lang=autoLang;const sep=document.createElement('span');sep.setAttribute('aria-hidden','true');sep.textContent='/';box.insertBefore(sep,box.firstChild);box.insertBefore(b,sep);}}
+{const NAMES={zh:'中文',ja:'日本語',ka:'ქართული',ne:'नेपाली'};const box=document.getElementById('langs');if(box&&NAMES[autoLang]){const b=document.createElement('button');b.type='button';b.dataset.lang=autoLang;b.textContent=NAMES[autoLang];b.lang=autoLang;const sep=document.createElement('span');sep.setAttribute('aria-hidden','true');sep.textContent='/';box.insertBefore(sep,box.firstChild);box.insertBefore(b,sep);}if(box&&allLangs){['ja','zh','ka','ne'].forEach(c=>{if(box.querySelector('[data-lang="'+c+'"]'))return;const sep=document.createElement('span');sep.setAttribute('aria-hidden','true');sep.textContent='/';const b=document.createElement('button');b.type='button';b.dataset.lang=c;b.textContent=NAMES[c];b.lang=c;box.appendChild(sep);box.appendChild(b);});}}
 const MORE={sv:['Gå med i lyssningen','Lämna lyssningen','Spelas nu: Väntemusik'],no:['Bli med på lyttingen','Forlat lyttingen','Spilles nå: Ventemusikk'],da:['Deltag i lytningen','Forlad lytningen','Spiller nu: Ventemusik'],de:['Jetzt zuhören','Zuhören beenden','Jetzt läuft: Wartemusik'],fr:["Rejoindre l'écoute","Quitter l'écoute","En cours : musique d'attente"],es:['Unirse a la escucha','Salir de la escucha','Sonando ahora: música de espera'],it:["Unisciti all'ascolto","Esci dall'ascolto","In riproduzione: musica d'attesa"],nl:['Doe mee met luisteren','Stop met luisteren','Nu speelt: wachtmuziek'],et:['Liitu kuulamisega','Lahku kuulamisest','Praegu mängib: ootemuusika'],pt:['Entrar na audição','Sair da audição','A tocar agora: música de espera'],pl:['Dołącz do słuchania','Opuść słuchanie','Teraz gra: muzyka oczekiwania'],ru:['Слушать вместе','Выйти','Сейчас играет: музыка ожидания'],ja:['リスニングに参加','リスニングを終了','再生中：待機中の音楽']};
 var statusNoteDefault='';
 /* 8 Nov (Harri): the same texts in every language (as in Finnish). */
@@ -369,7 +371,7 @@ const isAndroid=/Android/i.test(navigator.userAgent);
 const firefoxAndroid=isAndroid&&/Firefox\//.test(navigator.userAgent);
 // V12.9 analytics (GoatCounter, no cookies). Not loaded at all when any test switch is in the address,
 // so Harri's own test runs do not pollute the numbers. The test site is counted under its own name.
-/* ?report = debug panel with everything else exactly as for normal visitors (analytics on). */const reportMode=params.has('report');const testSwitch=['rejoinedit','hourin','debug','latency','nowebaudio','webaudio','iosfade','iosnative'].some(k=>params.has(k));
+/* ?report = debug panel with everything else exactly as for normal visitors (analytics on). */const reportMode=params.has('report');const testSwitch=['rejoinedit','hourin','debug','latency','nowebaudio','webaudio','iosfade','iosnative'].some(k=>params.has(k))||allLangs;
 const mainSite=/^(www\.)?pallosalama\.fi$/i.test(location.hostname);
 const gcPrefix=mainSite?'':location.hostname+' ';
 let gcQueue=[];

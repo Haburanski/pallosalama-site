@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+<meta name="robots" content="noindex,nofollow">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Harri Kalevi Sippola: Pallosalama</title>
+<link rel="canonical" href="https://pallosalama.fi/">
+<script>/* 1 Nov: Instagram opens the link as http://. The MP3 only plays for https pages (CORS), so move to https first.
+   3 Nov: www.pallosalama.fi moves to pallosalama.fi (one address for search engines). */(function(){var h=location.hostname.toLowerCase();if(!/(^|\.)pallosalama\.fi$/.test(h))return;var host=h==='www.pallosalama.fi'?'pallosalama.fi':location.host;if(location.protocol==='http:'||host!==location.host)location.replace('https://'+host+location.pathname+location.search+location.hash);})();</script>
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="icon" type="image/png" sizes="48x48" href="favicon-48.png">
+<link rel="icon" type="image/png" sizes="96x96" href="favicon-96.png">
+<link rel="icon" type="image/png" sizes="192x192" href="favicon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="description" content="Pallosalama soi aina tasatunnein. Liity kuunteluun!">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Pallosalama">
+<meta property="og:description" content="Pallosalama soi aina tasatunnein. Liity kuunteluun!">
+<meta property="og:image" content="https://pallosalama.fi/og-image-2.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Akt:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* V13 design (23 Oct 2026): layout from the visuals designer (Artboard-jd97). The player script is unchanged V12.9
+   apart from a body[data-sound] flag (button look) and the track arrow (CONFIG.trackStarts). Previous look: git tag v12.9-before-design. */
+html,body{margin:0;padding:0;background:#000;}
+*{box-sizing:border-box;}
+body{color:#fff;-webkit-font-smoothing:antialiased;overflow-x:hidden;}
+::selection{background:#fff;color:#000;}
+.site{position:relative;min-height:100vh;overflow:hidden;background:#000;color:#fff;
+  font-family:'Akt',system-ui,sans-serif;font-weight:400;font-size:clamp(15px,1.05vw,21px);line-height:1.45;
+  display:grid;grid-template-columns:minmax(240px,1fr) 1.75fr minmax(240px,1fr);grid-template-rows:auto auto 1fr;
+  grid-template-areas:"artist . album" "ctrl . tracks" "foot . .";column-gap:2vw;padding:8.5vh 6.8vw 4.5vh;}
+.bg{position:absolute;top:0;right:0;bottom:0;left:0;inset:0;display:flex;justify-content:center;pointer-events:none;z-index:0;}
+/* Still orb picture until the designer's video arrives; the video will use the same rule. */
+.bg img,.bg video{height:100%;width:44vw;object-fit:cover;object-position:50% 30%;display:block;
+  -webkit-mask-image:linear-gradient(to right,transparent,#000 18%,#000 82%,transparent);
+  mask-image:linear-gradient(to right,transparent,#000 18%,#000 82%,transparent);}
+.artist,.album,.ctrl,.tracks,.foot{position:relative;z-index:1;}
+.artist,.album{margin:0;font-weight:700;text-transform:uppercase;font-size:1.5em;line-height:1.1;letter-spacing:.005em;}
+.artist{grid-area:artist;}
+.album{grid-area:album;}
+.ctrl{grid-area:ctrl;margin-top:21vh;}
+.tracks{grid-area:tracks;margin-top:21vh;}
+.foot{grid-area:foot;align-self:end;margin:0;font-size:.85em;font-weight:700;}
+.status{margin:0 0 3em;font-weight:700;font-size:1.1em;line-height:1.6;}
+.status span{display:inline;}
+.status .clock{font-variant-numeric:tabular-nums;}
+.btns{display:flex;flex-direction:column;gap:.9em;align-items:flex-start;}
+.btnrow{display:contents;}
+.btn{display:flex;align-items:center;justify-content:center;width:13.5em;height:4em;padding:0 1em;
+  border-radius:999px;border:1.5px solid #fff;background:transparent;color:#fff;font:inherit;font-size:1em;cursor:pointer;
+  background-image:linear-gradient(#fff,#fff);background-repeat:no-repeat;background-position:50% 100%;background-size:100% 0%;
+  transition:background-size .5s cubic-bezier(.16,1,.3,1),color .5s cubic-bezier(.16,1,.3,1);}
+@media (hover:hover){.btn:hover{background-size:100% 100%;color:#1b1512;}}
+.btn:focus-visible{outline:2px solid #fff;outline-offset:3px;}
+/* Sound button: filled white while it invites you in (sound off, or paused); outline while listening. */
+#sound-toggle{background-size:100% 100%;color:#1b1512;}
+body[data-sound="on"]:not([data-held="true"]) #sound-toggle{background-size:100% 0%;color:#fff;}
+@media (hover:hover){body[data-sound="on"]:not([data-held="true"]) #sound-toggle:hover{background-size:100% 100%;color:#1b1512;}}
+.list{list-style:none;margin:0;padding:0;font-size:1.1em;}
+.list li{display:grid;grid-template-columns:1.6em 1.7em 1fr;align-items:center;line-height:2;}
+.arrow{margin-left:.1em;opacity:0;transition:opacity .6s ease;display:flex;align-items:center;}
+.arrow.on{opacity:1;}
+.arrow svg{width:.5em;height:.5em;}
+.info{margin-top:3em;font-size:.85em;}
+.info p{margin:0 0 1.1em;}
+.info a{color:#fff;text-decoration:underline;text-underline-offset:.3em;text-decoration-thickness:1px;}
+/* Not shown in this design (the player script still updates them). */
+#live-badge,#lobby-message{display:none!important;}
+/* During the album: only the name on black. */
+.album-view{display:none;position:fixed;top:0;right:0;bottom:0;left:0;inset:0;align-items:center;justify-content:center;padding:24px;text-align:center;
+  font-family:'Akt',system-ui,sans-serif;font-weight:700;font-size:clamp(18px,1.6vw,28px);color:#fff;background:#000;}
+body[data-album="true"]:not([data-held="true"]) .site{display:none;}
+body[data-album="true"]:not([data-held="true"]) .album-view{display:flex;}
+#blackout{position:fixed;top:0;right:0;bottom:0;left:0;inset:0;background:#000;opacity:0;pointer-events:none;transition:opacity 0.3s linear;z-index:9999;}
+/* The page fades in from black over 1.2 s when it is opened. */
+#blackout{animation:openfade 1.2s ease-out;}
+@keyframes openfade{from{opacity:1;}to{opacity:0;}}
+@media (prefers-reduced-motion:reduce){#blackout{animation:none;}.btn,.arrow{transition:none;}}
+@media (max-width:760px){
+  .site{display:block;min-height:0;font-size:16px;padding:0 0 32px;}
+  .bg{top:-50px;right:0;bottom:auto;left:0;inset:-50px 0 auto 0;height:700px;}
+  .bg img,.bg video{width:100%;height:100%;object-position:50% 0;
+    -webkit-mask-image:linear-gradient(to bottom,#000 78%,transparent);
+    mask-image:linear-gradient(to bottom,#000 78%,transparent);}
+  .artist,.album{position:absolute;top:44px;writing-mode:vertical-rl;font-size:24px;}
+  .artist{left:30px;transform:rotate(180deg);}
+  .album{right:30px;}
+  .ctrl{margin-top:500px;padding:0 24px;text-align:center;}
+  .status{margin:0 0 1.4em;font-weight:400;}
+  .btns{align-items:center;gap:14px;}
+  .btnrow{display:flex;gap:14px;justify-content:center;width:100%;}
+  .btn{height:48px;width:150px;}
+  #sound-toggle{width:auto;min-width:150px;padding:0 1.4em;}
+  .btnrow .btn{width:calc(50% - 7px);max-width:160px;}
+  .tracks{margin:44px auto 0;width:220px;}
+  .list{font-size:1em;}
+  .info{font-size:.8em;margin-top:2em;}
+  .foot{width:220px;margin:56px auto 0;}
+}
+/* V14 (23 Oct 2026): designer's final proposal (petsulta/pallosalama-site): background video, text links, grey info,
+   "playing" video during the album. Our countdown text, 7 s fades and the whole player are kept. */
+.btn{width:auto;min-width:13.5em;padding:0 1.8em;white-space:nowrap;}
+.btnrow{display:flex;gap:1.8em;margin-top:1.1em;}
+.link{background:none;border:0;padding:0;margin:0;color:#969696;font:inherit;cursor:pointer;text-decoration:underline;
+  text-underline-offset:.3em;text-decoration-thickness:1px;transition:color .3s ease;}
+@media (hover:hover){.link:hover{color:#fff;}}
+.link:focus-visible{outline:2px solid #fff;outline-offset:4px;}
+.list li{grid-template-columns:3.3em 1fr;}
+.info{color:#969696;}
+.info a{color:#969696;}
+.site{min-height:100dvh;}
+/* Waiting-music line under the join button (designer): shown while the waiting music plays. */
+.wait{margin:0;color:#969696;font-size:1em;line-height:1.45;opacity:0;transition:opacity .8s ease;}
+.wait.on{opacity:1;}
+.status .status-note{display:block;margin-top:.9em;font-weight:400;font-size:.8em;line-height:1.45;color:#969696;max-width:22em;}
+@media (max-width:760px){.status .status-note{margin-left:auto;margin-right:auto;}}
+/* Jaa sits between the note and the join button (23 Oct). */
+.status{margin-bottom:2em;}
+.btnrow{margin:0 0 1.2em;}
+@media (max-width:760px){.status{margin-bottom:1.2em;}.btnrow{margin:0 0 8px;}}
+.info a{white-space:nowrap;}
+/* 23 Oct (Harri's mock-ups): share icon before the label, credits in three groups, note one sentence per line. */
+.link.share{display:inline-flex;align-items:center;gap:.45em;text-decoration:none;}
+.link.share .lbl{text-decoration:underline;text-underline-offset:.3em;text-decoration-thickness:1px;}
+.share-icon{width:1.3em;height:1.3em;flex:none;}
+.info p{line-height:1.45;margin-bottom:1.6em;}
+.status .status-note{white-space:pre-line;max-width:none;}
+.status .status-note{margin-top:1.5em;font-size:.91em;}
+.status{margin-bottom:1.7em;}
+.btnrow{margin-bottom:2.4em;}
+@media (max-width:760px){.status .status-note{margin-top:1.1em;}.status{margin-bottom:1.3em;}.btnrow{margin-bottom:18px;}}
+/* Language links above the status text. */
+.langs{margin:0 0 1.6em;display:flex;gap:.5em;align-items:center;color:#969696;font-size:.85em;}
+.langs button{background:none;border:0;padding:4px 2px;margin:0;font:inherit;color:#969696;cursor:pointer;}
+.langs button.active{color:#fff;text-decoration:underline;text-underline-offset:.3em;text-decoration-thickness:1px;}
+@media (hover:hover){.langs button:hover{color:#fff;}}
+.langs button:focus-visible{outline:2px solid #fff;outline-offset:3px;}
+@media (max-width:760px){.langs{justify-content:center;margin-bottom:1.1em;}}
+.album-fallback{display:none;}
+/* 25 Oct (Harri): album video hidden for now (CONFIG.albumVideo) -> plain black screen during the album. */
+body.no-album-video .album-view #listenvid,body.no-album-video .album-view .album-fallback{display:none!important;}
+.album-view.novideo .album-fallback{display:block;}
+.album-view.novideo #listenvid{display:none;}
+#listenvid{width:clamp(320px,36vw,720px);height:auto;display:block;mix-blend-mode:screen;opacity:0;transition:opacity 2s ease;}
+#listenvid.show{opacity:1;transition:opacity 1s ease;}
+/* After the name has been seen, it fades out over CONFIG.nameFadeDur (20 s). */
+#listenvid:not(.show){transition:opacity 20s ease-in-out;}
+@media (max-width:760px){
+  #listenvid{width:calc(100% - 48px);max-width:546px;}
+  .btn,#sound-toggle{height:48px;width:auto;min-width:150px;padding:0 28px;}
+  .btnrow{justify-content:center;width:100%;margin-top:10px;}
+}
+/* 25 Oct (Harri): join button right after the countdown; then the note, then Jaa. */
+.btns .note-p{margin:0;}
+.btns .note-p .status-note{margin-top:.3em;}
+.btns .btnrow{margin:.6em 0 2.4em;}
+@media (max-width:760px){.btns .btnrow{margin:4px 0 18px;}}
+/* 25 Oct (Harri): during the album, one grey line at the bottom of the black screen. */
+/* 12 Nov (Harri): before the album, first everything except the names and the video fades to black (10 s -> 5 s before), then the names and the video (5 s -> 0). */
+.site>:not(.bg):not(.artist):not(.album){opacity:var(--pre-ui,1);transition:opacity .3s linear;}
+/* 12 Nov (Harri): 'Ethän päivitä sivua kuuntelun aikana' fades in over 2.5 s */
+@keyframes albumNoteIn{from{opacity:0}to{opacity:1}}
+body[data-album="true"] .album-note{animation:albumNoteIn 2.5s ease 1.5s both;}/* 13 Nov (Harri): 1.5 s black, then 2.5 s fade in */
+/* 12 Nov (Harri): not on the 'Jatka kuuntelua' screen; it fades in when the album continues */
+/* 21 Nov (Harri): the 'Jatka kuuntelua' screen keeps 'Ethän päivitä sivua kuuntelun aikana.' (fades in with the others, no copyright line); it stays as it is when the album continues */
+body[data-rejoin="true"] .album-note{animation:namesIn 2.5s ease both;}
+.album-note{position:absolute;left:0;right:0;bottom:36px;bottom:max(36px,env(safe-area-inset-bottom));margin:0;padding:0 24px;font-weight:400;font-size:14px;line-height:1.5;letter-spacing:.02em;color:#6b6b6b;}/* 26 Nov (Harri): a little greyer, quieter, more delicate (was 15px #969696) */
+/* 14 Nov (Harri): on the 'Jatka kuuntelua' screen the copyright line (white) takes the note's place; fades in and out with the names (2.5 s). */
+.album-note.rejoin-foot{display:none!important;color:#fff;}
+body[data-rejoin="true"] .album-note.rejoin-foot{display:block;animation:namesIn 2.5s ease both;}
+body[data-rejoinout="true"] .album-note.rejoin-foot{display:block;animation:namesOut 2.5s ease both;}
+body.rejoined .album-note{animation:none;opacity:1;}
+/* 25 Oct: note full width so its reserved height is measured at the real width. */
+.btns .note-p{align-self:stretch;position:relative;}
+
+/* 29 Oct: 'Nyt soi: Odotusmusiikki' in white */
+.wait{color:#fff;}
+/* 30 Oct (Harri): 'Nyt soi' is shown above the button now, not below it. */
+#wait{display:none!important;}
+/* 3 Nov (Harri): after an accidental reload during the album: the album's black screen, 'Jatka kuuntelua' in white in the middle,
+   'Ethän päivitä sivua kuuntelun aikana.' at the bottom. */
+#rejoin-btn{display:none;}
+/* 3 Nov (Harri): the big name texts stay on the black 'Jatka kuuntelua' screen, in their lobby positions. */
+body[data-rejoin="true"] .site > :not(.artist):not(.album),body[data-rejoinout="true"] .site > :not(.artist):not(.album){display:none!important;}
+/* 13 Nov (Harri): no video on the 'Jatka kuuntelua' screen (names only); after the tap the names fade out in 2.5 s. */
+body[data-rejoin="true"] .album-view{z-index:20;background:transparent;}
+body[data-rejoin="true"] .artist,body[data-rejoin="true"] .album,body[data-rejoinout="true"] .artist,body[data-rejoinout="true"] .album{z-index:10;}
+/* They fade in with the button and fade out when the album continues (1.5 s). */
+body[data-rejoin="true"] .artist,body[data-rejoin="true"] .album{animation:namesIn 1.5s ease both;}
+body[data-rejoinout="true"] .site{display:grid!important;}
+@media (max-width:760px){body[data-rejoinout="true"] .site{display:block!important;}}
+body[data-rejoinout="true"] .artist,body[data-rejoinout="true"] .album{animation:namesOut 2.5s ease both;}
+@keyframes namesIn{from{opacity:0;}to{opacity:1;}}
+@keyframes namesOut{from{opacity:1;}to{opacity:0;}}
+body[data-rejoin="true"] .album-view{display:flex;}
+body[data-rejoin="true"] #rejoin-btn{display:flex;background-size:100% 100%;color:#1b1512;font-family:var(--rejoin-font,inherit);font-weight:400;font-size:clamp(15px,1.05vw,21px);width:auto;min-width:13.5em;height:4em;padding:0 1.8em;}
+@media (max-width:760px){body[data-rejoin="true"] #rejoin-btn{font-size:16px;min-width:150px;height:48px;padding:0 28px;}}
+/* 13 Nov (Harri): the button is in the middle on all screens (as before); it fades in over 2.5 s */
+body[data-rejoin="true"]:not(.rejoin-edit) #rejoin-btn{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);}
+body[data-rejoin="true"] #rejoin-btn{animation:namesIn 2.5s ease both;}
+body.rejoin-edit{user-select:none;-webkit-user-select:none;}
+/* 20 Nov (Harri): old TV browsers (legacy.js): video without the soft-edge masks, or a still image */
+html.legacy.tv1 .bg video{-webkit-mask-image:none!important;mask-image:none!important;}
+html.legacy .bg img.tvstill{height:100%;width:44vw;object-fit:cover;object-position:50% 30%;display:block;}
+/* 20 Nov (Harri): browsers without CSS grid (old Samsung TVs): the same three-column desktop layout with absolute positions */
+@supports not (display:grid){@media (min-width:761px){
+ .site{display:block;height:100vh;min-height:0;}
+ .site>.artist,.site>.album,.site>.ctrl,.site>.tracks,.site>.foot{position:absolute;width:22vw;min-width:240px;}
+ .site>.artist{top:8.5vh;left:6.8vw;}
+ .site>.album{top:8.5vh;right:6.8vw;}
+ .site>.ctrl{top:29.5vh;margin-top:2em;left:6.8vw;}
+ .site>.tracks{top:29.5vh;margin-top:2em;right:6.8vw;}
+ .site>.foot{bottom:4.5vh;left:6.8vw;}
+ .list li{display:-webkit-flex;display:flex;-webkit-align-items:center;align-items:center;}
+ .list li>span:first-child{-webkit-flex:0 0 1.6em;flex:0 0 1.6em;}
+ .list li>.arrow{-webkit-flex:0 0 1.7em;flex:0 0 1.7em;margin-left:0;}
+}}
+/* 26 Nov (Harri): 'Ethän päivitä sivua kuuntelun aikana.' hidden everywhere (album + Jatka kuuntelua). Remove this line to bring it back. */
+#album-note{display:none!important;}
+</style>
+</head>
+<body>
+<div id="blackout"></div>
+<main class="site">
+  <div class="bg" aria-hidden="true"><video id="bgvid" src="media/background.mp4" poster="media/background_poster.jpg" autoplay loop muted playsinline preload="auto"></video></div>
+  <h1 class="artist">Harri Kalevi Sippola</h1>
+  <h2 class="album">Pallosalama</h2>
+  <section class="ctrl" data-nosnippet>
+    <div class="langs" id="langs" role="group" aria-label="Kieli / Language"><button type="button" data-lang="fi">FI</button><span aria-hidden="true">/</span><button type="button" data-lang="en">EN</button></div>
+    <p class="status"><span class="status-intro" id="status-intro">Teos soi aina tasatunnein.</span><br><span class="clock-label" id="clock-label">Seuraava kuuntelu alkaa</span><br><span class="clock" id="clock">&nbsp;</span></p>
+    <div class="lobby-message" id="lobby-message" aria-live="polite"></div>
+    <div class="live-badge" id="live-badge"></div>
+    <div class="btns">
+      <button type="button" class="btn" id="sound-toggle">&#196;&#228;net p&#228;&#228;lle</button>
+      <p class="wait" id="wait" aria-hidden="true">Nyt soi: Odotusmusiikki</p>
+      <p class="status note-p"><span class="status-note" id="status-note">Liity kuunteluun ennen teoksen alkua.</span></p>
+      <div class="btnrow">
+        <button type="button" class="link share" id="share-btn"><svg class="share-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V3.5M7.5 8 12 3.5 16.5 8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M8 11.5H5.5v9h13v-9H16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="lbl" id="share-label">Jaa</span></button>
+      </div>
+    </div>
+    <audio id="lobby-audio" preload="auto" playsinline crossorigin="anonymous"></audio>
+  </section>
+  <section class="tracks">
+    <ol class="list" id="track-list">
+      <li><span>1</span><span>Pallosalama</span></li>
+      <li><span>2</span><span>Kuva hiekassa</span></li>
+      <li><span>3</span><span>Keskipakoisvoima</span></li>
+      <li><span>4</span><span>Pato</span></li>
+      <li><span>5</span><span>Olen pudonnut sinuun</span></li>
+      <li><span>6</span><span>Satama</span></li>
+    </ol>
+    <div class="info">
+      <p id="duration">Kesto 34 minuuttia</p>
+      <p><span id="music-label">Musiikki ja sanat</span>: Harri Kalevi Sippola<br><span id="mastering-label">Masterointi</span>: Tyko Tuulivaara<br><span id="design-label">Visuaalinen suunnittelu</span>: <a href="https://www.instagram.com/bittihiisi/" target="_blank" rel="noopener">Petteri Valtiala</a></p>
+      <p><span id="contact"></span><br><a id="instagram" href="https://www.instagram.com/harriksippola/" target="_blank" rel="noopener">Instagram</a></p>
+    </div>
+  </section>
+  <p class="foot">&copy; 2026 Harri Kalevi Sippola</p>
+</main>
+<div class="album-view" data-nosnippet><video id="listenvid" src="media/playing.mp4" muted playsinline preload="none" aria-label="Harri Kalevi Sippola: Pallosalama"></video><span class="album-fallback">Harri Kalevi Sippola: Pallosalama</span><button type="button" class="btn" id="rejoin-btn">Jatka kuuntelua</button><p class="album-note" id="album-note">Ethän päivitä sivua kuuntelun aikana.</p>
+<p class="album-note rejoin-foot" id="rejoin-foot">&copy; 2026 Harri Kalevi Sippola</p></div>
+<script>/* 20 Nov (Harri): ?virheet shows script errors + browser info on the screen (for TV browsers without a debug panel). Old-style JS on purpose. */
+(function(){if(location.search.indexOf('virheet')<0)return;var lines=[],box=null;function show(t){lines.push(t);if(!box){box=document.createElement('pre');box.style.cssText='position:fixed;left:0;right:0;bottom:0;max-height:60%;overflow:auto;z-index:99999;margin:0;padding:12px;background:#ffeb3b;color:#000;font:16px/1.35 monospace;white-space:pre-wrap';(document.body||document.documentElement).appendChild(box);}box.textContent=lines.join('\n');}
+show('SELAIN: '+navigator.userAgent);show('ruutu '+screen.width+'x'+screen.height+' ikkuna '+innerWidth+'x'+innerHeight);
+window.addEventListener('error',function(e){if(e.message)show('VIRHE: '+e.message+' (rivi '+e.lineno+':'+e.colno+')');else if(e.target&&(e.target.src||e.target.href))show('ei latautunut: '+(e.target.src||e.target.href));},true);
+window.addEventListener('unhandledrejection',function(e){show('PROMISE: '+(e.reason&&e.reason.message||e.reason));});
+setTimeout(function(){var v=document.getElementById('bgvid');if(v)show('video: paused='+v.paused+' ready='+v.readyState+' error='+(v.error&&v.error.code)+' w='+v.getBoundingClientRect().width+' h='+v.getBoundingClientRect().height+' display='+getComputedStyle(v).display);var c=document.getElementById('clock');show('ajastin: "'+(c&&c.textContent)+'" nappi: "'+(document.getElementById('sound-toggle')||{}).textContent+'"');show('grid='+(window.CSS&&CSS.supports&&CSS.supports('display','grid')));},4000);})();</script>
+<script>/* 20 Nov (Harri): very old browsers (Samsung TV 'Internet' = Chrome 47) can't run the modern script below; they get legacy.js (same code compiled to ES5 by tools/build_legacy.js). Modern browsers never load it. */
+(function(){var ok=true;try{new Function('let a=1;const f=({b=2}={})=>`${b}`;async function g(){await 0}')();}catch(e){ok=false;}window.__legacy=!ok;if(!ok){/* 20 Nov: old TVs show video on a separate hardware layer; CSS masks over it can hide it. ?tvvideo=0 original, 1 no masks, 2 (default) still image instead of video */var tv=(location.search.match(/tvvideo=(\d)/)||[])[1]||'2';/* 20 Nov: Samsung TV showed only the still image (2) */document.documentElement.className+=' legacy tv'+tv;if(tv==='2')document.addEventListener('DOMContentLoaded',function(){var v=document.getElementById('bgvid');if(!v)return;var im=document.createElement('img');im.src=v.getAttribute('poster');im.className='tvstill';try{v.pause();}catch(e){}v.parentNode.replaceChild(im,v);});}if(!ok)document.write('<script src="legacy.js?v='+Date.now()+'"><\/script>');})();</script>
+<script>
+// Pallosalama V12.8 (based on V12.7): one continuous file, lobby first (0..3600), album second.
+// Hourly album transition is driven by audio position, NOT a scheduled seek.
+// V12.8 changes (default playback path otherwise identical to V12.7):
+//  1. Lobby targeting is anchored to the hour the listener is ARMED for, not to
+//     "the next hour from now". Fixes: an armed listener whose seek/metadata/buffering
+//     is delayed past the hour was re-targeted to the NEXT hour and lost the album.
+//  2. Initial lobby seek confirmation accepts landing slightly behind target and
+//     logs measured seek latency; max 3 corrections (no endless re-seek
+//     loop on slow networks).
+//  3. Web Audio context is resumed if the browser suspends it while sound is on
+//     (element would keep advancing silently; position checks cannot see that).
+//  4. iPad / iPadOS also use the native (no Web Audio) path, like iPhone.
+//  5. Test switches (no effect unless present in URL):
+//     ?hourin=120        pretend the next hour is 120 s away (fast hourly tests)
+//     ?latency=playback  Web Audio with latencyHint 'playback' (Firefox A/B test)
+//     ?nowebaudio        native element + element-volume fade (Firefox A/B test)
+//     ?webaudio          force Web Audio on Firefox Android (default there is native)
+//     ?iosfade           EXPERIMENT: iPhone/iPad use Web Audio fade (default there is native, no fade)
+//  6. Firefox on Android uses the native element (no Web Audio): fixes lock/unlock crackle.
+// V12.9 (20 Oct 2026), collected fix batch:
+//  - iPhone/iPad default = Web Audio fade + audioSession 'playback' (was ?iosfade). ?iosnative forces the old native path.
+//  - Tap fade: 8 s, curved (slow start), starts only once audio is actually flowing; Firefox element volume ~30 updates/s.
+//  - Return to lobby: code fade only if the landing falls outside the quiet zone (album was interrupted / finished late).
+//  - Inside the quiet zone the lobby is re-aligned to the clock with a 1 s threshold (a jump there is inaudible).
+//  - Soft hold (call etc.): Android Chrome no longer auto-resumes while hidden (Chrome resumes by itself after a call);
+//    any browser resumes as soon as the page is visible again; iPhone/Firefox auto-resume with a silent probe.
+//  - Paused album shows the whole page. Sound button follows the phone language (fi / other -> English).
+//  - Share text, "Kopioitu" confirmation, link preview tags, GoatCounter analytics (off with any test switch).
+// V12.9 (21 Oct): visual fades, 7 s each (CONFIG.visualFade). Fade to black during the last 7 s before the album, only for
+// listeners armed for that hour (sound on, not paused); the lobby view fades back in from black over 7 s when the album
+// has finished. Display only: the black layer never touches the audio.
+// V12.9 (20 Oct, hosting move): the MP3 lives in Cloudflare R2 (too big for page hosting). It is a different
+// address than the page, so the audio element asks for it with CORS (crossorigin) - without that, Web Audio
+// (Android Chrome, iPhone fade path) would play silence. The R2 bucket has a matching CORS rule.
+const CONFIG={rejoin:true,albumVideo:false,file:'https://audio.pallosalama.fi/Pallosalama_master4.mp3',lobby:3600,album:2009,cycle:3600,fadeIn:2,resumeFade:3,backstep:2,version:'12.9',build:'2026-11-26-haruman',visualFade:3,uiFadeAt:10,uiFadeEnd:5,lobbyFade:5,nameFadeAt:45,nameFadeDur:20,pauseGrace:30,trackStarts:[],driftThreshold:3,quietDriftThreshold:1,quietFrom:2004,quietTo:2021,driftBoundaryGuard:30,driftCooldown:60,maxSeekCorrections:3};
+if(!CONFIG.albumVideo)document.body.classList.add('no-album-video');
+const $=id=>document.getElementById(id);
+const a=$('lobby-audio'),btn=$('sound-toggle'),clock=$('clock'),label=$('clock-label'),message=$('lobby-message'),badge=$('live-badge'),blackout=$('blackout');
+const params=new URLSearchParams(location.search);
+// V12.9: only the sound button follows the phone's language: Finnish if any of the phone's languages is Finnish
+// (or Finland region), otherwise English. Everything else on the page stays in Finnish.
+const langs=(navigator.languages&&navigator.languages.length)?navigator.languages:[navigator.language||'fi'];
+/* 24 Oct: language = the visitor's own choice (FI / EN / 中文 / ქართ links, remembered in this browser),
+   otherwise the phone language. Switching changes only the texts; the music keeps playing. */
+const autoLang=/^zh\b/i.test(String(langs[0]))?'zh':/^ja\b/i.test(String(langs[0]))?'ja':/^ka\b/i.test(String(langs[0]))?'ka':/^ne\b/i.test(String(langs[0]))?'ne':'fi';/* 8 Nov (Harri): Nepali added. *//* 24 Oct rule: always Finnish, unless the phone is in Chinese, Japanese or Georgian. No language selection. */
+/* 26 Nov (Harri): pallosalama.fi/haruman (haruman.html, a copy made by tools/build_legacy.js) offers every language; not linked anywhere, not indexed, no analytics. */
+const allLangs=/\/haruman(\.html)?\/?$/.test(location.pathname);
+let savedLang=null;try{savedLang=localStorage.getItem('pallosalama-lang');}catch(e){}
+let finnish,chinese,georgian,japanese,nepali,first,T,ST,UI;
+function pickLang(code){finnish=code==='fi';chinese=code==='zh';georgian=code==='ka';japanese=code==='ja';nepali=code==='ne';first=code;}
+/* 30 Oct (Harri): FI / EN links above the status text; the choice is remembered in this browser. */pickLang((savedLang==='fi'||savedLang==='en'||(savedLang&&savedLang===autoLang)||(allLangs&&['ja','zh','ka','ne'].indexOf(savedLang)>=0))?savedLang:autoLang);
+/* 30 Oct (Harri): on a phone whose language has a translated page (Chinese, Japanese, Georgian), that language is offered first: e.g. 日本語 / FI / EN. */
+{const NAMES={zh:'中文',ja:'日本語',ka:'ქართული',ne:'नेपाली'};const box=document.getElementById('langs');if(box&&NAMES[autoLang]){const b=document.createElement('button');b.type='button';b.dataset.lang=autoLang;b.textContent=NAMES[autoLang];b.lang=autoLang;const sep=document.createElement('span');sep.setAttribute('aria-hidden','true');sep.textContent='/';box.insertBefore(sep,box.firstChild);box.insertBefore(b,sep);}if(box&&allLangs){['ja','zh','ka','ne'].forEach(c=>{if(box.querySelector('[data-lang="'+c+'"]'))return;const sep=document.createElement('span');sep.setAttribute('aria-hidden','true');sep.textContent='/';const b=document.createElement('button');b.type='button';b.dataset.lang=c;b.textContent=NAMES[c];b.lang=c;box.appendChild(sep);box.appendChild(b);});}}
+const MORE={sv:['Gå med i lyssningen','Lämna lyssningen','Spelas nu: Väntemusik'],no:['Bli med på lyttingen','Forlat lyttingen','Spilles nå: Ventemusikk'],da:['Deltag i lytningen','Forlad lytningen','Spiller nu: Ventemusik'],de:['Jetzt zuhören','Zuhören beenden','Jetzt läuft: Wartemusik'],fr:["Rejoindre l'écoute","Quitter l'écoute","En cours : musique d'attente"],es:['Unirse a la escucha','Salir de la escucha','Sonando ahora: música de espera'],it:["Unisciti all'ascolto","Esci dall'ascolto","In riproduzione: musica d'attesa"],nl:['Doe mee met luisteren','Stop met luisteren','Nu speelt: wachtmuziek'],et:['Liitu kuulamisega','Lahku kuulamisest','Praegu mängib: ootemuusika'],pt:['Entrar na audição','Sair da audição','A tocar agora: música de espera'],pl:['Dołącz do słuchania','Opuść słuchanie','Teraz gra: muzyka oczekiwania'],ru:['Слушать вместе','Выйти','Сейчас играет: музыка ожидания'],ja:['リスニングに参加','リスニングを終了','再生中：待機中の音楽']};
+var statusNoteDefault='';
+/* 8 Nov (Harri): the same texts in every language (as in Finnish). */
+const LX={
+ fi:{note:'Liity kuunteluun ennen teoksen alkua.',joined:'Voit sammuttaa laitteesi näytön.\nTeos alkaa ajallaan.',album:'Ethän päivitä sivua kuuntelun aikana.',rejoin:'Jatka kuuntelua',starts:'Pallosalama alkaa',share:'Pallosalama soi aina tasatunnein. Liity kuunteluun!'},
+ en:{note:'Join before the piece begins.',joined:'You can turn off your screen.\nThe piece will start on time.',album:'Please do not refresh the page while listening.',rejoin:'Continue listening',starts:'Pallosalama starts',share:'Pallosalama begins every full hour. Join the listening!'},
+ ja:{note:'作品が始まる前に参加してください。',joined:'画面をオフにしても大丈夫です。\n作品は時間通りに始まります。',album:'再生中はページを更新しないでください。',rejoin:'リスニングを続ける',starts:'Pallosalama は',share:'Pallosalama は毎正時に流れます。リスニングに参加しよう！'},
+ zh:{note:'请在作品开始前加入。',joined:'你可以关闭屏幕。\n作品将准时开始。',album:'聆听期间请勿刷新页面。',rejoin:'继续聆听',starts:'Pallosalama',share:'Pallosalama 每逢整点播放。加入聆听吧！'},
+ ka:{note:'შეუერთდი ნაწარმოების დაწყებამდე.',joined:'შეგიძლია ეკრანი გამორთო.\nნაწარმოები დროულად დაიწყება.',album:'გთხოვ, მოსმენისას გვერდს ნუ განაახლებ.',rejoin:'მოსმენის გაგრძელება',starts:'Pallosalama დაიწყება',share:'Pallosalama ჟღერს ყოველი საათის დასაწყისში. შემოგვიერთდი მოსმენაზე!'},
+ ne:{note:'रचना सुरु हुनुअघि सामेल हुनुहोस्।',joined:'तपाईं स्क्रिन बन्द गर्न सक्नुहुन्छ।\nरचना समयमै सुरु हुन्छ।',album:'सुन्दै गर्दा कृपया पृष्ठ रिफ्रेस नगर्नुहोस्।',rejoin:'सुन्न जारी राख्नुहोस्',starts:'Pallosalama सुरु हुन्छ',share:'Pallosalama हरेक घण्टाको सुरुमा बज्छ। सुन्न सामेल हुनुहोस्!'}};
+function lx(){return LX[finnish?'fi':japanese?'ja':chinese?'zh':georgian?'ka':nepali?'ne':'en'];}
+/* 25 Oct (Harri): the grey note cross-fades when its text changes (out 0.6 s, new text, in 0.6 s). */
+let noteTarget=null;
+/* 25 Oct (Harri): the note area keeps the height of its longest text, so 'Kutsu kuunteluun' never moves.
+   Before joining the note sits one row higher (in the empty row where 'Nyt soi' appears after joining). */
+const JOINED_NOTE='Voit sammuttaa laitteesi näytön.\nTeos alkaa ajallaan.';const JOINED_NOTE_EN='You can turn off your screen.\nThe piece will start on time.';function joinedText(){return lx().joined;}let noteJoined=null,noteLift=0;
+function placeNote(sn){sn.style.position='relative';sn.style.top=noteJoined?'0px':(-noteLift)+'px';}
+function reserveNote(){const sn=$('status-note'),w=$('wait');if(!sn||!w)return;const m=sn.cloneNode(false);m.removeAttribute('id');m.style.cssText='position:absolute;visibility:hidden;left:0;right:0;top:0;pointer-events:none;transition:none;min-height:0';sn.parentNode.appendChild(m);let h=0;for(const t of [statusNoteDefault,joinedText()]){m.textContent=t;h=Math.max(h,m.getBoundingClientRect().height);}m.remove();sn.style.minHeight=Math.ceil(h)+'px';const top0=sn.style.top;sn.style.top='0px';noteLift=getComputedStyle(w).display==='none'?0:Math.max(0,sn.getBoundingClientRect().top-w.getBoundingClientRect().top);sn.style.top=top0;placeNote(sn);}
+function setNote(sn,want,joined){const key=want+'|'+joined;if(noteTarget===key)return;const first=noteTarget===null;noteTarget=key;if(first){noteJoined=joined;if(sn.textContent!==want)sn.textContent=want;placeNote(sn);return;}sn.style.transition='opacity .6s ease';sn.style.opacity='0';clearTimeout(sn._t);sn._t=setTimeout(()=>{sn.textContent=want;noteJoined=joined;placeNote(sn);sn.style.opacity='1';},600);}
+window.addEventListener('resize',()=>reserveNote());try{document.fonts&&document.fonts.ready.then(()=>reserveNote());}catch(e){}setTimeout(()=>reserveNote(),0);setTimeout(()=>reserveNote(),1500);
+function fadeSwap(el,txt){if(!el||el._target===txt)return;const first=el._target===undefined;el._target=txt;if(first||!el.textContent){el.textContent=txt;return;}el.style.transition='opacity .6s ease';el.style.opacity='0';clearTimeout(el._ft);el._ft=setTimeout(()=>{el.textContent=el._target;el.style.opacity='1';},600);}
+function applyTexts(){
+T=finnish?{on:'Liity kuunteluun',off:'Poistu kuuntelusta',wait:'Nyt soi: Odotusmusiikki'}:japanese?{on:'リスニングに参加',off:'リスニングを終了',wait:'再生中：待機音楽'}:chinese?{on:'加入聆听会',off:'离开',wait:'正在播放：等候音乐'}:nepali?{on:'सुन्न सामेल हुनुहोस्',off:'सुन्न छोड्नुहोस्',wait:'अहिले बज्दैछ: प्रतीक्षा संगीत'}:georgian?{on:'შეუერთდი მოსმენას',off:'მოსმენის დატოვება',wait:'ახლა ჟღერს: ლოდინის მუსიკა'}:MORE[first]?{on:MORE[first][0],off:MORE[first][1],wait:MORE[first][2]}:{on:'Join listening session',off:'Leave session',wait:'Now playing: Waiting music'};
+{const w=document.getElementById('wait');if(w)w.textContent=T.wait;}
+ST=finnish?{intro:'Teos soi aina tasatunnein.',label:'Seuraava kuuntelu alkaa',mins:n=>`${n} minuutin kuluttua`,secs:c=>c}:japanese?{intro:'作品は毎正時に流れます。',label:'次のリスニングは',mins:n=>`${n} 分後に始まります`,secs:c=>`${c} 後に始まります`}:chinese?{intro:'本作品每逢整点播放。',label:'下一场聆听会',mins:n=>`${n} 分钟后开始`,secs:c=>`${c} 后开始`}:nepali?{intro:'यो रचना हरेक घण्टाको सुरुमा बज्छ।',label:'अर्को सुनाइ सुरु हुन्छ',mins:n=>`${n} मिनेटमा`,secs:c=>c}:georgian?{intro:'ნაწარმოები ჟღერს ყოველი საათის დასაწყისში.',label:'შემდეგი მოსმენა დაიწყება',mins:n=>`${n} წუთში`,secs:c=>c}:{intro:'The piece begins every full hour.',label:'Next listening session starts',mins:n=>`in ${n} minutes`,secs:c=>`in ${c}`};
+{const txt=lx().note;statusNoteDefault=txt;{const n=document.getElementById('status-note');if(n)n.textContent=txt;}{const an=document.getElementById('album-note');if(an)an.textContent=lx().album;}}
+/* V14: the rest of the page text follows the phone language too (names stay as they are). */
+UI=finnish?{lang:'fi',share:'Jaa',copy:'Kopioi linkki',copied:'Kopioitu',duration:'Kesto 34 minuuttia',music:'Musiikki ja sanat',mastering:'Masterointi',design:'Visuaalinen suunnittelu',shareText:''}
+ :japanese?{lang:'ja',share:'共有',copy:'リンクをコピー',copied:'コピーしました',duration:'再生時間 34 分',music:'作詞・作曲',mastering:'マスタリング',design:'ビジュアルデザイン',shareText:''}
+ :nepali?{lang:'ne',share:'साझा गर्नुहोस्',copy:'लिङ्क कपी गर्नुहोस्',copied:'कपी भयो',duration:'अवधि 34 मिनेट',music:'संगीत र शब्द',mastering:'मास्टरिङ',design:'भिजुअल डिजाइन',shareText:''}
+ :georgian?{lang:'ka',share:'გაზიარება',copy:'ბმულის კოპირება',copied:'დაკოპირდა',duration:'ხანგრძლივობა 34 წუთი',music:'მუსიკა და ტექსტი',mastering:'მასტერინგი',design:'ვიზუალური დიზაინი',shareText:''}
+ :chinese?{lang:'zh',share:'分享',copy:'复制链接',copied:'已复制',duration:'时长 34 分钟',music:'词曲',mastering:'母带处理',design:'视觉设计',shareText:''}
+ :{lang:'en',share:'Share',copy:'Copy link',copied:'Copied',duration:'Duration 34 minutes',music:'Music and lyrics',mastering:'Mastering',design:'Visual design',shareText:''};
+UI.shareText=lx().share;{document.documentElement.lang=UI.lang;const set=(id,t)=>{const e=document.getElementById(id);if(e)e.textContent=t;};set('share-label',UI.share);set('copy-link-btn',UI.copy);set('duration',UI.duration);set('music-label',UI.music);set('mastering-label',UI.mastering);set('design-label',UI.design);}
+{const i=document.getElementById('status-intro');if(i){i.textContent=ST.intro;i._target=undefined;}const l=document.getElementById('clock-label');l.textContent=ST.label;l._target=undefined;}
+document.querySelectorAll('#langs [data-lang]').forEach(b=>{const on=b.dataset.lang===(finnish?'fi':chinese?'zh':japanese?'ja':georgian?'ka':nepali?'ne':'en');b.classList.toggle('active',on);b.setAttribute('aria-pressed',on?'true':'false');});
+}
+applyTexts();
+btn.textContent=T.on;
+document.querySelectorAll('#langs [data-lang]').forEach(b=>b.addEventListener('click',()=>{const c=b.dataset.lang;try{localStorage.setItem('pallosalama-lang',c);}catch(e){}pickLang(c);applyTexts();reserveNote();btn.textContent=(document.body.dataset.sound==='on'&&document.body.dataset.held!=='true')?T.off:T.on;}));
+const isAndroid=/Android/i.test(navigator.userAgent);
+const firefoxAndroid=isAndroid&&/Firefox\//.test(navigator.userAgent);
+// V12.9 analytics (GoatCounter, no cookies). Not loaded at all when any test switch is in the address,
+// so Harri's own test runs do not pollute the numbers. The test site is counted under its own name.
+/* ?report = debug panel with everything else exactly as for normal visitors (analytics on). */const reportMode=params.has('report');const testSwitch=['rejoinedit','hourin','debug','latency','nowebaudio','webaudio','iosfade','iosnative'].some(k=>params.has(k))||allLangs;
+const mainSite=/^(www\.)?pallosalama\.fi$/i.test(location.hostname);
+const gcPrefix=mainSite?'':location.hostname+' ';
+let gcQueue=[];
+function gcSend(v){try{if(window.goatcounter&&typeof window.goatcounter.count==='function'){window.goatcounter.count(v);return true;}}catch(e){}return false;}
+function gcFlush(){while(gcQueue.length&&gcSend(gcQueue[0]))gcQueue.shift();}
+function gc(path,title,event){if(testSwitch)return;const v={path:(event?gcPrefix:'')+path,title:title,event:!!event};if(!gcSend(v)){gcQueue.push(v);if(gcQueue.length>50)gcQueue.shift();}}
+function gcEvent(name,title){gc(name,gcPrefix+title,true);}
+if(!testSwitch){try{window.goatcounter={no_onload:true};const sc=document.createElement('script');sc.async=true;sc.src='https://gc.zgo.at/count.js';sc.dataset.goatcounter='https://harrikalevisippola.goatcounter.com/count';sc.onload=gcFlush;document.head.appendChild(sc);gc(mainSite?'/':location.hostname+'/','Pallosalama',false);}catch(e){}}
+// V12.8 test clock: ?hourin=N shifts this page's clock so the next hour is N seconds away.
+const hourIn=Number(params.get('hourin'));
+const clockOffset=(hourIn>=10&&hourIn<=3600)?(()=>{try{const k='pallosalama_test_clock',sv=sessionStorage.getItem(k);if(sv!==null&&params.has('rejoin'))return Number(sv);const r=Date.now()/1000;const o=(Math.floor(r/3600)*3600+3600-r)-hourIn;sessionStorage.setItem(k,String(o));return o;}catch(e){const r=Date.now()/1000;return (Math.floor(r/3600)*3600+3600-r)-hourIn;}})():0;
+const now=()=>Date.now()/1000+clockOffset, nextHour=t=>Math.floor(t/3600)*3600+3600;
+const key='pallosalama_v12_diagnostics';
+let history=[];try{history=JSON.parse(localStorage.getItem(key)||'[]');if(!Array.isArray(history))history=[];}catch(e){}
+let mode='OFF',armedFor=null,activeHour=null,starts=0,completions=0,misses=0;
+let seekingPurpose='',seekUntil=0,initializing=false,hasPlayed=false,enteredAt=0,volumeReady=false,initialSeekIssued=false;
+let lastPosition=0,lastAdvanceAt=now(),lastGoodAlbum=CONFIG.lobby,albumConfirmed=false;
+let recovering=false,recoveryEpoch=0,recoveryTimer=null,recoveryCount=0;
+let lastVisualMode='',lastLoggedSecond=-1,lastProgress=0;
+let fadeStartedAt=null,fadeLastLogged=-1;
+let lastDot=null; // V12.8: yellow dot state (shown to visitors who arrive while an album is in progress)
+// V12.8 "held" (Harri 18 Oct: "we play it for you" — no user action should be needed):
+// ONLY two kinds of pause are respected (held):
+//  1. the listener's own pause on the lock screen / notification / headset button (Media Session handler);
+//  2. a pause that coincides with an audio output change (headphones unplugged, Bluetooth disconnected),
+//     so music never jumps to the phone speaker.
+// Every other pause (unexplained OS/browser pause, phone call, etc.) is a "soft hold" (V12.8, after the
+// 19 Oct phone-call test where an instant restart played the album over the ringtone): the page first
+// WAITS — if the browser resumes by itself (e.g. call ended) the music just continues — and only then
+// restarts playback itself: after 30 s, doubling (60, 120, ... max 300 s) if the system keeps pausing it
+// again right after each restart (a call still in progress). Lock-screen play / page button resume at once.
+// While held, the session stays alive and eligible; play (lock screen, headset, page button) continues
+// from where the listener was (album: last genuinely played position minus the 2 s backstep; never ahead).
+// V12.9 soft-hold rule (19 Oct call test on Android Chrome: our 30 s auto-resume collided with the end of the call,
+// the system paused it again and Chrome then did NOT resume by itself; without our timer Chrome resumed on its own):
+//  - Android Chrome (and other Android Chromium browsers): no auto-resume timer. Chrome resumes after the call itself.
+//    Known limit: Chrome freezes a paused page in the background, so page timers could not run anyway.
+//  - All browsers: a soft hold ends as soon as the page is visible again.
+//  - iPhone / Firefox / desktop: timer as before, but the restart is a silent probe: output stays at 0 and fades in
+//    only after ~2 s of uninterrupted playback, so nothing is heard over a call that is still going on.
+let held=false,holdKind='',heldSince=0,deliberatePauseAt=-1e9,lastDeviceChange=-1e9,pauseDecisionTimer=null;
+const autoResumeAllowed=!isAndroid||firefoxAndroid;
+let autoResumeTimer=null,autoResumeDelay=30,lastAutoResumeAt=-1e9;
+function clearAutoResume(){if(pauseDecisionTimer){clearTimeout(pauseDecisionTimer);pauseDecisionTimer=null;}if(autoResumeTimer){clearTimeout(autoResumeTimer);autoResumeTimer=null;}}
+try{navigator.mediaDevices.addEventListener('devicechange',()=>{lastDeviceChange=now();log('AUDIO_DEVICE_CHANGE',`paused=${a.paused}`);if(a.paused&&mode!=='OFF'&&now()-lastPauseAt<3){if(held&&holdKind==='soft'){clearAutoResume();holdKind='hard';log('HELD','audio output changed (headphones / Bluetooth): no auto-resume');}else if(!held)hold('audio output changed (headphones / Bluetooth)');}});}catch(e){}
+let lastPauseAt=-1e9;
+// Decide what an outside pause was. The devicechange event can arrive slightly after the pause,
+// so the auto-resume is only scheduled 1.5 s after the pause.
+function onOutsidePause(){
+ lastPauseAt=now();
+ if(now()-deliberatePauseAt<2){hold('lock screen / headset pause');return;}
+ if(now()-lastDeviceChange<3){hold('audio output changed (headphones / Bluetooth)');return;}
+ hold(autoResumeAllowed?'outside pause (call / other app / system): waiting before auto-resume':'outside pause (call / other app / system): waiting for the browser to resume or the page to be opened','soft');
+ clearAutoResume();
+ if(!autoResumeAllowed)return;
+ pauseDecisionTimer=setTimeout(()=>{pauseDecisionTimer=null;if(mode==='OFF'||!held||!a.paused||a.ended)return;
+  if(now()-lastDeviceChange<3){holdKind='hard';log('HELD','audio output changed (headphones / Bluetooth): no auto-resume');return;}
+  autoResumeDelay=(now()-lastAutoResumeAt<90)?Math.min(autoResumeDelay*2,300):30;
+  const d=autoResumeDelay;log('AUTO_RESUME_SCHEDULED',`in ${d} s unless the browser resumes first`);
+  autoResumeTimer=setTimeout(()=>{autoResumeTimer=null;if(held&&holdKind==='soft'&&mode!=='OFF'&&a.paused){lastAutoResumeAt=now();resumeHeld(`auto after outside pause (${d} s)`,true);}},d*1000);
+ },1500);
+}
+function setMS(s){try{if('mediaSession'in navigator)navigator.mediaSession.playbackState=s;}catch(e){}}
+function heldUI(){document.body.dataset.held=String(held);if(mode!=='OFF')btn.textContent=held?T.on:T.off;}
+function hold(why,kind){if(held||mode==='OFF')return;held=true;holdKind=kind||'hard';heldSince=now();cancelRecovery();setMS('paused');heldUI();log('HELD',`${holdKind}: ${why} at pos=${a.currentTime.toFixed(2)} lastGoodAlbum=${lastGoodAlbum.toFixed(2)}`);}
+function resumeHeld(why,probe){
+ if(!held||mode==='OFF')return;held=false;holdKind='';clearAutoResume();heldUI();
+ // V12.9: automatic restart = silent probe (fade in only after ~2 s of uninterrupted playback). A restart by the
+ // listener (button, lock screen, page opened) is heard at once.
+ if(probe&&!nativeIPhoneAudio)requestFade(CONFIG.resumeFade,2,'silent probe after auto-resume');else if(fadePendingSince!==null&&fadeNeed>=1){cancelFade();fullOutput();volumeReady=true;}
+ if(mode==='ALBUM'){const target=Math.max(CONFIG.lobby,lastGoodAlbum-CONFIG.backstep);if(Math.abs(a.currentTime-target)>1)seek(target,'resume album after pause');}
+ else if(armedFor!==null&&now()>=armedFor&&now()<armedFor+CONFIG.album-15){const h=armedFor;mode='ALBUM';activeHour=h;albumConfirmed=true;initializing=false;initialSeekIssued=true;cancelFade();setOutputGain(0);const target=Math.min(albumClockPos(h),CONFIG.lobby+CONFIG.album-1);lastGoodAlbum=target;visual(true);rememberAlbum(h);log('ALBUM_JOIN_AFTER_PAUSE',`sound stopped before the hour; continues at album ${(target-CONFIG.lobby).toFixed(1)} s`);gcEvent('album-after-pause','Albumi tauon jälkeen');seek(target,'rejoin album');}
+ else if(!initializing){rearmIfHourPassed('resume');const target=lobbyTarget(now());if(Math.abs(a.currentTime-target)>3)seek(target,'resume lobby after pause');}
+ log('RESUME_FROM_HOLD',`${why} pos=${a.currentTime.toFixed(2)}`);
+ lastAdvanceAt=now();lastPosition=a.currentTime;setMS('playing');play('resume after pause: '+why);
+}
+let returningToLobby=false,returnLobbySince=0,returnLobbyRetries=0;
+// V12.4: Web Audio gain is used only for lobby fade-in. A single media element
+// remains responsible for continuous lobby-to-album playback.
+let audioCtx=null, gainNode=null, audioSource=null, fadeFallback=false;
+// V12.6 compatibility test: iPhone Safari uses the native media element directly.
+// Do not create a MediaElementAudioSourceNode: once connected, it cannot be
+// detached to restore native output if iOS interrupts the AudioContext.
+// V12.8: also iPad/iPod, and iPadOS which reports itself as a Mac with touch.
+const isIOS=/iPhone|iPad|iPod/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+// V12.8 experiment: ?iosfade lets iOS use the Web Audio fade path (like Android Chrome) so the
+// tap gets a fade-in. Without the switch iOS keeps the proven native path (no fade).
+// V12.9: the Web Audio fade path is now the iOS default (tested 18-19 Oct: Instagram in-app, Chrome iOS 17.6:
+// fade, locked screen, album start, SMS sounds, ringer switch all fine). ?iosnative forces the old native path.
+/* 1 Nov: in-app browsers (Instagram, Facebook, Messenger, other app web views) play the audio element, but sound routed through Web Audio
+   can come out silent there (Instagram, Android + iPhone, launch day). They use the phone's plain audio player instead:
+   Android with an element-volume fade, iPhone without a fade (iPhone ignores element volume). */
+/* (later the same day) the real Instagram cause was http:// (fixed by the https redirect); in-app browsers use the normal paths again, with the fade. inApp is kept only for the report. */const inApp=/Instagram|FBAN|FBAV|FB_IAB|FBIOS|Messenger|; wv\)/i.test(navigator.userAgent);
+const iosFadeTest=isIOS&&!params.has('iosnative');
+const nativeIPhoneAudio=isIOS&&!iosFadeTest;
+let lastCtxResume=0;
+function resumeCtx(why){if(!audioCtx||mode==='OFF'||audioCtx.state==='running'||audioCtx.state==='closed')return;if(now()-lastCtxResume<2)return;lastCtxResume=now();log('WEB_AUDIO_RESUME_ATTEMPT',`${why} state=${audioCtx.state}`);audioCtx.resume().then(()=>log('WEB_AUDIO_RESUMED',audioCtx.state)).catch(e=>log('WEB_AUDIO_RESUME_ERROR',String(e)));}
+
+function setupGain(){
+ if(nativeIPhoneAudio){log('IPHONE_NATIVE_AUDIO','Web Audio bypassed for background playback');return;}
+ if(audioCtx||fadeFallback)return;
+ // iOS 16.4+: declare a 'playback' audio session so Web Audio is not muted by the ringer
+ // switch and is treated as media playback rather than UI sound.
+ if(iosFadeTest){try{if(navigator.audioSession){navigator.audioSession.type='playback';log('IOS_AUDIO_SESSION',`type=${navigator.audioSession.type}`);}else log('IOS_AUDIO_SESSION','navigator.audioSession not available (older iOS): ringer switch may mute');}catch(e){log('IOS_AUDIO_SESSION_ERROR',String(e));}}
+ // V12.8: Firefox on Android crackles at screen lock/unlock when routed through Web Audio
+ // (A/B/C test 18 Oct, Android 16 / Firefox 158: default and latencyHint 'playback' crackled,
+ // native element did not). Firefox Android therefore uses the native element + element-volume
+ // fade. ?webaudio forces the Web Audio path back on for comparison.
+ /* 12 Nov (Harri): all Android browsers play the file directly (no Web Audio: it crackled on some phones / Bluetooth). Web Audio stays for iPhone (needed for the fades) and computers. ?webaudio = old way for testing. */if(params.has('nowebaudio')||(isAndroid&&!params.has('webaudio'))){fadeFallback=true;log('WEB_AUDIO_DISABLED',isAndroid?'Android: native element, element volume fade':inApp?'in-app browser: native element, element volume fade':firefoxAndroid?'Firefox Android: native element, element volume fade':'?nowebaudio test switch: element volume fade');return;}
+ try{
+  const AC=window.AudioContext||window.webkitAudioContext;
+  if(!AC)throw new Error('Web Audio unavailable');
+  const playbackLatency=params.get('latency')==='playback';
+  audioCtx=playbackLatency?new AC({latencyHint:'playback'}):new AC();audioSource=audioCtx.createMediaElementSource(a);
+  log('WEB_AUDIO_LATENCY',`hint=${playbackLatency?'playback':'default'} base=${(audioCtx.baseLatency!=null?audioCtx.baseLatency:'n/a')} output=${(audioCtx.outputLatency!=null?audioCtx.outputLatency:'n/a')} rate=${audioCtx.sampleRate}`);
+  audioCtx.onstatechange=()=>{log('WEB_AUDIO_STATE',audioCtx.state);if(audioCtx.state!=='running')resumeCtx('statechange');};
+  gainNode=audioCtx.createGain();gainNode.gain.value=0;
+  audioSource.connect(gainNode);gainNode.connect(audioCtx.destination);
+  a.volume=1;
+  log('WEB_AUDIO_READY',`state=${audioCtx.state}`);
+ }catch(e){fadeFallback=true;log('WEB_AUDIO_UNAVAILABLE',String(e));}
+}
+function setOutputGain(v){
+ if(nativeIPhoneAudio){a.volume=1;return;}
+ if(gainNode){gainNode.gain.cancelScheduledValues(audioCtx.currentTime);gainNode.gain.setValueAtTime(v,audioCtx.currentTime);}
+ else a.volume=v;
+}
+function fullOutput(){
+ if(gainNode){gainNode.gain.cancelScheduledValues(audioCtx.currentTime);gainNode.gain.setValueAtTime(1,audioCtx.currentTime);}
+ else a.volume=1;
+}
+
+const session=new Date().toISOString();
+function snapshot(){return `hidden=${document.hidden} mode=${mode} pos=${a.currentTime.toFixed(2)} paused=${a.paused} ready=${a.readyState} network=${a.networkState} error=${(a.error&&a.error.code)||'none'}`;}
+function log(type,info=''){history.push(`${new Date().toISOString()} | ${type} | ${info} | ${snapshot()}`);history=history.slice(-3000);try{localStorage.setItem(key,JSON.stringify(history));}catch(e){}if(panel){panel.querySelector('pre').textContent=history.slice(-45).join('\n');panel.querySelector('#v12status').textContent=`${history.length} saved events`;}}
+let lastBogusEnded=-1e9;let seekIssuedAt=0,lastSeekLatency=0,seekCorrections=0,lastStuckPlay=0;
+function seek(pos,why){seekingPurpose=why;seekUntil=now()+5;seekIssuedAt=now();try{a.currentTime=pos;log('SEEK_SET',`${why} target=${pos.toFixed(3)}`);}catch(e){log('SEEK_ERROR',`${why}: ${e}`);}}
+function play(why){try{const p=a.play();log('PLAY_REQUEST',why);p&&p.then(()=>log('PLAY_RESOLVED',why)).catch(e=>log('PLAY_REJECTED',`${why}: ${e}`));}catch(e){log('PLAY_ERROR',String(e));}}
+// V12.8: lobby position is measured against the hour this session is armed for.
+// Before that hour this is identical to V12.7. If the armed hour has already passed
+// while still in the lobby (slow seek, buffering, stall), the target stays capped
+// just before the album start, so the armed listener still gets the full album
+// instead of being sent back to the beginning of the next hour's lobby.
+function lobbyRef(t){return armedFor!==null?armedFor:nextHour(t);}
+function lobbyTarget(t){return Math.max(0,Math.min(CONFIG.lobby-0.05,CONFIG.lobby-(lobbyRef(t)-t)));}
+function startLobbySeek(why){if(mode!=='LOBBY'||!initializing||a.readyState<1||initialSeekIssued)return;initialSeekIssued=true;seek(lobbyTarget(now()),why);log('LOBBY_INITIAL_SEEK_AFTER_METADATA');}
+// V12.9 fade: requested first (output silent), started only once the audio is actually flowing, so the whole
+// fade is heard. Curve x^3 = slow, gentle start. Web Audio: scheduled curve (runs even with the screen locked).
+// Element volume (Firefox): updated ~30 times a second while fading.
+let fadePendingSince=null,fadePendingPos=0,fadeNeed=0.05,fadeDur=CONFIG.fadeIn,fadeWhy='',fadeTimer=null;
+const fadeCurve=x=>x*x*x;
+function cancelFade(){fadePendingSince=null;fadeStartedAt=null;if(fadeTimer){clearInterval(fadeTimer);fadeTimer=null;}}
+function requestFade(dur,need,why){
+ if(nativeIPhoneAudio){a.volume=1;cancelFade();volumeReady=true;log('LOBBY_FADE_SKIPPED','iOS native path (?iosnative): no fade');return;}
+ cancelFade();setOutputGain(0);volumeReady=false;fadeLastLogged=-1;
+ fadePendingSince=now();fadePendingPos=a.currentTime;fadeNeed=need;fadeDur=dur;fadeWhy=why;
+ log('FADE_REQUESTED',`${why} duration=${dur}s starts after ${need}s of flowing audio`);
+}
+function startLobbyFade(){enteredAt=now();requestFade(CONFIG.fadeIn,0.05,'lobby');}
+function elementFadeStep(){if(fadeStartedAt===null||gainNode){if(fadeTimer){clearInterval(fadeTimer);fadeTimer=null;}return;}const x=Math.min(1,(now()-fadeStartedAt)/fadeDur);a.volume=fadeCurve(x);if(x>=1){clearInterval(fadeTimer);fadeTimer=null;}}
+function maybeBeginFade(src){
+ if(fadePendingSince===null||mode==='OFF')return;
+ const flowing=!a.paused&&!a.seeking&&a.currentTime>fadePendingPos+fadeNeed;
+ // A lobby fade that cannot confirm flowing audio within 6 s starts anyway (never leave the listener muted).
+ // A silent probe (need > 1 s) never starts by itself: if the system pauses again, it stays silent.
+ const overdue=fadeNeed<1&&now()-fadePendingSince>6;
+ if(!flowing&&!overdue)return;
+ fadePendingSince=null;fadeStartedAt=now();
+ if(gainNode){
+  const t=audioCtx.currentTime,n=256,c=new Float32Array(n);for(let i=0;i<n;i++)c[i]=fadeCurve(i/(n-1));
+  try{gainNode.gain.cancelScheduledValues(t);gainNode.gain.setValueAtTime(0,t);gainNode.gain.setValueCurveAtTime(c,t+0.01,fadeDur);}
+  catch(e){try{gainNode.gain.cancelScheduledValues(t);gainNode.gain.setValueAtTime(0,t);gainNode.gain.linearRampToValueAtTime(1,t+fadeDur);}catch(e2){gainNode.gain.value=1;}log('FADE_CURVE_FALLBACK',String(e));}
+ }else{a.volume=0;fadeTimer=setInterval(elementFadeStep,33);}
+ log('LOBBY_FADE_STARTED',`${fadeWhy} via=${src} ${flowing?'audio flowing':'overdue (6 s)'} method=${gainNode?'WebAudio curve':'element volume 30/s'} ctx=${(audioCtx&&audioCtx.state)||'none'} duration=${fadeDur}`);
+}
+function confirmLobbySeek(){if(mode!=='LOBBY'||!initializing||!initialSeekIssued||a.seeking||a.readyState<2)return;const wanted=lobbyTarget(now()),off=a.currentTime-wanted;const bad=off>1.5||off<-CONFIG.driftThreshold;if(bad&&seekCorrections<CONFIG.maxSeekCorrections){seekCorrections++;seek(lobbyTarget(now()),`initial seek correction ${seekCorrections} prevLatency=${lastSeekLatency.toFixed(2)}s`);return;}if(bad)log('LOBBY_SEEK_ACCEPTED',`offset=${off.toFixed(2)}s after ${seekCorrections} corrections`);initializing=false;lastAdvanceAt=now();lastPosition=a.currentTime;log('LOBBY_POSITION_CONFIRMED',`offset=${(a.currentTime-wanted).toFixed(2)}s`);/* V12.8: the lobby audio itself has a quiet zone (room tone ~33:47-34:01, fade-in after) where the
+ album->lobby return lands, so no code fade on return: full output, nothing to go wrong while locked.
+ The fade on the first tap is kept. *//* V12.9: if the album was interrupted (finished late), the landing falls outside the quiet zone -> code fade. */if(returningToLobby){const p=a.currentTime;if(p>=CONFIG.quietFrom&&p<=CONFIG.quietTo){if(isIOS&&gainNode){requestFade(1.2,0.3,'iOS return glitch guard');}else{cancelFade();fullOutput();volumeReady=true;}log('RETURN_LOBBY_NO_FADE',`landing ${p.toFixed(1)} inside the quiet zone: the audio does the fade`);}else{log('RETURN_LOBBY_CODE_FADE',`landing ${p.toFixed(1)} outside the quiet zone ${CONFIG.quietFrom}-${CONFIG.quietTo}`);startLobbyFade();}}else startLobbyFade();if(returningToLobby){log('RETURN_LOBBY_SEEK_CONFIRMED',`hidden=${document.hidden}`);}if(held){log('LOBBY_CONFIRMED_WHILE_HELD','not starting playback: listener paused');return;}play(returningToLobby?'return to lobby':'verified lobby seek');}
+let fadeInUntil=0;
+function lobbyFadeIn(){const d=CONFIG.lobbyFade;/* 23 Oct: 5 s back to the waiting page (fade to black before the album stays 7 s) */fadeInUntil=now()+d+0.2;blackout.style.transition='none';blackout.style.opacity='1';void blackout.offsetWidth;blackout.style.transition=`opacity ${d}s ease-in-out`;blackout.style.opacity='0';setTimeout(()=>{blackout.style.transition='opacity 0.3s linear';},d*1000+300);log('LOBBY_VISUAL_FADE_IN',`${d}s`);}
+function visual(album){const target=album?'ALBUM':'LOBBY';if(lastVisualMode===target)return;const prev=lastVisualMode;lastVisualMode=target;document.body.dataset.album=String(album);if(!album&&prev==='ALBUM')lobbyFadeIn();else if(now()>=fadeInUntil)blackout.style.opacity='0';/* V12.9 (21 Oct): do not hide the yellow dot here; tick() re-evaluates it (hiding it for a moment made the page below jump) */lastDot=null;message.style.display='none';log('VISUAL_STATE',target);}
+function cancelRecovery(){recoveryEpoch++;if(recoveryTimer)clearTimeout(recoveryTimer);recoveryTimer=null;recovering=false;recoveryCount=0;}
+function arm(t){armedFor=nextHour(t);log('ARMED_FOR',new Date(armedFor*1000).toISOString());}
+/* 24 Oct: paused in the waiting music while the hour went by (more than CONFIG.pauseGrace s ago) -> this album is missed;
+   wait for the next hour instead of starting the album late on one's own. A short interruption right at the hour still gets in. */
+/* 13 Nov (Harri): someone who joined before the hour and whose sound was stopped by the phone/app (e.g. WhatsApp's own browser on iPhone) keeps the hour while the album is still running; only after the album do they move to the next hour. */
+function rearmIfHourPassed(why){if(mode==='LOBBY'&&held&&armedFor!==null&&now()>armedFor+CONFIG.album-15){log('REARM_AFTER_PAUSE',`${why}: hour ${new Date(armedFor*1000).toISOString()} passed during the pause`);arm(now());}}
+function enterLobby(why){cancelRecovery();returningToLobby=(why==='album completed');returnLobbySince=now();returnLobbyRetries=0;mode='LOBBY';albumConfirmed=false;activeHour=null;lastVisualMode='';visual(false);arm(now());enteredAt=now();volumeReady=false;cancelFade();/* Do not mute before seek: keep the media session audible/active while locked. */initializing=true;initialSeekIssued=false;seekCorrections=0;lastAdvanceAt=now();lastPosition=a.currentTime;startLobbySeek(why);log('ENTER_LOBBY',why);}
+function enterAlbum(){if(mode!=='LOBBY')return;const t=now();const due=armedFor!==null&&t>=armedFor-3&&t<armedFor+CONFIG.album; if(!due){log('ALBUM_GATE_BLOCK',`armed=${armedFor} now=${t}`);enterLobby('unauthorized boundary');return;}
+ cancelRecovery();mode='ALBUM';activeHour=armedFor;starts++;albumConfirmed=true;lastGoodAlbum=Math.max(CONFIG.lobby,a.currentTime);lastPosition=a.currentTime;lastAdvanceAt=t;cancelFade();volumeReady=true;fullOutput();visual(true);log('ALBUM_START_NATURAL',`hour=${new Date(activeHour*1000).toISOString()} lateness=${(t-activeHour).toFixed(2)}s`);gcEvent('album-start','Albumi alkoi');rememberAlbum(activeHour);}
+function completeAlbum(){if(mode!=='ALBUM')return;completions++;document.body.classList.remove('rejoined');forgetAlbum('album complete');log('ALBUM_COMPLETE',`pos=${a.currentTime.toFixed(2)}`);gcEvent('album-complete','Albumi kuunneltu loppuun');/* 1 Nov: iPhone glitch at the jump back to the lobby -> silent during the jump, short fade in after (see RETURN_LOBBY). */if(isIOS&&gainNode){setOutputGain(0);log('IOS_RETURN_MUTE','gain 0 during the jump back to the lobby');}enterLobby('album completed');}
+// V12.5: preserve the active media source during background recovery. Chrome on
+// Android can reject load() while locked even after a previously playable MP3.
+// V12.7: lobby-only wall-clock correction. Strictly separate from playback recovery.
+// Never runs in ALBUM, during recovery/return-to-lobby/initial seek, while a seek is
+// pending, within the guard window before the hour, or inside the cooldown. The target
+// comes from lobbyTarget(), which is capped below the album start, so this can never
+// move a listener into the album.
+let lastDriftFix=-1e9;
+function lobbyDriftCorrection(t){
+ if(mode!=='LOBBY'||initializing||recovering||returningToLobby)return;
+ if(a.seeking||t<seekUntil||a.paused||a.readyState<2)return;
+ if(a.currentTime>=CONFIG.lobby-0.5)return;
+ if(t-lastDriftFix<CONFIG.driftCooldown)return;
+ const toHour=lobbyRef(t)-t; // V12.8: negative once the armed hour has passed -> no correction
+ if(toHour<CONFIG.driftBoundaryGuard)return;
+ const target=lobbyTarget(t),drift=a.currentTime-target;
+ // V12.9: inside the quiet zone (room tone) a jump is inaudible, so align more tightly there.
+ // Fixes Firefox 19 Oct: return landed 2.4 s behind, later a 4 s jump was made during the lobby fade-in.
+ const quiet=a.currentTime>=CONFIG.quietFrom&&a.currentTime<=CONFIG.quietTo-1&&target<=CONFIG.quietTo;
+ if(Math.abs(drift)<=(quiet?CONFIG.quietDriftThreshold:CONFIG.driftThreshold))return;
+ if(quiet)log('QUIET_ZONE_ALIGN',`drift=${drift.toFixed(2)}`);
+ lastDriftFix=t;
+ log('LOBBY_DRIFT_CORRECT',`from=${a.currentTime.toFixed(2)} target=${target.toFixed(2)} drift=${drift.toFixed(2)} toHour=${toHour.toFixed(1)}s hidden=${document.hidden}`);
+ seek(target,'lobby drift correction');
+}
+function recover(reason){
+ if(recovering||mode==='OFF')return;
+ returningToLobby=false;recovering=true;
+ const epoch=++recoveryEpoch,wasAlbum=mode==='ALBUM';
+ const fixedResume=Math.max(CONFIG.lobby,Math.min(CONFIG.lobby+CONFIG.album-1,lastGoodAlbum-CONFIG.backstep));
+ log('RECOVERY_TRIGGER',`${reason} ${wasAlbum?'album':'lobby'} resume=${fixedResume.toFixed(2)}`);
+ let baseline=a.currentTime,phase=0;
+ const schedule=(ms)=>{recoveryTimer=setTimeout(attempt,ms);};
+ const attempt=()=>{
+  if(epoch!==recoveryEpoch||mode==='OFF')return;
+  recoveryCount++;
+  const target=wasAlbum?fixedResume:lobbyTarget(now());
+  const fatal=!!a.error||a.networkState===3;
+  // Never destroy the currently attached source while the screen is locked.
+  // First ask the existing element to continue; this can recover a transient
+  // buffer underrun without requiring a fresh media load or autoplay grant.
+  const reload=fatal&&!document.hidden;
+  log('RECOVERY_ATTEMPT',`attempt=${recoveryCount} phase=${reload?'visible-reload':'keep-source'} target=${target.toFixed(2)} ready=${a.readyState}`);
+  if(reload){
+   log('RECOVERY_VISIBLE_RELOAD',`mediaError=${(a.error&&a.error.code)||'none'}`);
+   a.src=CONFIG.file;a.load();
+   // Seek only after metadata is available; pending target is fixed for album.
+   const onMeta=()=>{if(epoch===recoveryEpoch&&mode!=='OFF')seek(wasAlbum?fixedResume:lobbyTarget(now()),'visible recovery metadata');};
+   if(a.readyState>=1)onMeta();else{const once=()=>{a.removeEventListener('loadedmetadata',once);onMeta();};a.addEventListener('loadedmetadata',once);}/* 20 Nov: {once:true} is not understood by old TV browsers */
+  }else if(!fatal&&!a.seeking&&a.readyState>=2){
+   // An actual pause can be restored with a small backstep. For buffering,
+   // avoid seeking away from the existing buffered position.
+   if(a.paused&&wasAlbum&&Math.abs(a.currentTime-target)>1)seek(target,'non-destructive album resume');
+   if(a.paused&&!wasAlbum&&Math.abs(a.currentTime-target)>8)seek(target,'lobby recovery alignment');
+  }
+  if(!wasAlbum&&a.paused&&!fatal){startLobbyFade();}
+  if(!fatal||reload)play('recovery keep-source');
+  else log('RECOVERY_WAIT_FOR_VISIBLE','media error while hidden: no destructive reload');
+  baseline=a.currentTime;
+  recoveryTimer=setTimeout(()=>{
+   if(epoch!==recoveryEpoch||mode==='OFF')return;
+   if(!a.error&&!a.paused&&!a.seeking&&a.readyState>=2&&a.currentTime>baseline+0.4){
+    log('RECOVERY_OK',`attempt=${recoveryCount} pos=${a.currentTime.toFixed(2)}`);
+    recovering=false;recoveryCount=0;lastPosition=a.currentTime;lastAdvanceAt=now();return;
+   }
+   const delay=Math.min(30000,2000*Math.max(1,recoveryCount));
+   log('RECOVERY_RETRY',`in=${delay}ms hidden=${document.hidden} error=${(a.error&&a.error.code)||'none'}`);
+   schedule(delay);
+  },5000);
+ };
+ attempt();
+}
+
+function on(){if(mode!=='OFF')return;lastLockTitle='';returningToLobby=false;mode='LOBBY';document.body.dataset.sound='on';arm(now());a.crossOrigin='anonymous';btn.textContent=T.off;listenedSec=0;nextListenMark=10;a.src=CONFIG.file;a.preload='auto';a.loop=false;setupGain();setOutputGain(0);if(audioCtx){audioCtx.resume().then(()=>log('WEB_AUDIO_RESUMED',audioCtx.state)).catch(e=>log('WEB_AUDIO_RESUME_ERROR',String(e)));}enteredAt=now();initializing=true;initialSeekIssued=false;seekCorrections=0;volumeReady=false;lastVisualMode='';visual(false);startLobbySeek('initial clock-aligned lobby');log('SOUND_ON',CONFIG.file);
+ // V12.8: iOS browsers (Safari and Chrome on iPhone are both WebKit) will not load media
+ // data for an element that was not started inside the tap, so the clock-aligned seek
+ // never completes. Start playback here, synchronously in the tap; the lobby's opening
+ // seconds are near-silent, and the seek then happens on an already-playing element.
+ /* 1 Nov: start playback inside the tap on every phone (was iPhone only). In-app browsers such as Instagram's only allow sound that starts directly in the tap; output is silent until the fade. */if(isIOS)a.volume=1;play('start inside the tap (all browsers)');setTimeout(()=>gcEvent('sound-on','Äänet päälle painettu'),0);
+ if('mediaSession'in navigator){try{navigator.mediaSession.metadata=new MediaMetadata({title:'Pallosalama',artist:'Harri Kalevi Sippola'});navigator.mediaSession.setActionHandler('play',()=>{if(mode==='OFF')return;if(held)resumeHeld('lock screen / headset play');else play('media play');});navigator.mediaSession.setActionHandler('pause',()=>{log('MEDIA_PAUSE','OS media control');if(mode==='OFF')return;deliberatePauseAt=now();a.pause();hold('lock screen / headset pause');});setMS('playing');}catch(e){log('MEDIA_SESSION_ERROR',String(e));}}}
+function off(){cancelRecovery();document.body.classList.remove('rejoined');if(mode==='ALBUM')forgetAlbum('left the session');returningToLobby=false;held=false;holdKind='';clearAutoResume();document.body.dataset.held='false';setMS('none');mode='OFF';document.body.dataset.sound='off';armedFor=null;activeHour=null;cancelFade();fadeOutThenPause();visual(false);btn.textContent=T.on;log('SOUND_OFF');}
+/* 1 Nov: leaving the session fades the sound out over 0.25 s before pausing (an instant pause glitched on iPhone). */
+let offToken=0;
+function fadeOutThenPause(){const tk=++offToken;if(gainNode&&audioCtx&&!a.paused){try{const t=audioCtx.currentTime;gainNode.gain.cancelScheduledValues(t);gainNode.gain.setValueAtTime(gainNode.gain.value,t);gainNode.gain.linearRampToValueAtTime(0,t+0.25);}catch(e){}setTimeout(()=>{if(tk!==offToken||mode!=='OFF')return;a.pause();fullOutput();},320);}else{a.pause();fullOutput();}}
+/* 3 Nov (Harri): someone who was in this hour's album and reloads the page by mistake gets 'Jatka kuuntelua'.
+   The album then continues from the shared moment (where everyone else is now), not from where they left:
+   same timing as everyone, same return to the lobby. Remembered only in this browser, only during that album. */
+const REJOIN_KEY='pallosalama_in_album';
+const rejoinOn=CONFIG.rejoin||params.has('rejoin');
+let rejoinOffer=null,rejoinPending=false;
+function rememberAlbum(h){if(!rejoinOn)return;try{localStorage.setItem(REJOIN_KEY,JSON.stringify({hour:h}));}catch(e){}}
+function forgetAlbum(why){try{if(localStorage.getItem(REJOIN_KEY)){localStorage.removeItem(REJOIN_KEY);log('REJOIN_FORGET',why);}}catch(e){}rejoinOffer=null;}
+function albumClockPos(h){return CONFIG.lobby+(now()-h);}
+function rejoinValid(h){const p=albumClockPos(h);return p>=CONFIG.lobby+2&&p<CONFIG.lobby+CONFIG.album-15;}
+function rejoinText(){return lx().rejoin;}
+/* 12 Nov (Harri): ?rejoinedit = the 'Jatka kuuntelua' screen for placing the button by dragging; shows the position to send to Claude. */
+const rejoinEdit=params.has('rejoinedit');
+if(rejoinEdit){document.body.dataset.rejoin='true';document.body.classList.add('rejoin-edit');const rb=document.getElementById('rejoin-btn');const out=document.createElement('div');out.style.cssText='position:fixed;top:12px;left:50%;transform:translateX(-50%);z-index:10001;background:#ffeb3b;color:#000;font:600 15px system-ui,sans-serif;padding:8px 14px;border-radius:8px;text-align:center;pointer-events:none';document.body.appendChild(out);
+ let dx=0,dy=0,sx=0,sy=0,drag=false;const show=()=>{const r=rb.getBoundingClientRect();const x=(r.left+r.width/2)/innerWidth*100,y=(r.top+r.height/2)/innerHeight*100;out.textContent=`${innerWidth<=760?'Puhelin':'Tietokone'}: korkeus ${y.toFixed(0)} %  — vedä nappia ylös tai alas`;};
+ rb.style.touchAction='none';rb.style.cursor='grab';
+ rb.addEventListener('pointerdown',e=>{drag=true;window.__rejoinDragged=false;sx=e.clientX-dx;sy=e.clientY-dy;rb.setPointerCapture(e.pointerId);e.preventDefault();});
+ rb.addEventListener('pointermove',e=>{if(!drag)return;if(Math.abs(e.clientY-sy-dy)>4)window.__rejoinDragged=true;else return;dy=e.clientY-sy;rb.style.transform=`translateY(${dy}px)`;/* vertical only */show();});
+ const KEY='pallosalama_rejoin_y_'+(innerWidth<=760?'phone':'desk');
+ rb.addEventListener('pointerup',()=>{drag=false;const r=rb.getBoundingClientRect();try{localStorage.setItem(KEY,String((r.top+r.height/2)/innerHeight*100));}catch(e){}});
+ /* remember the chosen height in this browser (for the editing page only) */
+ setTimeout(()=>{let v=null;try{v=parseFloat(localStorage.getItem(KEY));}catch(e){}if(v>0){rb.style.transform='none';const r=rb.getBoundingClientRect();dy=v/100*innerHeight-(r.top+r.height/2);rb.style.transform=`translateY(${dy}px)`;}show();},300);addEventListener('resize',show);}
+if(rejoinOn){try{const v=JSON.parse(localStorage.getItem(REJOIN_KEY)||'null');if(v&&typeof v.hour==='number'){if(rejoinValid(v.hour)){rejoinOffer=v.hour;log('REJOIN_OFFER',`was in the album of ${new Date(v.hour*1000).toISOString()}, now at album ${(albumClockPos(v.hour)-CONFIG.lobby).toFixed(0)} s`);}else localStorage.removeItem(REJOIN_KEY);}}catch(e){}}
+function rejoin(h){
+ if(mode!=='OFF')return;
+ on();/* the normal start: audio set up and started inside the tap (silent until the fade) */
+ cancelFade();setOutputGain(0);initializing=false;initialSeekIssued=true;
+ mode='ALBUM';armedFor=h;activeHour=h;albumConfirmed=true;rejoinOffer=null;
+ const target=Math.min(albumClockPos(h),CONFIG.lobby+CONFIG.album-1);
+ lastGoodAlbum=target;lastPosition=0;lastAdvanceAt=now();
+ document.body.classList.add('rejoined');document.body.dataset.rejoinout='true';setTimeout(()=>{document.body.dataset.rejoinout='false';},2600);visual(true);rejoinPending=true;
+ log('REJOIN',`album continues from the shared moment: album ${(target-CONFIG.lobby).toFixed(1)} s`);gcEvent('rejoin','Jatka kuuntelua painettu');
+ if(a.readyState>=1)rejoinSeek();
+}
+function rejoinSeek(){if(!rejoinPending||mode!=='ALBUM')return;rejoinPending=false;const target=Math.min(albumClockPos(activeHour),CONFIG.lobby+CONFIG.album-1);lastGoodAlbum=target;seek(target,'rejoin album');}
+if(rejoinOffer!==null){document.body.dataset.rejoin='true';try{document.documentElement.style.setProperty('--rejoin-font',getComputedStyle(btn).fontFamily);}catch(e){}}
+($('rejoin-btn')||document.createElement('i')).addEventListener('click',()=>{if(rejoinEdit){/* 12 Nov (Harri): on the editing page a tap (not a drag) starts the album from its beginning, for testing */if(mode==='OFF'&&!window.__rejoinDragged){if(rejoinOffer!==null&&rejoinValid(rejoinOffer)){log('REJOIN_TEST','editing page: continue the test album');rejoin(rejoinOffer);}else{const h=now();log('REJOIN_TEST','editing page: album from the beginning (remembered, so a reload offers Jatka kuuntelua)');rememberAlbum(h);rejoin(h);}}return;}if(mode!=='OFF')return;if(rejoinOffer!==null&&rejoinValid(rejoinOffer))rejoin(rejoinOffer);else{document.body.dataset.rejoin='false';on();}});
+btn.addEventListener('click',()=>{if(mode==='OFF'){if(rejoinOffer!==null&&rejoinValid(rejoinOffer))rejoin(rejoinOffer);else on();}else if(held)resumeHeld('page button');else off();});
+// V12.9: share text + a quiet "Kopioitu" on the pressed button when the link was copied.
+const cleanUrl=()=>location.href.split(/[?#]/)[0];
+function copyText(txt){return new Promise((res,rej)=>{const fallback=()=>{try{const ta=document.createElement('textarea');ta.value=txt;ta.setAttribute('readonly','');ta.style.cssText='position:fixed;top:-1000px;opacity:0';document.body.appendChild(ta);ta.select();const ok=document.execCommand&&document.execCommand('copy');ta.remove();ok?res():rej();}catch(e){rej(e);}};if((navigator.clipboard&&navigator.clipboard.writeText))navigator.clipboard.writeText(txt).then(res,fallback);else fallback();});}
+function copied(b){if(!b)return;if(!b.dataset.label)b.dataset.label=b.textContent;b.textContent=UI.copied;clearTimeout(b._t);b._t=setTimeout(()=>{b.textContent=b.dataset.label;},2000);}
+($('share-btn')||document.createElement('i')).addEventListener('click',e=>{const b=e.currentTarget;if(navigator.share)navigator.share({title:'Pallosalama',text:UI.shareText,url:cleanUrl()}).catch(()=>{});else copyText(cleanUrl()).then(()=>copied($('share-label'))).catch(()=>{});});
+($('copy-link-btn')||document.createElement('i')).addEventListener('click',e=>{const b=e.currentTarget;copyText(cleanUrl()).then(()=>copied(b)).catch(()=>{});});
+// Contact address is assembled here so it never appears as plain text in the HTML (keeps simple spam bots away).
+(function(){const el=$('contact');if(!el)return;const u=['har','ri'].join(''),d=['pallo','salama','.fi'].join(''),addr=u+'@'+d;const link=document.createElement('a');link.href='mai'+'lto:'+addr;link.textContent=addr;el.appendChild(link);})();
+let listenedSec=0,nextListenMark=10,lastListenTick=0;
+/* V13: track arrow. Shows the track that is playing (album position) once CONFIG.trackStarts has the 6 start times in seconds. */
+const arrows=Array.prototype.slice.call(document.querySelectorAll('#track-list .arrow'));let lastArrow=-2;
+function updateArrow(){let cur=-1;if(mode==='ALBUM'&&CONFIG.trackStarts.length){const p=a.currentTime-CONFIG.lobby;CONFIG.trackStarts.forEach((st,i)=>{if(p>=st)cur=i;});}if(cur!==lastArrow){lastArrow=cur;arrows.forEach((el,i)=>el.classList.toggle('on',i===cur));}}
+/* V14: designer's 'playing' video during the album (display only, never touches the audio). */
+const lv=$('listenvid'),albumView=document.querySelector('.album-view');let lvRun=false;
+lv.addEventListener('error',()=>albumView.classList.add('novideo'));
+function driveListenVideo(){if(!CONFIG.albumVideo)return;const p=a.currentTime-CONFIG.lobby;const inAlbum=mode==='ALBUM'&&!held;const show=inAlbum&&p>=5&&p<CONFIG.nameFadeAt;lv.classList.toggle('show',show);/* 24 Oct: the name fades away slowly from 45 s; then only black */
+ if(inAlbum&&p>=5){if(!lvRun){lvRun=true;try{const d=lv.duration;if(d&&p-5>=d-0.05)lv.currentTime=d;else{lv.currentTime=Math.max(0,p-5);const q=lv.play();if(q&&q.catch)q.catch(()=>{});}}catch(e){}}}
+ else if(lvRun&&mode!=='ALBUM'){lvRun=false;try{lv.pause();lv.currentTime=0;}catch(e){}}}
+/* 29 Oct: lock-screen title follows what plays: while waiting 'Pallosalama alkaa N minuutin kuluttua' (updated once a minute),
+   during the album 'Pallosalama'. Only touches the Media Session text, never the audio. */
+let lastLockTitle='';
+function lockTitle(rem){if(!('mediaSession'in navigator)||mode==='OFF')return;
+ let title='Harri Kalevi Sippola: Pallosalama',artist='';
+ if(mode==='LOBBY'&&rem>0){const n=Math.max(1,Math.ceil(rem/60));title=finnish?`Pallosalama ${n} min kuluttua. Nyt soi: Odotusmusiikki`:`Pallosalama · ${ST.mins(n)}. ${T.wait||''}`;artist='';}
+ const key=title+'|'+artist;if(key===lastLockTitle)return;lastLockTitle=key;
+ try{navigator.mediaSession.metadata=new MediaMetadata({title:title,artist:artist});}catch(e){}}
+function tick(){const t=now();rearmIfHourPassed('tick');
+ // V12.9 fade (lobby tap fade, return fade, silent probe): start once audio flows, then follow progress.
+ if(fadePendingSince!==null)maybeBeginFade('tick');
+ if(!volumeReady&&fadeStartedAt!==null){const elapsed=Math.max(0,t-fadeStartedAt);const x=Math.min(1,elapsed/fadeDur);if(!gainNode&&!nativeIPhoneAudio)a.volume=fadeCurve(x);const step=Math.floor(elapsed);if(step!==fadeLastLogged){fadeLastLogged=step;log('LOBBY_FADE_PROGRESS',`requested=${fadeCurve(x).toFixed(3)} method=${gainNode?'WebAudio':'element'} ctx=${(audioCtx&&audioCtx.state)||'none'} actual=${gainNode?gainNode.gain.value.toFixed(3):a.volume.toFixed(3)}`);}if(elapsed>=fadeDur){volumeReady=true;fadeStartedAt=null;if(fadeTimer){clearInterval(fadeTimer);fadeTimer=null;}fullOutput();log('LOBBY_FADE_IN_COMPLETE',fadeWhy);}}
+ // V12.9: a soft hold while the page stays on screen (e.g. iPhone call banner) -> silent probe after 30 s.
+ // Opening the page (visibilitychange) resumes at once, see below.
+ if(held&&holdKind==='soft'&&!document.hidden&&t-heldSince>30)resumeHeld('page visible, 30 s after outside pause',true);
+ // V12.9 analytics: listening time in 10-minute marks (10, 20, ... 180 min), counted only while sound plays.
+ {const dt=lastListenTick?Math.min(5,t-lastListenTick):0;lastListenTick=t;if(mode!=='OFF'&&!held&&!a.paused&&!a.seeking){listenedSec+=dt;if(listenedSec>=nextListenMark*60&&nextListenMark<=180){gcEvent('listening-'+nextListenMark+'min','Kuunneltu '+nextListenMark+' min');log('LISTEN_MARK',nextListenMark+' min');nextListenMark+=10;}}}
+ if(mode==='LOBBY'){
+  if(returningToLobby&&!initializing&&!a.paused&&!a.seeking&&a.readyState>=2&&a.currentTime>lastPosition+0.1){log('RETURN_LOBBY_OK',`pos=${a.currentTime.toFixed(2)}`);returningToLobby=false;}
+  // Lobby clock drift is handled by lobbyDriftCorrection() (V12.7: lobby only, >3s, guarded). Recovery below handles stopped playback only. Never jump during album.
+  if(initializing){startLobbySeek('metadata-ready lobby alignment');confirmLobbySeek();}
+  // V12.8 watchdog (observed on iPhone 17.6 / Chrome iOS): a seek on a paused element can wait
+  // forever for data. If stuck >6 s, ask the element to play so the browser fetches data.
+  if(initializing&&initialSeekIssued&&a.seeking&&a.paused&&t-seekIssuedAt>6&&t-lastStuckPlay>6){lastStuckPlay=t;log('SEEK_STUCK_PAUSED',`waited=${(t-seekIssuedAt).toFixed(1)}s ready=${a.readyState}`);play('stuck seek: start playback so media loads');}
+  /* 1 Nov: start stuck paused (e.g. after a bogus 'ended' in an in-app browser) -> ask the element to play again. */
+  if(initializing&&a.paused&&!held&&!a.seeking&&t-enteredAt>6&&t-lastStuckPlay>6){lastStuckPlay=t;log('INIT_STUCK_PAUSED',`ready=${a.readyState} pos=${a.currentTime.toFixed(2)}`);play('start stuck paused: play again');}
+  // A seek at the end of the MP3 can cause Chrome to pause while hidden.
+  // Try to resume the existing media element first. Do NOT call load() in a
+  // background tab: Chrome can classify the restarted source as power-save media.
+  if(returningToLobby&&a.paused&&!a.seeking&&a.readyState>=2&&t-returnLobbySince>1&&t-returnLobbyRetries>3){returnLobbyRetries=t;log('RETURN_LOBBY_RESUME',`hidden=${document.hidden} ctx=${(audioCtx&&audioCtx.state)||'none'}`);play('resume after album end');}
+  if(returningToLobby&&t-returnLobbySince>12&&a.paused&&document.hidden){log('RETURN_LOBBY_DEFER_RELOAD','await visible; avoid background load()');returnLobbySince=t;}
+  if(returningToLobby&&t-returnLobbySince>12&&a.paused&&!document.hidden){log('RETURN_LOBBY_FALLBACK','visible retry via recovery');returningToLobby=false;recover('return-to-lobby retry');}
+
+  // V12.8: an arm that has fully expired (album window over while still in lobby) is renewed.
+  if(armedFor!==null&&t>=armedFor+CONFIG.album&&!initializing){log('ARM_EXPIRED',`armed=${new Date(armedFor*1000).toISOString()}`);arm(t);}
+  lobbyDriftCorrection(t);
+  if(a.currentTime>=CONFIG.lobby-0.03&&!a.seeking&&!initializing){enterAlbum();}
+  if(a.currentTime>=CONFIG.lobby+2&&mode==='LOBBY')enterAlbum();
+ }else if(mode==='ALBUM'){
+  if(!recovering&&!a.seeking&&!a.paused&&a.currentTime>lastPosition+0.15){lastPosition=a.currentTime;lastAdvanceAt=t;if(a.currentTime<CONFIG.lobby+CONFIG.album)lastGoodAlbum=Math.max(lastGoodAlbum,a.currentTime);}
+  if(a.currentTime>=CONFIG.lobby+CONFIG.album-0.12&&!a.seeking&&!recovering){completeAlbum();}
+  else if(!held&&!recovering&&!a.seeking&&t-lastAdvanceAt>10)recover('album position stopped');
+ }
+ if(mode==='LOBBY'&&!held&&!recovering&&!initializing&&!a.seeking){if(!a.paused&&a.currentTime>lastPosition+0.15){lastPosition=a.currentTime;lastAdvanceAt=t;}else if(t-lastAdvanceAt>10)recover('lobby position stopped');}
+ /* V12.8 yellow dot: an album is in progress (first 2031 s of the clock hour) and this visitor is
+    not in it -> show the dot. Listeners in the album see nothing (black). An armed listener who is
+    a few seconds late crossing into the album does not get the dot. Display-only; touches no audio. */
+ {const hs=Math.floor(t/3600)*3600;const showDot=mode!=='ALBUM'&&t<hs+CONFIG.album&&!(armedFor!==null&&armedFor<=t);if(showDot!==lastDot){lastDot=showDot;badge.style.display=showDot?'flex':'none';log('LIVE_DOT',showDot?'shown':'hidden');}}
+ if(t>=fadeInUntil){const toAlbum=armedFor!==null?armedFor-t:1e9;const fading=mode==='LOBBY'&&!held&&toAlbum<=CONFIG.uiFadeAt&&toAlbum>-5;const clamp=x=>Math.min(1,Math.max(0,x));/* 12 Nov (Harri): 10 s -> 5 s before: page texts out; 5 s -> 0: names and video to black */const ui=fading?1-clamp((CONFIG.uiFadeAt-toAlbum)/(CONFIG.uiFadeAt-CONFIG.uiFadeEnd)):1;{const u=ui.toFixed(2);if(document.body.style.getPropertyValue('--pre-ui')!==u)document.body.style.setProperty('--pre-ui',u);}const op=fading?clamp((CONFIG.visualFade-toAlbum)/CONFIG.visualFade):0;const want=op.toFixed(2);if(blackout.style.opacity!==want&&!(want==='0.00'&&(blackout.style.opacity==='0'||blackout.style.opacity===''))){blackout.style.opacity=want;if(op>=1&&!blackout.dataset.logged){blackout.dataset.logged='1';log('PRE_ALBUM_FADE','screen black before the album');}}if(op===0)delete blackout.dataset.logged;}
+ const target=mode!=='OFF'&&armedFor?armedFor:nextHour(t);/* V12.8: armed & slightly late shows 00 : 00, not the next hour */const rem=Math.max(0,target-t);lockTitle(rem);if(rem>300){clock.textContent=ST.mins(Math.ceil(rem/60));}else{const totalSeconds=Math.ceil(rem);const m=Math.floor(totalSeconds/60),s=totalSeconds%60;clock.textContent=ST.secs([m,s].map(v=>('0'+v).slice(-2)).join(' : '));}/* 25 Oct (Harri): after joining, the note under the countdown changes (Finnish). Not joined: the normal note. */{const joined=mode!=='OFF';const want=joined?joinedText():statusNoteDefault;const sn=$('status-note');if(sn&&want)setNote(sn,want,joined);}if(rejoinOffer!==null&&mode==='OFF'&&!rejoinValid(rejoinOffer)){forgetAlbum('album over');btn.textContent=T.on;}{const off2=(rejoinOffer!==null||rejoinEdit)&&mode==='OFF';document.body.dataset.rejoin=off2?'true':'false';{const rb=$('rejoin-btn');if(rb&&off2&&rb.textContent!==rejoinText())rb.textContent=rejoinText();}if(off2&&btn.textContent!==rejoinText())btn.textContent=rejoinText();const sn=$('status-note');if(sn)sn.style.visibility=off2?'hidden':'';}clock.style.display=(mode==='ALBUM'||(rejoinOffer!==null&&mode==='OFF'))?'none':'';label.style.display=(mode==='ALBUM'||(rejoinOffer!==null&&mode==='OFF'))?'none':'';/* 30 Oct (Harri): after joining, the text above the button reads 'Nyt soi: Odotusmusiikki.' / 'Pallosalama alkaa' / countdown (cross-fade). */{const j=mode==='LOBBY'&&!held;const en=UI&&UI.lang==='en';const lab=j?lx().starts:ST.label;const it=j?(finnish?'Nyt soi: Odotusmusiikki.':en?'Now playing: Waiting music.':T.wait):ST.intro;fadeSwap(label,lab);fadeSwap($('status-intro'),it);}updateArrow();driveListenVideo();{const w=$('wait');const on=mode==='LOBBY'&&!held;if(w.classList.contains('on')!==on){w.classList.toggle('on',on);w.setAttribute('aria-hidden',on?'false':'true');}}
+ if(t-lastProgress>10){lastProgress=t;log('PROGRESS',`starts=${starts} completions=${completions} armed=${armedFor} drift=${mode==='LOBBY'?(a.currentTime-lobbyTarget(t)).toFixed(2):'n/a'}`);}
+}
+/* 15 Nov (Harri): Android, screen off: if the file plays to its very end it stops, and Android won't load the lobby for a stopped page until the screen is turned on. So jump back to the lobby ~0.8 s before the end (already silent, < -65 dB), while still playing. Media 'timeupdate' events keep firing with the screen off, unlike the page timers. */
+a.addEventListener('timeupdate',()=>{if(mode==='ALBUM'&&!a.seeking&&!recovering&&!a.paused&&a.currentTime>=CONFIG.lobby+CONFIG.album-0.8&&a.currentTime<CONFIG.lobby+CONFIG.album+1){log('ALBUM_END_EARLY',`pos=${a.currentTime.toFixed(2)} hidden=${document.hidden}`);completeAlbum();}});
+['loadstart','loadedmetadata','canplay','playing','pause','waiting','stalled','suspend','seeking','seeked','ended','error'].forEach(ev=>a.addEventListener(ev,()=>{
+ log('PLAYER_'+ev.toUpperCase());
+ if(ev==='loadedmetadata'){startLobbySeek('loadedmetadata');rejoinSeek();}
+ // V12.8: verify/measure the finished seek BEFORE confirmLobbySeek may issue a correction seek.
+ if(ev==='seeked'&&seekingPurpose==='rejoin album'){requestFade(CONFIG.fadeIn,0.05,'rejoin');lastAdvanceAt=now();}if(ev==='seeked'){lastSeekLatency=now()-seekIssuedAt;log('SEEK_VERIFIED',`${seekingPurpose} pos=${a.currentTime.toFixed(2)} latency=${lastSeekLatency.toFixed(2)}s`);if(seekingPurpose==='lobby drift correction')log('LOBBY_DRIFT_CORRECTED',`residual=${(a.currentTime-lobbyTarget(now())).toFixed(2)}`);seekingPurpose='';lastAdvanceAt=now();lastPosition=a.currentTime;}
+ if(ev==='seeked'&&mode==='LOBBY'&&initializing)confirmLobbySeek();
+ if(ev==='playing'){hasPlayed=true;lastAdvanceAt=now();lastPosition=a.currentTime;if(returningToLobby)log('RETURN_LOBBY_PLAYING');if(held){held=false;holdKind='';clearAutoResume();heldUI();setMS('playing');log('RESUMED_BY_BROWSER','e.g. after a call; continuing from current position');}if(fadePendingSince!==null)maybeBeginFade('playing');}
+ if(ev==='error'&&mode!=='OFF'&&!recovering)recover('media error '+(a.error&&a.error.code));
+ if(ev==='pause'&&mode!=='OFF'&&!a.ended&&!recovering){
+   if(mode==='LOBBY'&&returningToLobby){log('RETURN_LOBBY_PAUSE','wait for seek, then resume same element');}
+   else onOutsidePause();
+ }
+ if(ev==='seeking'&&mode==='ALBUM'&&!recovering&&now()>seekUntil){log('ALBUM_UNAUTHORIZED_SEEK',`requested=${a.currentTime.toFixed(2)}`);seek(Math.max(CONFIG.lobby,lastGoodAlbum-CONFIG.backstep),'restore album position');}
+ if(ev==='ended'&&mode==='ALBUM'){if(a.currentTime<CONFIG.lobby+CONFIG.album-5&&activeHour!==null){const t=now();if(t-lastBogusEnded>2){lastBogusEnded=t;log('BOGUS_ENDED',`album pos=${a.currentTime.toFixed(2)}: seek again and play`);seek(Math.max(CONFIG.lobby,Math.min(albumClockPos(activeHour),lastGoodAlbum)),'album after bogus ended');play('album after bogus ended');}}else completeAlbum();}
+ if(ev==='ended'&&mode==='LOBBY'&&!returningToLobby){/* 1 Nov (iPhone, Instagram): iOS can report 'ended' right after the first seek, far from the real end. Then seek again and play. */if(a.currentTime<CONFIG.lobby+CONFIG.album-5){const t=now();if(t-lastBogusEnded>2){lastBogusEnded=t;log('BOGUS_ENDED',`pos=${a.currentTime.toFixed(2)} ready=${a.readyState}: seek again and play`);seek(lobbyTarget(t),'after bogus ended');play('after bogus ended');}}else enterLobby('unexpected file end');}
+}));
+a.addEventListener('timeupdate',()=>{if(fadePendingSince!==null)maybeBeginFade('timeupdate');});
+document.addEventListener('visibilitychange',()=>{log('VISIBILITY',`${document.hidden?'hidden':'visible'} audioContext=${(audioCtx&&audioCtx.state)||'none'}`);if(!document.hidden){resumeCtx('visible');lastVisualMode='';visual(mode==='ALBUM');if(held&&holdKind==='soft')resumeHeld('page visible again');tick();}});
+window.addEventListener('pagehide',()=>log('PAGEHIDE','refresh or close ends admission'));
+function reportText(){return [`Pallosalama V12 ${session}`,`Exported ${new Date().toISOString()}`,`User agent ${navigator.userAgent}`,`Config ${JSON.stringify(CONFIG)}`,`Starts ${starts} completions ${completions} misses ${misses}`,'',...history].join('\n');}
+// V12.8: in-app browsers (Instagram, Facebook) often block file downloads. "Show report" puts the
+// whole report on the page as selectable text and tries to copy it to the clipboard.
+function showReport(){log('SHOW_REPORT');const box=panel.querySelector('#v12reporttext');box.style.display='block';box.value=reportText();box.focus();box.select();let ok=false;try{ok=document.execCommand&&document.execCommand('copy');}catch(e){}if((navigator.clipboard&&navigator.clipboard.writeText))navigator.clipboard.writeText(box.value).then(()=>{panel.querySelector('#v12status').textContent='Report copied — paste it into a message.';}).catch(()=>{panel.querySelector('#v12status').textContent=ok?'Report copied — paste it into a message.':'Copy blocked: select the text below and copy it by hand.';});else panel.querySelector('#v12status').textContent=ok?'Report copied — paste it into a message.':'Select the text below and copy it by hand.';}
+/* 13 Nov (Harri): one big button that sends the report straight to WhatsApp etc. (as a file; text if files can't be shared; download as the last resort). */
+async function shareReport(){log('SHARE_REPORT');const st=panel.querySelector('#v12sharestatus');const txt=reportText();const name='pallosalama_raportti_'+new Date().toISOString().slice(0,16).replace(/[:T]/g,'-')+'.txt';
+ try{const f=new File([txt],name,{type:'text/plain'});if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f],title:'Pallosalama raportti'});st.textContent='Jaettu.';return;}}catch(e){if(e&&e.name==='AbortError'){st.textContent='';return;}}
+ try{if(navigator.share){const head=txt.split('\n').slice(0,6).join('\n');const body=txt.length>60000?head+'\n…\n'+txt.slice(-55000):txt;await navigator.share({text:body,title:'Pallosalama raportti'});st.textContent='Jaettu.';return;}}catch(e){if(e&&e.name==='AbortError'){st.textContent='';return;}}
+ exportLog();st.textContent='Raportti ladattiin tiedostona — lähetä se viestissä.';}
+function exportLog(){log('EXPORT');const lines=[reportText()];const url=URL.createObjectURL(new Blob([lines.join('\n')],{type:'text/plain'}));const link=document.createElement('a');link.href=url;link.download='pallosalama_v12_report_'+new Date().toISOString().replace(/[:.]/g,'-')+'.txt';link.click();setTimeout(()=>URL.revokeObjectURL(url),10000);}
+let panel=null;
+function makePanel(){if(panel)return;panel=document.createElement('div');panel.style.cssText='position:relative;z-index:10001;background:#121b20;color:#dbe7e8;padding:18px;font:12px system-ui;max-width:900px;margin:20px auto;border:1px solid #52636a';panel.innerHTML=`<b>PALLOSALAMA V${CONFIG.version} — build ${CONFIG.build}</b><div style="margin:14px 0"><button id="v12share" style="display:block;width:100%;max-width:210px;margin:0 auto;padding:8px 10px;font:700 14px system-ui,sans-serif;background:#25d366;color:#fff;border:0;border-radius:8px;cursor:pointer">Jaa raportti</button><div id="v12sharestatus" style="text-align:center;margin-top:8px;font-size:14px"></div></div><div style="margin:10px 0"><button id="v12export">Export report</button> <button id="v12show">Show report</button> <button id="v12clear">Export and clear</button> <button id="v12wipe">Clear report</button> <button id="v12albumfail">Simulate album failure</button> <button id="v12lobbyfail">Simulate lobby failure</button></div><div id="v12status"></div><textarea id="v12reporttext" readonly style="display:none;width:100%;height:200px;font:11px monospace;margin:8px 0"></textarea><pre style="white-space:pre-wrap;overflow-wrap:anywhere;max-height:260px;overflow:auto"></pre>`;document.body.insertBefore(panel,document.body.firstChild);panel.querySelector('#v12export').onclick=exportLog;panel.querySelector('#v12show').onclick=showReport;panel.querySelector('#v12share').onclick=shareReport;panel.querySelector('#v12wipe').onclick=()=>{if(!confirm('Poistetaanko raportti? Tätä ei voi perua.'))return;history=[];const ta=panel.querySelector('#v12reporttext');if(ta){ta.value='';ta.style.display='none';}log('DIAGNOSTIC_HISTORY_CLEARED','cleared without export');};panel.querySelector('#v12clear').onclick=()=>{exportLog();history=[];log('DIAGNOSTIC_HISTORY_CLEARED');};panel.querySelector('#v12albumfail').onclick=()=>{if(mode!=='ALBUM')return;log('DEBUG_ALBUM_FAILURE');a.src=location.pathname+'__missing_v12_test__.mp3';a.load();recover('simulated album network failure');};panel.querySelector('#v12lobbyfail').onclick=()=>{if(mode!=='LOBBY')return;log('DEBUG_LOBBY_FAILURE');a.src=location.pathname+'__missing_v12_test__.mp3';a.load();recover('simulated lobby network failure');};log('PANEL_OPENED',location.href);}
+if(params.has('debug')||reportMode)makePanel();
+/* 1 Nov: hidden way to open the report panel without changing the address (some in-app browsers drop '?report'):
+   tap the © line 5 times within 3 seconds. Everything else stays as for normal visitors. */
+{let taps=[];const f=document.querySelector('.foot');if(f)f.addEventListener('click',()=>{const t=Date.now();taps=taps.filter(x=>t-x<3000);taps.push(t);if(taps.length>=5){taps=[];makePanel();window.scrollTo(0,0);}});}
+log('V12_LOADED',`v${CONFIG.version} build ${CONFIG.build} lobby=3600 album=${CONFIG.album} file=${CONFIG.file} nativeIOS=${nativeIPhoneAudio} inApp=${inApp} lang=${finnish?'fi':'other'} analytics=${testSwitch?'off (test switch)':'on'} switches=${['hourin','latency','nowebaudio','webaudio','iosfade','iosnative','debug'].filter(k=>params.has(k)).map(k=>k+'='+params.get(k)).join(',')||'none'}${clockOffset?` TEST_CLOCK_OFFSET=${clockOffset.toFixed(1)}s`:''}`);setInterval(tick,250);tick();
+</script>
+
+</body>
+</html>
