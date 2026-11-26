@@ -792,7 +792,7 @@ var CONFIG = {
   resumeFade: 3,
   backstep: 2,
   version: '12.9',
-  build: '2026-11-21-credits',
+  build: '2026-11-26-quietnote',
   visualFade: 3,
   uiFadeAt: 10,
   uiFadeEnd: 5,
