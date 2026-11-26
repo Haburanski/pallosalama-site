@@ -792,7 +792,7 @@ var CONFIG = {
   resumeFade: 3,
   backstep: 2,
   version: '12.9',
-  build: '2026-11-27-zhcredits',
+  build: '2026-11-27-zhname2',
   visualFade: 3,
   uiFadeAt: 10,
   uiFadeEnd: 5,
@@ -1201,9 +1201,13 @@ function applyTexts() {
     set('copy-link-btn', UI.copy);
     set('duration', UI.duration);
     set('music-label', UI.music);
-    document.querySelectorAll('.zh-name').forEach(function (e) {
-      e.textContent = chinese ? ' 哈瑞' : '';
-    });
+    {
+      var mn = document.getElementById('music-name');
+      if (mn) mn.textContent = chinese ? '哈瑞（Harri Kalevi Sippola）' : 'Harri Kalevi Sippola';
+      document.querySelectorAll('.csep').forEach(function (e) {
+        e.textContent = chinese ? '：' : ': ';
+      });
+    }
     set('mastering-label', UI.mastering);
     set('design-label', UI.design);
   }
