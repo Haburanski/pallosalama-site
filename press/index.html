@@ -110,14 +110,14 @@ if(document.body)build();else document.addEventListener('DOMContentLoaded',build
 <div class="lb" id="lb" hidden role="dialog" aria-modal="true" aria-label="Esikatselu"><button class="lbx" id="lbx" type="button" aria-label="Sulje">×</button><div id="lbbody"></div><div class="lbbar"><span class="lbname" id="lbname"></span><a id="lbdl" href="#" download>Lataa</a></div></div>
 <audio id="player" preload="none"></audio>
 <script>
-var MEDIA=[{"name": "Pallosalama, still nettisivulta", "type": "Kuva", "file": "/press/media/pallosalama_nettisivu_still.jpg", "thumb": "/press/media/pallosalama_nettisivu_still_thumb.jpg"}, {"name": "Harri Kalevi Sippola, promokuva", "type": "Kuva", "file": "", "thumb": ""}, {"name": "Pallosalama, sanat", "type": "PDF", "file": "/press/media/Pallosalama_sanat.pdf", "thumb": "/press/media/Pallosalama_sanat_thumb.jpg"}];
+var MEDIA=[{"name": "Pallosalama, still nettisivulta", "type": "JPG · 133 kt", "file": "/press/media/pallosalama_nettisivu_still.jpg", "thumb": "/press/media/pallosalama_nettisivu_still_thumb.jpg"}, {"name": "Harri Kalevi Sippola, promokuva", "type": "Kuva", "file": "", "thumb": ""}, {"name": "Pallosalama, sanat", "type": "PDF · 60 kt", "file": "/press/media/Pallosalama_sanat.pdf", "thumb": "/press/media/Pallosalama_sanat_thumb.jpg"}];
 var TRACKS=[{"n": 1, "name": "Pallosalama", "file": "", "mp3": ""}, {"n": 2, "name": "Kuva hiekassa", "file": "", "mp3": ""}, {"n": 3, "name": "Keskipakoisvoima", "file": "", "mp3": ""}, {"n": 4, "name": "Pato", "file": "", "mp3": ""}, {"n": 5, "name": "Olen pudonnut sinuun", "file": "", "mp3": ""}, {"n": 6, "name": "Satama", "file": "", "mp3": ""}];
 var MAIN=3;
 var PLAY='M7 4.5v15l13-7.5z',PAUSE='M6 4.5h4.5v15H6zM13.5 4.5H18v15h-4.5z';
 function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
 var ml=document.getElementById('media');
 MEDIA.forEach(function(m,i){var li=document.createElement('li');
- li.innerHTML='<span class="n">'+(i+1)+'</span>'+(m.thumb||(m.file&&/^Kuva/i.test(m.type))?'<img class="th'+(m.file?' zoom':'')+'" data-i="'+i+'" src="'+esc(m.thumb||m.file)+'" alt="Avaa '+esc(m.name)+'" tabindex="'+(m.file?0:-1)+'">':'<span class="th"></span>')+'<span class="nm">'+esc(m.name)+'<span>'+esc(m.type)+'</span></span>'+(m.file?'<a class="dl" href="'+esc(m.file)+'" download>Lataa</a>':'<span class="soon">Tulossa</span>');
+ li.innerHTML='<span class="n">'+(i+1)+'</span>'+(m.thumb||(m.file&&/[.](jpe?g|png|webp|gif)$/i.test(m.file))?'<img class="th'+(m.file?' zoom':'')+'" data-i="'+i+'" src="'+esc(m.thumb||m.file)+'" alt="Avaa '+esc(m.name)+'" tabindex="'+(m.file?0:-1)+'">':'<span class="th"></span>')+'<span class="nm">'+esc(m.name)+'<span>'+esc(m.type)+'</span></span>'+(m.file?'<a class="dl" href="'+esc(m.file)+'" download>Lataa</a>':'<span class="soon">Tulossa</span>');
  ml.appendChild(li);});
 var lb=document.getElementById('lb'),lbbody=document.getElementById('lbbody');
 function openLb(i){var m=MEDIA[i];if(!m||!m.file)return;lbbody.textContent='';

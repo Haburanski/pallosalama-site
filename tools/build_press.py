@@ -37,6 +37,16 @@ if T.get('heroNakyy'):
 video = ('<video class="bgv" src="/media/background.mp4" poster="/media/background_poster.jpg" autoplay loop muted playsinline aria-hidden="true"></video>\n'
          if T.get('video') else '')
 media = [{'name': m.get('nimi', ''), 'type': m.get('tyyppi', ''), 'file': m.get('file', ''), 'thumb': m.get('thumb', '')} for m in C.get('media', [])]
+def fileinfo(path, fallback):
+    # "JPG · 130 kt" / "PDF · 2,8 Mt" from the file in the repo; the editor's type word if the file is not there yet
+    if not path: return fallback
+    fp = os.path.join(root, path.lstrip('/'))
+    if not os.path.exists(fp): return fallback
+    ext = os.path.splitext(fp)[1].lstrip('.').upper().replace('JPEG', 'JPG')
+    n = os.path.getsize(fp)
+    size = ('%d kt' % max(1, round(n / 1000))) if n < 1000000 else ('%.1f Mt' % (n / 1000000)).replace('.', ',')
+    return '%s · %s' % (ext, size)
+for m in media: m['type'] = fileinfo(m['file'], m['type'])
 tracks = [{'n': i + 1, 'name': k.get('nimi', ''), 'file': k.get('file', ''), 'mp3': k.get('mp3', '')} for i, k in enumerate(C.get('kappaleet', []))]
 j = lambda o: json.dumps(o, ensure_ascii=False).replace('<', '\\u003c')
 main = tracks[(C.get('paa') or 1) - 1] if tracks else {'name': '', 'n': 1}
@@ -144,7 +154,7 @@ var PLAY='M7 4.5v15l13-7.5z',PAUSE='M6 4.5h4.5v15H6zM13.5 4.5H18v15h-4.5z';
 function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
 var ml=document.getElementById('media');
 MEDIA.forEach(function(m,i){var li=document.createElement('li');
- li.innerHTML='<span class="n">'+(i+1)+'</span>'+(m.thumb||(m.file&&/^Kuva/i.test(m.type))?'<img class="th'+(m.file?' zoom':'')+'" data-i="'+i+'" src="'+esc(m.thumb||m.file)+'" alt="Avaa '+esc(m.name)+'" tabindex="'+(m.file?0:-1)+'">':'<span class="th"></span>')+'<span class="nm">'+esc(m.name)+'<span>'+esc(m.type)+'</span></span>'+(m.file?'<a class="dl" href="'+esc(m.file)+'" download>Lataa</a>':'<span class="soon">Tulossa</span>');
+ li.innerHTML='<span class="n">'+(i+1)+'</span>'+(m.thumb||(m.file&&/[.](jpe?g|png|webp|gif)$/i.test(m.file))?'<img class="th'+(m.file?' zoom':'')+'" data-i="'+i+'" src="'+esc(m.thumb||m.file)+'" alt="Avaa '+esc(m.name)+'" tabindex="'+(m.file?0:-1)+'">':'<span class="th"></span>')+'<span class="nm">'+esc(m.name)+'<span>'+esc(m.type)+'</span></span>'+(m.file?'<a class="dl" href="'+esc(m.file)+'" download>Lataa</a>':'<span class="soon">Tulossa</span>');
  ml.appendChild(li);});
 var lb=document.getElementById('lb'),lbbody=document.getElementById('lbbody');
 function openLb(i){var m=MEDIA[i];if(!m||!m.file)return;lbbody.textContent='';
