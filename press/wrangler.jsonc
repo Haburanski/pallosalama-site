@@ -1,6 +1,0 @@
-// press.pallosalama.fi: a separate static Worker built from this folder (root directory "press" in Cloudflare).
-{
-  "name": "pallosalama-press",
-  "compatibility_date": "2025-11-01",
-  "assets": { "directory": "." }
-}
