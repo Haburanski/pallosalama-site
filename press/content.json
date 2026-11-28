@@ -1,0 +1,85 @@
+{
+ "hero": {
+  "asset": "",
+  "url": ""
+ },
+ "julkaisu": {
+  "pyydetty": "2026-11-28T11:03:22.536Z"
+ },
+ "kappaleet": [
+  {
+   "nimi": "Pallosalama"
+  },
+  {
+   "nimi": "Kuva hiekassa"
+  },
+  {
+   "nimi": "Keskipakoisvoima"
+  },
+  {
+   "nimi": "Pato"
+  },
+  {
+   "nimi": "Olen pudonnut sinuun"
+  },
+  {
+   "nimi": "Satama"
+  }
+ ],
+ "media": [
+  {
+   "asset": "2bffa9293f5db3bc98d7d9dfeda0c3ae",
+   "nimi": "Pallosalama, still nettisivulta",
+   "tyyppi": "Kuva",
+   "url": "/_blob/2bffa9293f5db3bc98d7d9dfeda0c3ae",
+   "file": "/press/media/pallosalama_nettisivu_still.jpg",
+   "thumb": "/press/media/pallosalama_nettisivu_still_thumb.jpg"
+  },
+  {
+   "asset": "",
+   "nimi": "Harri Kalevi Sippola, promokuva",
+   "tyyppi": "Kuva",
+   "url": ""
+  },
+  {
+   "asset": "",
+   "nimi": "Pallosalama, sanat",
+   "tyyppi": "PDF",
+   "url": ""
+  }
+ ],
+ "meta": "6 kappaletta · 34 min · 2026",
+ "otsikko": "Harri Kalevi Sippola: Pallosalama",
+ "paa": 3,
+ "teosLinkki": "https://pallosalama.fi",
+ "teosOts": "",
+ "teosTeksti": "Linkki  itse teokseen (pallosalama.fi, aukeaa uuteen ikkunaan)",
+ "tiedote": "Harri Sippola on helvetin kova jätkä ylipäätään\n\nHän on tehnyt kaikkea vitun hienoa ja nyt on tämä vitun hieno.",
+ "tyyli": {
+  "ala": 14,
+  "h3": 22,
+  "hero": 31,
+  "heroNakyy": 0,
+  "laatikko": 62,
+  "leveys": 1040,
+  "lista": 16,
+  "meta": 16,
+  "otsikko": 39,
+  "play": 58,
+  "pyor": 28,
+  "soitin": 15.5,
+  "sov": "cover",
+  "sumennus": 10,
+  "teksti": 17,
+  "teos": 19,
+  "vali": 24,
+  "video": 1,
+  "vkirk": 71,
+  "yhteys": 17
+ },
+ "video": {
+  "asset": "a8391f0e06f60498a7674d5208231820",
+  "url": "/_blob/a8391f0e06f60498a7674d5208231820"
+ },
+ "yhteys": "Harri Kalevi Sippola\nharri@pallosalama.fi\nInstagram @harriksippola\n0405758123"
+}
