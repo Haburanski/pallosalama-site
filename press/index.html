@@ -9,28 +9,50 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Akt:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
-:root{--fg:#fff7e7;--mute:#a8a294;--line:rgba(255,247,231,.18)}
-html,body{margin:0;background:#000;color:var(--fg)}
-body{font-family:'Akt',system-ui,sans-serif;font-size:17px;line-height:1.55;padding:0 max(20px,env(safe-area-inset-left)) 0 max(20px,env(safe-area-inset-right))}
-.bg{position:fixed;inset:0;z-index:0;opacity:.35}
-.bg video{width:100%;height:100%;object-fit:cover}
-main{position:relative;z-index:1;max-width:680px;margin:0 auto;padding:12vh 0 80px}
-h1{font-weight:400;font-size:clamp(16px,2vw,20px);letter-spacing:.06em;margin:0 0 4px;color:var(--mute)}
-h2{font-weight:700;font-size:clamp(40px,8vw,72px);line-height:1;margin:0 0 10px}
-.lede{font-size:clamp(18px,2.2vw,22px);margin:0 0 56px}
-.lede a{color:var(--fg)}
-section{border-top:1px solid var(--line);padding:28px 0 32px}
-h3{font-weight:500;font-size:13px;text-transform:uppercase;letter-spacing:.14em;color:var(--mute);margin:0 0 16px}
-.track{font-size:22px;font-weight:500;margin:0 0 12px}
-audio{width:100%;margin:0 0 14px}
-.dl{display:flex;gap:12px;flex-wrap:wrap}
-.dl a{color:#000;background:var(--fg);text-decoration:none;padding:9px 16px;font-weight:500;font-size:15px}
-.dl a.ghost{background:none;color:var(--fg);border:1px solid var(--line)}
-.photo{display:block;width:100%;background:#111;aspect-ratio:4/5;object-fit:cover;margin:0 0 14px}
-.todo{border:1px dashed var(--line);color:var(--mute);padding:18px;font-size:15px}
+/* Rakenne Bridge-pressisivun mallin mukaan, Pallosalaman maailmassa: musta, lämmin valkoinen, Akt. */
+:root{--bg:#000;--card:#0e0d0c;--fg:#fff7e7;--mute:#a59f92;--line:rgba(255,247,231,.14)}
+html,body{margin:0;background:var(--bg);color:var(--fg)}
+body{font-family:'Akt',system-ui,sans-serif;font-size:17px;line-height:1.6;padding:0 max(16px,env(safe-area-inset-right)) 0 max(16px,env(safe-area-inset-left))}
+.wrap{max-width:1040px;margin:0 auto;padding:28px 0 64px}
+.hero{display:block;width:100%;aspect-ratio:16/5;object-fit:cover;border-radius:28px;background:#111}
+.card{background:var(--card);border-radius:28px;margin-top:24px;padding:clamp(24px,5vw,56px)}
+h1{font-weight:500;font-size:clamp(30px,5vw,52px);line-height:1.1;margin:0 0 6px}
+.meta{color:var(--mute);margin:0 0 28px;font-size:16px}
+.actions{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin:0 0 36px}
+.play{width:84px;height:84px;border-radius:50%;border:0;background:var(--fg);color:#000;cursor:pointer;display:flex;align-items:center;justify-content:center;flex:none}
+.play svg{width:30px;height:30px}
+.play:disabled{opacity:.35;cursor:default}
+.now{display:flex;flex-direction:column;min-width:0}
+.now b{font-weight:500;font-size:19px}
+.now span{color:var(--mute);font-size:15px}
+.prog{height:3px;background:var(--line);margin-top:8px;width:min(320px,60vw);border-radius:2px;overflow:hidden}
+.prog i{display:block;height:100%;width:0;background:var(--fg)}
+.btn{display:inline-flex;align-items:center;gap:10px;color:var(--fg);text-decoration:none;border:1px solid var(--line);border-radius:10px;padding:12px 18px;font-size:16px}
+.btn:hover{border-color:var(--mute)}
+.text{max-width:760px}
 .text p{margin:0 0 1em}
+.todo{border:1px dashed var(--line);border-radius:12px;color:var(--mute);padding:18px;font-size:15px}
+.work{display:block;margin:36px 0 0;padding:24px 28px;border:1px solid var(--line);border-radius:18px;color:var(--fg);text-decoration:none}
+.work small{display:block;color:var(--mute);font-size:14px;text-transform:uppercase;letter-spacing:.12em;margin-bottom:4px}
+.work b{font-weight:500;font-size:clamp(22px,3vw,30px)}
+.work:hover{border-color:var(--mute)}
+h2{font-weight:500;font-size:22px;margin:0 0 14px}
 .contact a{color:var(--fg)}
-footer{color:var(--mute);font-size:14px;padding-top:24px}
+.list{list-style:none;margin:0;padding:0}
+.list li{display:grid;grid-template-columns:36px 64px minmax(0,1fr) auto;gap:16px;align-items:center;padding:12px 0;border-top:1px solid var(--line)}
+.list li:last-child{border-bottom:1px solid var(--line)}
+.list .n{color:var(--mute);font-variant-numeric:tabular-nums}
+.list .th{width:64px;height:48px;border-radius:6px;object-fit:cover;background:#1a1917;display:block}
+.list .nm{min-width:0;overflow-wrap:anywhere}
+.list .nm span{display:block;color:var(--mute);font-size:14px}
+.list .dl{color:var(--fg);font-size:15px;text-decoration:none;border:1px solid var(--line);border-radius:8px;padding:7px 12px;white-space:nowrap}
+.list .dl:hover{border-color:var(--mute)}
+.list .soon{color:var(--mute);font-size:14px;white-space:nowrap}
+.tracks li{grid-template-columns:36px minmax(0,1fr) auto auto}
+.tracks .tp{background:none;border:1px solid var(--line);color:var(--fg);border-radius:50%;width:36px;height:36px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.tracks .tp svg{width:12px;height:12px}
+@media (max-width:560px){.list li{grid-template-columns:28px 52px minmax(0,1fr);}.list .dl,.list .soon{grid-column:3}.list .th{width:52px;height:40px}.tracks li{grid-template-columns:28px minmax(0,1fr) auto}.tracks .dl,.tracks .soon{grid-column:2}}
+footer{color:var(--mute);font-size:14px;text-align:center;margin-top:36px}
 </style>
 <script>/* press.pallosalama.fi asks for a password, Commodore 64 style (own password, 28 Nov). Only the SHA-256 of the password is here. A light lock: unlocked once per browser (localStorage). Old-style JS on purpose (TV browsers). */
 (function(){var K='pallosalama_press_ok',H='842fcb5e60989a03d08ee07f9bea0a0a4a824d991fe8cc055f3a89e05c5c392e';try{if(localStorage.getItem(K)===H)return;}catch(e){}
@@ -43,37 +65,82 @@ var inp=document.getElementById('c64i'),t=document.getElementById('c64t'),scr=o.
 inp.addEventListener('input',function(){var n=inp.value.length,s='';for(var i=0;i<n;i++)s+='*';t.textContent=s;});
 inp.addEventListener('keydown',function(e){if(e.keyCode!==13)return;e.preventDefault();var v=inp.value;sha(v,function(h){if(h===H){try{localStorage.setItem(K,H);}catch(x){}o.parentNode.removeChild(o);document.documentElement.className=document.documentElement.className.replace(/\s*hlocked/,'');}else{/* wrong: just clear */inp.value='';t.textContent='';focus();}});});}
 if(document.body)build();else document.addEventListener('DOMContentLoaded',build);})();</script>
-
 </head>
 <body>
-<div class="bg" aria-hidden="true"><video src="media/background.mp4" poster="media/background_poster.jpg" autoplay loop muted playsinline></video></div>
-<main>
-  <h1>Harri Kalevi Sippola</h1>
-  <h2>Pallosalama</h2>
-  <p class="lede">Koko levy soi vain tasatunnein osoitteessa <a href="https://pallosalama.fi">pallosalama.fi</a>.</p>
+<div class="wrap">
+  <img class="hero" src="media/hero.jpg" alt="">
 
-  <section id="kappale">
-    <h3>Kuunneltavaksi</h3>
-    <p class="track">Keskipakoisvoima</p>
-    <div class="todo">[Keskipakoisvoima tulee tähän: soitin ja lataus MP3 / WAV]</div>
-  </section>
+  <div class="card">
+    <h1>Harri Kalevi Sippola: Pallosalama</h1>
+    <p class="meta">6 kappaletta · 34 min · 2026</p>
 
-  <section id="kuva">
-    <h3>Promokuva</h3>
-    <div class="todo">[Promokuva tulee tähän, ladattavana isona tiedostona. Kuvaaja: ]</div>
-  </section>
+    <div class="actions">
+      <button class="play" id="mainPlay" type="button" aria-label="Soita Keskipakoisvoima"><svg viewBox="0 0 24 24" aria-hidden="true"><path id="mainIcon" d="M7 4.5v15l13-7.5z" fill="currentColor"/></svg></button>
+      <div class="now"><b>Keskipakoisvoima</b><span id="mainState">Pallosalama · kappale 3</span><div class="prog"><i id="mainProg"></i></div></div>
+    </div>
 
-  <section id="tiedote" class="text">
-    <h3>Tiedote</h3>
-    <div class="todo">[Tiedotteen teksti tulee tähän]</div>
-  </section>
+    <div class="text" id="tiedote">
+      <div class="todo">[Tiedotteen teksti tulee tähän]</div>
+    </div>
 
-  <section id="yhteys" class="contact">
-    <h3>Yhteystiedot</h3>
-    <p>Harri Kalevi Sippola<br><a href="mailto:harri@pallosalama.fi">harri@pallosalama.fi</a><br>Instagram <a href="https://www.instagram.com/harriksippola/">@harriksippola</a></p>
-  </section>
+    <a class="work" href="https://pallosalama.fi" target="_blank" rel="noopener"><small>Itse teos</small><b>Pallosalama soi tasatunnein osoitteessa pallosalama.fi</b></a>
+  </div>
+
+  <div class="card contact">
+    <h2>Yhteystiedot</h2>
+    <p style="margin:0">Harri Kalevi Sippola<br><a href="mailto:harri@pallosalama.fi">harri@pallosalama.fi</a><br>Instagram <a href="https://www.instagram.com/harriksippola/" target="_blank" rel="noopener">@harriksippola</a></p>
+  </div>
+
+  <div class="card">
+    <h2>Kuvat ja dokumentit</h2>
+    <ul class="list" id="media"></ul>
+  </div>
+
+  <div class="card">
+    <h2>Kappaleet</h2>
+    <ul class="list tracks" id="tracks"></ul>
+  </div>
 
   <footer>© Harri Kalevi Sippola 2026</footer>
-</main>
+</div>
+<audio id="player" preload="none"></audio>
+<script>
+// Tiedostot: kun tiedosto on lisätty kansioon, kirjoita sen polku 'file'-kohtaan. Ilman tiedostoa rivillä lukee "Tulossa".
+var MEDIA=[
+  {name:'Pallosalama, still nettisivulta',file:'media/pallosalama_nettisivu_still.jpg',thumb:'media/pallosalama_nettisivu_still_thumb.jpg',type:'Kuva'},
+  {name:'Harri Kalevi Sippola, promokuva',file:'',thumb:'',type:'Kuva'},
+  {name:'Pallosalama, sanat',file:'',thumb:'',type:'PDF'}
+];
+var TRACKS=[
+  {n:1,name:'Pallosalama',file:''},
+  {n:2,name:'Kuva hiekassa',file:''},
+  {n:3,name:'Keskipakoisvoima',file:''},
+  {n:4,name:'Pato',file:''},
+  {n:5,name:'Olen pudonnut sinuun',file:''},
+  {n:6,name:'Satama',file:''}
+];
+var MAIN=3; // pääsoitin soittaa tämän kappaleen
+var PLAY='M7 4.5v15l13-7.5z',PAUSE='M6 4.5h4.5v15H6zM13.5 4.5H18v15h-4.5z';
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+var ml=document.getElementById('media');
+MEDIA.forEach(function(m,i){var li=document.createElement('li');
+ li.innerHTML='<span class="n">'+(i+1)+'</span>'+(m.thumb?'<img class="th" src="'+esc(m.thumb)+'" alt="">':'<span class="th"></span>')+'<span class="nm">'+esc(m.name)+'<span>'+esc(m.type)+'</span></span>'+(m.file?'<a class="dl" href="'+esc(m.file)+'" download>Lataa</a>':'<span class="soon">Tulossa</span>');
+ ml.appendChild(li);});
+var tl=document.getElementById('tracks'),player=document.getElementById('player'),cur=null;
+TRACKS.forEach(function(t){var li=document.createElement('li');
+ li.innerHTML='<span class="n">'+t.n+'</span><span class="nm">'+esc(t.name)+'</span>'+(t.file?'<button class="tp" type="button" aria-label="Soita '+esc(t.name)+'" data-n="'+t.n+'"><svg viewBox="0 0 24 24"><path d="'+PLAY+'" fill="currentColor"/></svg></button><a class="dl" href="'+esc(t.file)+'" download>Lataa WAV</a>':'<span></span><span class="soon">Tulossa</span>');
+ tl.appendChild(li);});
+function track(n){for(var i=0;i<TRACKS.length;i++)if(TRACKS[i].n===n)return TRACKS[i];}
+function icons(){var mi=document.getElementById('mainIcon');mi.setAttribute('d',(cur===MAIN&&!player.paused)?PAUSE:PLAY);
+ [].slice.call(document.querySelectorAll('.tp path')).forEach(function(p){var n=+p.parentNode.parentNode.getAttribute('data-n');p.setAttribute('d',(cur===n&&!player.paused)?PAUSE:PLAY);});}
+function toggle(n){var t=track(n);if(!t||!t.file)return;
+ if(cur===n){if(player.paused)player.play();else player.pause();}else{cur=n;player.src=t.file;player.play();}}
+var mainBtn=document.getElementById('mainPlay');
+if(!track(MAIN).file){mainBtn.disabled=true;document.getElementById('mainState').textContent='Kappale tulossa';}
+mainBtn.addEventListener('click',function(){toggle(MAIN);});
+tl.addEventListener('click',function(e){var b=e.target.closest('.tp');if(b)toggle(+b.getAttribute('data-n'));});
+player.addEventListener('play',icons);player.addEventListener('pause',icons);player.addEventListener('ended',icons);
+player.addEventListener('timeupdate',function(){if(cur===MAIN&&player.duration)document.getElementById('mainProg').style.width=(100*player.currentTime/player.duration)+'%';});
+</script>
 </body>
 </html>
