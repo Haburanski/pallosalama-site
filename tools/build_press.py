@@ -94,6 +94,15 @@ h2{font-weight:500;font-size:%(h3)spx;margin:0 0 14px}
 .tracks .tp svg{width:12px;height:12px}
 @media (max-width:560px){.list li{grid-template-columns:28px 52px minmax(0,1fr);}.list .dl,.list .soon{grid-column:3}.list .th{width:52px;height:40px}.tracks li{grid-template-columns:28px minmax(0,1fr) auto}.tracks .dl,.tracks .soon{grid-column:2}}
 footer{color:var(--mute);font-size:%(ala)spx;text-align:center;margin-top:36px}
+.list .th.zoom{cursor:zoom-in}
+.lb{position:fixed;top:0;left:0;right:0;bottom:0;z-index:50;background:rgba(0,0,0,.86);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:56px 16px 24px;box-sizing:border-box}
+.lb[hidden]{display:none}
+.lb img{max-width:100%%;max-height:calc(100vh - 140px);object-fit:contain;border-radius:8px;display:block}
+.lb iframe{width:min(900px,100%%);height:calc(100vh - 140px);border:0;border-radius:8px;background:#000}
+.lb .lbbar{display:flex;gap:12px;align-items:center;flex-wrap:wrap;justify-content:center}
+.lb .lbname{color:var(--fg);font-size:15px}
+.lb a,.lb button{color:var(--fg);background:none;border:1px solid var(--line);border-radius:8px;padding:7px 14px;font:inherit;font-size:14px;text-decoration:none;cursor:pointer}
+.lb .lbx{position:absolute;top:14px;right:16px;font-size:20px;line-height:1;padding:6px 12px}
 </style>
 ''' % dict(cardbg=cardbg, blur=T['sumennus'], r=T['pyor'], gap=T['vali'], teksti=T['teksti'], sov='contain' if T.get('sov') == 'contain' else 'cover',
            vkirk=T['vkirk'] / 100, leveys=T['leveys'], hero=T['hero'], otsikko=T['otsikko'], meta=T['meta'], play=T['play'], soitin=T['soitin'],
@@ -125,6 +134,7 @@ footer{color:var(--mute);font-size:%(ala)spx;text-align:center;margin-top:36px}
   </div>
   <footer>© Harri Kalevi Sippola 2026</footer>
 </div>
+<div class="lb" id="lb" hidden role="dialog" aria-modal="true" aria-label="Esikatselu"><button class="lbx" id="lbx" type="button" aria-label="Sulje">×</button><div id="lbbody"></div><div class="lbbar"><span class="lbname" id="lbname"></span><a id="lbdl" href="#" download>Lataa</a></div></div>
 <audio id="player" preload="none"></audio>
 <script>
 var MEDIA=''' + j(media) + ''';
@@ -134,8 +144,19 @@ var PLAY='M7 4.5v15l13-7.5z',PAUSE='M6 4.5h4.5v15H6zM13.5 4.5H18v15h-4.5z';
 function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
 var ml=document.getElementById('media');
 MEDIA.forEach(function(m,i){var li=document.createElement('li');
- li.innerHTML='<span class="n">'+(i+1)+'</span>'+(m.thumb||(m.file&&/^Kuva/i.test(m.type))?'<img class="th" src="'+esc(m.thumb||m.file)+'" alt="">':'<span class="th"></span>')+'<span class="nm">'+esc(m.name)+'<span>'+esc(m.type)+'</span></span>'+(m.file?'<a class="dl" href="'+esc(m.file)+'" download>Lataa</a>':'<span class="soon">Tulossa</span>');
+ li.innerHTML='<span class="n">'+(i+1)+'</span>'+(m.thumb||(m.file&&/^Kuva/i.test(m.type))?'<img class="th'+(m.file?' zoom':'')+'" data-i="'+i+'" src="'+esc(m.thumb||m.file)+'" alt="Avaa '+esc(m.name)+'" tabindex="'+(m.file?0:-1)+'">':'<span class="th"></span>')+'<span class="nm">'+esc(m.name)+'<span>'+esc(m.type)+'</span></span>'+(m.file?'<a class="dl" href="'+esc(m.file)+'" download>Lataa</a>':'<span class="soon">Tulossa</span>');
  ml.appendChild(li);});
+var lb=document.getElementById('lb'),lbbody=document.getElementById('lbbody');
+function openLb(i){var m=MEDIA[i];if(!m||!m.file)return;lbbody.textContent='';
+ if(/[.]pdf$/i.test(m.file)){var f=document.createElement('iframe');f.src=m.file;f.title=m.name;lbbody.appendChild(f);}
+ else{var im=document.createElement('img');im.src=m.file;im.alt=m.name;lbbody.appendChild(im);}
+ document.getElementById('lbname').textContent=m.name;document.getElementById('lbdl').href=m.file;lb.hidden=false;document.body.style.overflow='hidden';document.getElementById('lbx').focus();}
+function closeLb(){lb.hidden=true;lbbody.textContent='';document.body.style.overflow='';}
+ml.addEventListener('click',function(e){var t=e.target.closest('.th.zoom');if(t)openLb(+t.getAttribute('data-i'));});
+ml.addEventListener('keydown',function(e){var t=e.target.closest('.th.zoom');if(t&&(e.key==='Enter'||e.key===' ')){e.preventDefault();openLb(+t.getAttribute('data-i'));}});
+document.getElementById('lbx').addEventListener('click',closeLb);
+lb.addEventListener('click',function(e){if(e.target===lb||e.target===lbbody)closeLb();});
+document.addEventListener('keydown',function(e){if(e.key==='Escape'&&!lb.hidden)closeLb();});
 var tl=document.getElementById('tracks'),player=document.getElementById('player'),cur=null;
 TRACKS.forEach(function(t){var li=document.createElement('li');var src=t.mp3||t.file;
  li.innerHTML='<span class="n">'+t.n+'</span><span class="nm">'+esc(t.name)+'</span>'+(src?'<button class="tp" type="button" aria-label="Soita '+esc(t.name)+'" data-n="'+t.n+'"><svg viewBox="0 0 24 24"><path d="'+PLAY+'" fill="currentColor"/></svg></button>':'<span></span>')+(t.file?'<a class="dl" href="'+esc(t.file)+'" download>Lataa WAV</a>':'<span class="soon">Tulossa</span>');
